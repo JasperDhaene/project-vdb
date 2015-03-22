@@ -55,12 +55,12 @@ public class FuzzySystem {
         UnivariateFunction union = new UnionFunction(consequences, new TrapezoidIntegrator());
 
         /**
-         * 5. Sharpening/defuzzification of variables
+         * 5. Defuzzification of variables
          */
-        Map<String, Double> sharpened = new HashMap<>();
+        Map<String, Double> crisp = new HashMap<>();
         for(String s: inputs.keySet()){
-            sharpened.put(s, union.value(inputs.get(s)));
+            crisp.put(s, union.value(inputs.get(s)));
         }
-        return sharpened;
+        return crisp;
     }
 }

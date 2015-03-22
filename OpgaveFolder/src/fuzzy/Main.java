@@ -1,7 +1,8 @@
 package fuzzy;
 
+import fuzzy.expression.Premise;
 import fuzzy.membership.SFunction;
-import fuzzy.norm.LukasiewicsNorm;
+import fuzzy.norm.ZadehNorm;
 import org.apache.commons.math3.analysis.function.Identity;
 
 /**
@@ -19,11 +20,10 @@ public class Main {
              *
              */
 	    FuzzySystem system = new FuzzySystem();
-            Rule rule = new Rule();
-            rule.addPremise(new Premise("temperature", new SFunction(20, 25)));
+            Rule rule = new Rule(new Premise("temperature", new SFunction(20, 25)));
             rule.setConsequence(new Consequence(new Identity()));
 
-            system.setNorm(new LukasiewicsNorm());
+            system.setNorm(new ZadehNorm());
             system.addRule(rule);
             system.addInput("temperature", 22);
 
