@@ -22,7 +22,7 @@ public class Rule {
         this.consequence = consequence;
     }
 
-    public Consequence evaluate(Map<String, Double> inputs, Norm norm) {
+    public Consequence evaluate(Norm norm, Map<String, Double> inputs) {
 
         double membership = expression.evaluate(norm, inputs);
 

@@ -3,7 +3,6 @@ package fuzzy;
 import fuzzy.expression.Premise;
 import fuzzy.membership.SFunction;
 import fuzzy.norm.ZadehNorm;
-import org.apache.commons.math3.analysis.function.Identity;
 
 /**
  * fuzzy.Main - Simulates a fuzzy rule-based system
@@ -21,11 +20,12 @@ public class Main {
              */
 	    FuzzySystem system = new FuzzySystem();
             Rule rule = new Rule(new Premise("temperature", new SFunction(20, 25)));
-            rule.setConsequence(new Consequence(new Identity()));
+            rule.setConsequence(new Consequence(new SFunction(20, 25)));
 
             system.setNorm(new ZadehNorm());
             system.addRule(rule);
-            system.addInput("temperature", 22);
+
+            system.addInput("temperature", 23);
 
             System.out.println("system => " + system.evaluate());
 

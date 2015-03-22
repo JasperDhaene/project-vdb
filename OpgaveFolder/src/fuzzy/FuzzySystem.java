@@ -40,12 +40,12 @@ public class FuzzySystem {
     }
 
     public Map<String, Double> evaluate(){
-        List<UnivariateFunction> consequences = new ArrayList<>();
+        List<Consequence> consequences = new ArrayList<>();
         /**
          * 1. Evaluation: evaluate each rule for a given variable
          */
         rules.forEach((r) -> {
-            consequences.add(r.evaluate(inputs, norm).membership);
+            consequences.add(r.evaluate(norm, inputs));
         });
 
         /**

@@ -1,5 +1,6 @@
 package fuzzy.membership;
 
+import fuzzy.Consequence;
 import java.util.List;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
@@ -20,8 +21,8 @@ public class UnionFunction implements UnivariateFunction {
     private final UnivariateFunction f, g;
     private final UnivariateIntegrator integrator;
 
-    public UnionFunction(List<UnivariateFunction> functions, UnivariateIntegrator integrator){
-        this.g = new DenominatorFunction(functions);
+    public UnionFunction(List<Consequence> consequences, UnivariateIntegrator integrator){
+        this.g = new DenominatorFunction(consequences);
         this.f = new NominatorFunction(this.g);
         this.integrator = integrator;
     }
@@ -34,20 +35,21 @@ public class UnionFunction implements UnivariateFunction {
         return (nominator / denominator);
     }
 
+
     // f(x) gives the maximum of all aggregate functions
     private class DenominatorFunction implements UnivariateFunction {
 
-        private final List<UnivariateFunction> functions;
+        private final List<Consequence> consequences;
 
-        public DenominatorFunction(List<UnivariateFunction> functions) {
-            this.functions = functions;
+        public DenominatorFunction(List<Consequence> consequences) {
+            this.consequences = consequences;
         }
 
         @Override
         public double value(double x) {
             double max = Double.MIN_VALUE;
-            for(UnivariateFunction f: functions){
-                max = Math.max(f.value(x), max);
+            for(Consequence c: consequences){
+                max = Math.max(c.value(x), max);
             }
             return max;
         }

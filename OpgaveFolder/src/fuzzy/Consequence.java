@@ -12,11 +12,16 @@ public class Consequence {
     public UnivariateFunction membership;
 
     public Consequence(UnivariateFunction membership){
+        this.limit = Double.MIN_VALUE;
         this.membership = membership;
     }
 
     public void setLimit(double limit){
         this.limit = limit;
+    }
+
+    public double value(double x){
+        return Math.max(limit, membership.value(x));
     }
 
 }
