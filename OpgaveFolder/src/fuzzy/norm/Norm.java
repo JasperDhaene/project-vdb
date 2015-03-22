@@ -1,4 +1,4 @@
-package fuzzy;
+package fuzzy.norm;
 
 /**
  * Norm - t-(co-)norm pair
@@ -6,7 +6,7 @@ package fuzzy;
  */
 public interface Norm {
 
-    public int norm(int a, int b);
-    public int conorm(int a, int b);
+    public double norm(double a, double b);
+    public double conorm(double a, double b);
 
 }

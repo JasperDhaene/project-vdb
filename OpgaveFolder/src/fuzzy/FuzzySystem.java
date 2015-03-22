@@ -1,10 +1,14 @@
 package fuzzy;
 
+import fuzzy.membership.UnionFunction;
+import fuzzy.norm.Norm;
 import fuzzy.norm.ZadehNorm;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.integration.TrapezoidIntegrator;
 
 /**
  * FuzzySystem - Simulates a fuzzy rule-based system
@@ -13,7 +17,7 @@ import java.util.Map;
 public class FuzzySystem {
 
     private final List<Rule> rules;
-    private final Map<String, Integer> inputs;
+    private final Map<String, Double> inputs;
     private Norm norm;
 
     public FuzzySystem() {
@@ -27,7 +31,7 @@ public class FuzzySystem {
         this.rules.add(rule);
     }
 
-    public void addInput(String input, int value) {
+    public void addInput(String input, double value) {
         this.inputs.put(input, value);
     }
 
@@ -35,24 +39,28 @@ public class FuzzySystem {
         this.norm = norm;
     }
 
-    public int evaluate(){
-        List<Consequence> consequences = new ArrayList<>();
+    public Map<String, Double> evaluate(){
+        List<UnivariateFunction> consequences = new ArrayList<>();
         /**
          * 1. Evaluation: evaluate each rule for a given variable
          */
         rules.forEach((r) -> {
-            consequences.add(r.evaluate(inputs, norm));
+            consequences.add(r.evaluate(inputs, norm).membership);
         });
 
         /**
          * 4. Union of rules
          */
-
+        // Possible integrators: Romberg, Trapezoid, Simpson, LegendreGauss
+        UnivariateFunction union = new UnionFunction(consequences, new TrapezoidIntegrator());
 
         /**
-         * 5. Sharpening (defuzzification)
+         * 5. Sharpening/defuzzification of variables
          */
-        return 0;
+        Map<String, Double> sharpened = new HashMap<>();
+        for(String s: inputs.keySet()){
+            sharpened.put(s, union.value(inputs.get(s)));
+        }
+        return sharpened;
     }
-
 }

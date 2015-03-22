@@ -1,5 +1,6 @@
 package fuzzy;
 
+import fuzzy.norm.Norm;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -32,9 +33,9 @@ public class Rule {
         this.consequence = consequence;
     }
 
-    public Consequence evaluate(Map<String, Integer> inputs, Norm norm) {
+    public Consequence evaluate(Map<String, Double> inputs, Norm norm) {
         // Aggregate membership of rule is one by default: no premises means no conditions to adhere to
-        int membership = 1;
+        double membership = 1;
 
         // Calculate aggregate membership by looping over needed input variables
         for(String v: variables.keySet()){
@@ -48,8 +49,9 @@ public class Rule {
                  * 2. Aggregation of multiple premises by t-(co-)norm
                  */
                 Premise p = it.next();
-                norm.norm(membership, p.membership(inputs.get(v)));
-                System.out.println("Evaluating premise '" + p.variable + "' in variable " + inputs.get(v) + ": " + p.membership(inputs.get(v)));
+                norm.norm(membership, p.membership.value(inputs.get(v)));
+                System.out.println("Evaluating premise '" + p.variable + "' in variable " +
+                        inputs.get(v) + ": " + p.membership.value(inputs.get(v)));
             }
         }
 

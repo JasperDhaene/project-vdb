@@ -1,5 +1,9 @@
 package fuzzy;
 
+import fuzzy.membership.SFunction;
+import fuzzy.norm.LukasiewicsNorm;
+import org.apache.commons.math3.analysis.function.Identity;
+
 /**
  * fuzzy.Main - Simulates a fuzzy rule-based system
  * @author Florian Dejonckheere <florian@floriandejonckheere.be>
@@ -11,32 +15,15 @@ public class Main {
             /**
              * Setup: create a new fuzzy system and add rules and inputs
              *
-             * Practical example: IF (temperature is "low") THEN (heater is "high")
+             * Example: IF (temperature is "low") THEN (heater is "high")
              *
              */
 	    FuzzySystem system = new FuzzySystem();
             Rule rule = new Rule();
-            rule.addPremise(new Premise("temperature") {
+            rule.addPremise(new Premise("temperature", new SFunction(20, 25)));
+            rule.setConsequence(new Consequence(new Identity()));
 
-                @Override
-                public int membership(int input) {
-                    if((input > 20) && (input < 25))
-                        return 1;
-                    return 0;
-                }
-
-            });
-            rule.setConsequence(new Consequence(){
-
-                // Returns the power value for the heater in W
-                @Override
-                public int membership(int input) {
-                    if(input > 0.5)
-                        return 1000;
-                    return 0;
-                }
-
-            });
+            system.setNorm(new LukasiewicsNorm());
             system.addRule(rule);
             system.addInput("temperature", 22);
 

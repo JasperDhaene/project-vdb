@@ -1,17 +1,22 @@
 package fuzzy;
 
+import org.apache.commons.math3.analysis.UnivariateFunction;
+
 /**
  * Consequence - Output function
  * @author Florian Dejonckheere <florian@floriandejonckheere.be>
  */
-public abstract class Consequence {
+public class Consequence {
 
-    private int limit;
+    public double limit;
+    public UnivariateFunction membership;
 
-    public void setLimit(int limit){
-        this.limit = limit;
+    public Consequence(UnivariateFunction membership){
+        this.membership = membership;
     }
 
-    public abstract int membership(int input);
+    public void setLimit(double limit){
+        this.limit = limit;
+    }
 
 }
