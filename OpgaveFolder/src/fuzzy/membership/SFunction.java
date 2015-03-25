@@ -8,14 +8,12 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
  */
 public class SFunction implements UnivariateFunction {
 
-    private double alpha;
-    private double beta;
-    private double gamma;
+    private final double alpha, beta, gamma;
 
     public SFunction(double alpha, double gamma){
         this.alpha = alpha;
         this.gamma = gamma;
-        beta = (alpha + gamma) / 2;
+        this.beta = (alpha + gamma) / 2;
     }
 
     @Override

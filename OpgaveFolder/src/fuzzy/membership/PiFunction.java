@@ -8,10 +8,13 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
  */
 public class PiFunction implements UnivariateFunction {
 
-    private int beta, gamma;
-    private UnivariateFunction sf1, sf2;
+    private final int beta, gamma;
+    protected final UnivariateFunction sf1, sf2;
 
     public PiFunction(int beta, int gamma) {
+        if(beta <= 0)
+            throw new RuntimeException(new IllegalArgumentException("Beta must be larger than 0"));
+
         this.beta = beta;
         this.gamma = gamma;
         sf1 = new SFunction((gamma - beta), gamma);
