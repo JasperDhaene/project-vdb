@@ -15,6 +15,8 @@ public class Main {
             /**
              * Setup: create a new fuzzy system and add rules and inputs
              *
+             * http://petro.tanrei.ca/fuzzylogic/index.html
+             *
              * Example: IF (temperature is "low") THEN (heater is "high")
              *
              */
