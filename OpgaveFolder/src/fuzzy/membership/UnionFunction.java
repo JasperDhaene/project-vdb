@@ -9,9 +9,9 @@ import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
  * UnionFunction - Union of functions
  * @author Florian Dejonckheere <florian@floriandejonckheere.be>
  */
-public class UnionFunction implements UnivariateFunction {
+public class UnionFunction {
 
-    // Maximum number of evaluations
+    // Maximum number of function evaluations
     public static final int MAX_EVAL = 10000;
 
     // Integration boundaries
@@ -22,26 +22,25 @@ public class UnionFunction implements UnivariateFunction {
     private final UnivariateIntegrator integrator;
 
     public UnionFunction(List<Consequence> consequences, UnivariateIntegrator integrator){
-        this.g = new DenominatorFunction(consequences);
-        this.f = new NominatorFunction(this.g);
+        this.g = new Denominator(consequences);
+        this.f = new Numerator(this.g);
         this.integrator = integrator;
     }
 
-    @Override
-    public double value(double d) {
-        double nominator = integrator.integrate(MAX_EVAL, this.f, MIN_VAL, MAX_VAL);
+    public double value() {
+        double numerator = integrator.integrate(MAX_EVAL, this.f, MIN_VAL, MAX_VAL);
         double denominator = integrator.integrate(MAX_EVAL, this.g, MIN_VAL, MAX_VAL);
 
-        return (nominator / denominator);
+        return (numerator / denominator);
     }
 
 
     // f(x) gives the maximum of all aggregate functions
-    private class DenominatorFunction implements UnivariateFunction {
+    private class Denominator implements UnivariateFunction {
 
         private final List<Consequence> consequences;
 
-        public DenominatorFunction(List<Consequence> consequences) {
+        public Denominator(List<Consequence> consequences) {
             this.consequences = consequences;
         }
 
@@ -56,11 +55,11 @@ public class UnionFunction implements UnivariateFunction {
     }
 
     // f(x) gives x*f(x)
-    private class NominatorFunction implements UnivariateFunction {
+    private class Numerator implements UnivariateFunction {
 
         private final UnivariateFunction f;
 
-        public NominatorFunction(UnivariateFunction f) {
+        public Numerator(UnivariateFunction f) {
             this.f = f;
         }
 

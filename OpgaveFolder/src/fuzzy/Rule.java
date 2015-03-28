@@ -2,6 +2,7 @@ package fuzzy;
 
 import fuzzy.expression.Expression;
 import fuzzy.norm.Norm;
+import fuzzy.norm.ZadehNorm;
 import java.util.Map;
 
 /**
@@ -12,25 +13,32 @@ import java.util.Map;
 public class Rule {
 
     private final Expression expression;
-    private Consequence consequence;
+    private final Consequence consequence;
+    private final Norm norm;
 
-    public Rule(Expression expression) {
+    public Rule(Expression expression, Consequence consequence, Norm norm) {
         this.expression = expression;
-    }
-
-    public void setConsequence(Consequence consequence) {
         this.consequence = consequence;
+        this.norm = norm;
     }
 
-    public Consequence evaluate(Norm norm, Map<String, Double> inputs) {
+    public Rule(Expression expression, Consequence consequence) {
+        // Default to Zadeh t-(co-)norm
+        this(expression, consequence, new ZadehNorm());
+    }
 
-        double membership = expression.evaluate(norm, inputs);
+    public Consequence evaluate(Map<String, Double> inputs) {
+
+        /**
+         * 1. Evaluation: evaluate each rule for a given variable
+         * 2. Aggregation of multiple conditions
+         */
+        double membership = this.expression.evaluate(this.norm, inputs);
 
         /**
          * 3. Determine combined output level
          */
         this.consequence.setLimit(membership);
-        System.out.println("Rule membership limit: " + membership);
 
         return this.consequence;
     }

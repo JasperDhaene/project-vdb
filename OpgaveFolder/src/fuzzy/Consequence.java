@@ -21,7 +21,7 @@ public class Consequence {
     }
 
     public double value(double x){
-        return Math.max(limit, membership.value(x));
+        return Math.max(this.limit, this.membership.value(x));
     }
 
 }

@@ -1,14 +1,12 @@
 package fuzzy;
 
 import fuzzy.membership.UnionFunction;
-import fuzzy.norm.Norm;
-import fuzzy.norm.ZadehNorm;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.analysis.integration.TrapezoidIntegrator;
+import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 
 /**
  * FuzzySystem - Simulates a fuzzy rule-based system
@@ -18,13 +16,10 @@ public class FuzzySystem {
 
     private final List<Rule> rules;
     private final Map<String, Double> inputs;
-    private Norm norm;
 
     public FuzzySystem() {
         this.rules = new ArrayList<>();
         this.inputs = new HashMap<>();
-        // Default to Zadeh t-(co-)norm pair
-        this.norm = new ZadehNorm();
     }
 
     public void addRule(Rule rule) {
@@ -35,32 +30,30 @@ public class FuzzySystem {
         this.inputs.put(input, value);
     }
 
-    public void setNorm(Norm norm){
-        this.norm = norm;
-    }
-
     public Map<String, Double> evaluate(){
         List<Consequence> consequences = new ArrayList<>();
         /**
          * 1. Evaluation: evaluate each rule for a given variable
+         * 2. Aggregation of multiple conditions
          */
-        rules.forEach((r) -> {
-            consequences.add(r.evaluate(norm, inputs));
+        this.rules.forEach((r) -> {
+            consequences.add(r.evaluate(this.inputs));
         });
 
         /**
          * 4. Union of rules
+         *
+         * Available integrators: Romberg, Trapezoid, Simpson, LegendreGauss
          */
-        // Possible integrators: Romberg, Trapezoid, Simpson, LegendreGauss
-        UnivariateFunction union = new UnionFunction(consequences, new TrapezoidIntegrator());
+        UnionFunction union = new UnionFunction(consequences, new SimpsonIntegrator());
 
         /**
          * 5. Defuzzification of variables
          */
         Map<String, Double> crisp = new HashMap<>();
-        for(String s: inputs.keySet()){
-            crisp.put(s, union.value(inputs.get(s)));
-        }
+        this.inputs.keySet().forEach((s) -> {
+            crisp.put(s, union.value());
+        });
         return crisp;
     }
 }

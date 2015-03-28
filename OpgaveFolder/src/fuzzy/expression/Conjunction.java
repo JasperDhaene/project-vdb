@@ -18,7 +18,7 @@ public class Conjunction implements Expression {
 
     @Override
     public double evaluate(Norm norm, Map<String, Double> inputs){
-        return norm.norm(left.evaluate(norm, inputs), right.evaluate(norm, inputs));
+        return norm.norm(this.left.evaluate(norm, inputs), this.right.evaluate(norm, inputs));
     }
 
 }
