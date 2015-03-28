@@ -1,3 +1,5 @@
 /OpgaveFolder/nbproject/private/
 /OpgaveFolder/build/
 *.so
+/build/
+/dist/
