@@ -6,7 +6,7 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
  * Consequence - Output function
  * @author Florian Dejonckheere <florian@floriandejonckheere.be>
  */
-public class Consequence {
+public class Consequence implements UnivariateFunction {
 
     public double limit;
     public UnivariateFunction membership;
@@ -21,7 +21,7 @@ public class Consequence {
     }
 
     public double value(double x){
-        return Math.max(this.limit, this.membership.value(x));
+        return Math.min(this.limit, this.membership.value(x));
     }
 
 }

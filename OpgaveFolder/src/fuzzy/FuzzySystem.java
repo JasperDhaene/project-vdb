@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 
 /**
@@ -31,6 +30,7 @@ public class FuzzySystem {
     }
 
     public Map<String, Double> evaluate(){
+        if(this.rules.isEmpty()) System.err.println("WARNING: No rules were defined in the system");
         List<Consequence> consequences = new ArrayList<>();
         /**
          * 1. Evaluation: evaluate each rule for a given variable
@@ -43,9 +43,11 @@ public class FuzzySystem {
         /**
          * 4. Union of rules
          *
-         * Available integrators: Romberg, Trapezoid, Simpson, LegendreGauss
          */
-        UnionFunction union = new UnionFunction(consequences, new SimpsonIntegrator());
+        UnionFunction union = new UnionFunction(consequences,
+                new SimpsonIntegrator(),
+                10000);
+//                SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
 
         /**
          * 5. Defuzzification of variables
