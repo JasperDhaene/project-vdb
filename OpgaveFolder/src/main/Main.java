@@ -14,7 +14,7 @@ public class Main {
     public static void main(String[] args) {
 	/**
 	 * Start a run with given settings: - username: used for statistics,
-         * see http://telin.ugent.be/~jnieland/scores.php for the leaderboard
+         * see http://ddcmstud.ugent.be/vagedb/scores.php for the leaderboard
          * trackname: possible values are: - spafrancorchamps1024 - silverstone1024 - interlagos1024 - texas1024
 	 * controller, written by you - manual control, only non-manual laps are recorded for the leaderboard
 	 */
