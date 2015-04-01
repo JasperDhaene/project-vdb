@@ -8,10 +8,12 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
  */
 public class Consequence implements UnivariateFunction {
 
-    public double limit;
-    public UnivariateFunction membership;
+    private double limit;
+    public final String variable;
+    public final UnivariateFunction membership;
 
-    public Consequence(UnivariateFunction membership){
+    public Consequence(String variable, UnivariateFunction membership){
+        this.variable = variable;
         this.limit = Double.MIN_VALUE;
         this.membership = membership;
     }

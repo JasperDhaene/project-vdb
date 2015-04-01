@@ -53,8 +53,8 @@ public class FuzzySystem {
          * 5. Defuzzification of variables
          */
         Map<String, Double> crisp = new HashMap<>();
-        this.inputs.keySet().forEach((s) -> {
-            crisp.put(s, union.value());
+        consequences.forEach((c) -> {
+            crisp.put(c.variable, union.value());
         });
         return crisp;
     }
