@@ -1,17 +1,25 @@
 package fuzzy;
 
-import fuzzy.membership.UnionFunction;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
+import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 
 /**
  * FuzzySystem - Simulates a fuzzy rule-based system
  * @author Florian Dejonckheere <florian@floriandejonckheere.be>
  */
 public class FuzzySystem {
+
+    // Maximum integration evaluation
+    private static final int MAX_EVAL = 9000;
+
+    // Integration interval
+    private static final int MIN_VAL = 0;
+    private static final int MAX_VAL = 100;
 
     private final List<Rule> rules;
     private final Map<String, Double> inputs;
@@ -31,31 +39,74 @@ public class FuzzySystem {
 
     public Map<String, Double> evaluate(){
         if(this.rules.isEmpty()) System.err.println("WARNING: No rules were defined in the system");
-        List<Consequence> consequences = new ArrayList<>();
+
         /**
          * 1. Evaluation: evaluate each rule for a given variable
-         * 2. Aggregation of multiple conditions
          */
+        Map<String, List<UnivariateFunction>> consequences = new HashMap<>();
         this.rules.forEach((r) -> {
-            consequences.add(r.evaluate(this.inputs));
+            Consequence c = r.evaluate(this.inputs);
+
+            if(!consequences.containsKey(c.variable))
+                consequences.put(c.variable, new ArrayList<>());
+
+            consequences.get(c.variable).add(c);
         });
 
         /**
-         * 4. Union of rules
-         *
-         */
-        UnionFunction union = new UnionFunction(consequences,
-                new SimpsonIntegrator(),
-                10000);
-//                SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
-
-        /**
+         * 4. Unification of rules
          * 5. Defuzzification of variables
          */
         Map<String, Double> crisp = new HashMap<>();
-        consequences.forEach((c) -> {
-            crisp.put(c.variable, union.value());
+
+        UnivariateIntegrator integrator = new SimpsonIntegrator();
+
+        consequences.forEach((s, l) -> {
+
+            UnivariateFunction g = new Denominator(l);
+            UnivariateFunction f = new Numerator(g);
+
+            double denominator = integrator.integrate(MAX_EVAL, g, MIN_VAL, MAX_VAL);
+            if(denominator != 0) {
+                double numerator = integrator.integrate(MAX_EVAL, f, MIN_VAL, MAX_VAL);
+                crisp.put(s, (numerator / denominator));
+            } else crisp.put(s, 0.0);
         });
+
         return crisp;
+    }
+
+    // f(x) gives the maximum of all aggregate functions
+    private class Denominator implements UnivariateFunction {
+
+        private final List<UnivariateFunction> functions;
+
+        public Denominator(List<UnivariateFunction> functions) {
+            this.functions = functions;
+        }
+
+        @Override
+        public double value(double x) {
+            double max = 0;
+            for(UnivariateFunction f: functions){
+                max = Math.max(f.value(x), max);
+            }
+            return max;
+        }
+    }
+
+    // f(x) gives x*f(x)
+    private class Numerator implements UnivariateFunction {
+
+        private final UnivariateFunction f;
+
+        public Numerator(UnivariateFunction f) {
+            this.f = f;
+        }
+
+        @Override
+        public double value(double x) {
+            return x * f.value(x);
+        }
     }
 }

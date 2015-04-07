@@ -30,7 +30,6 @@ public class Rule {
     public Consequence evaluate(Map<String, Double> inputs) {
 
         /**
-         * 1. Evaluation: evaluate each rule for a given variable
          * 2. Aggregation of multiple conditions
          */
         double membership = this.expression.evaluate(this.norm, inputs);
