@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
+import org.apache.commons.math3.analysis.integration.RombergIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 
 /**
@@ -15,11 +15,12 @@ import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 public class FuzzySystem {
 
     // Maximum integration evaluation
-    private static final int MAX_EVAL = 9000;
+    private static final int MAX_EVAL = 9001;
+    private static final UnivariateIntegrator integrator = new RombergIntegrator();
 
     // Integration interval
     private static final int MIN_VAL = 0;
-    private static final int MAX_VAL = 100;
+    private static final int MAX_VAL = 1600;
 
     private final List<Rule> rules;
     private final Map<String, Double> inputs;
@@ -59,16 +60,14 @@ public class FuzzySystem {
          */
         Map<String, Double> crisp = new HashMap<>();
 
-        UnivariateIntegrator integrator = new SimpsonIntegrator();
-
         consequences.forEach((s, l) -> {
 
             UnivariateFunction g = new Denominator(l);
             UnivariateFunction f = new Numerator(g);
 
-            double denominator = integrator.integrate(MAX_EVAL, g, MIN_VAL, MAX_VAL);
+            double denominator = FuzzySystem.integrator.integrate(MAX_EVAL, g, MIN_VAL, MAX_VAL);
             if(denominator != 0) {
-                double numerator = integrator.integrate(MAX_EVAL, f, MIN_VAL, MAX_VAL);
+                double numerator = FuzzySystem.integrator.integrate(MAX_EVAL, f, MIN_VAL, MAX_VAL);
                 crisp.put(s, (numerator / denominator));
             } else crisp.put(s, 0.0);
         });

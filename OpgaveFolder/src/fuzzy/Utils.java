@@ -23,7 +23,11 @@ public class Utils {
     }
 
     public static void visualizeFunc(UnivariateFunction f) {
-        for(int i = 0; i < 100; i+=3) {
+        visualizeFunc(f, 0, 100, 3);
+    }
+
+    public static void visualizeFunc(UnivariateFunction f, int lower, int upper, int step) {
+                for(int i = lower; i < upper; i += step) {
             System.out.print(String.format("f(%3d) = %3.1f |", i, f.value(i)));
             for(int j = 0; j < (100*f.value(i)); j++)
                 System.out.print("#");

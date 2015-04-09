@@ -16,13 +16,17 @@ public class Speed {
     public static void main(String[] args) {
         FuzzySystem system = new FuzzySystem();
 
-        Premise speedLow = new Premise("speed", new PIFunction.TrapezoidPIFunction(0, 0, 40, 70));
-        Premise speedMed = new Premise("speed", new PIFunction.TrapezoidPIFunction(40, 50, 70, 80));
-        Premise speedHigh = new Premise("speed", new PIFunction.TrapezoidPIFunction(50, 80, 100, 100));
+        Premise speedLow = new Premise("speed",
+                new PIFunction.TrapezoidPIFunction(0, 0, 40, 70));
+        Premise speedMed = new Premise("speed",
+                new PIFunction.TrapezoidPIFunction(40, 50, 70, 80));
+        Premise speedHigh = new Premise("speed",
+                new PIFunction.TrapezoidPIFunction(50, 80, 100, 100));
 
-        Consequence accelLow = new Consequence("acceleration", new PIFunction.TrapezoidPIFunction(0, 0, 480, 960));
-        Consequence accelHigh = new Consequence("acceleration", new PIFunction.TrapezoidPIFunction(640, 1120, 1600, 1600));
-//        Consequence accelNone = new Consequence("acceleration", new PIFunction.TrapezoidPIFunction(0, 0, 1, 2));
+        Consequence accelLow = new Consequence("acceleration",
+                new PIFunction.TrapezoidPIFunction(0, 0, 480, 960), 0, 1600);
+        Consequence accelHigh = new Consequence("acceleration",
+                new PIFunction.TrapezoidPIFunction(640, 1120, 1600, 1600), 0, 1600);
 
         for(double d: new double[]{40, 45, 50, 55, 60, 65, 70, 75, 80}) {
             double low = speedLow.membership.value(d);
@@ -36,16 +40,14 @@ public class Speed {
         // SPEED = med => ACCEL = low
         Rule r2 = new Rule(speedMed, accelLow);
         // SPEED = high => ACCEL = none
-//        Rule r3 = new Rule(speedHigh, accelNone);
 
         system.addRule(r1);
         system.addRule(r2);
-//        system.addRule(r3);
 
-        double speed = 60;
-
-        system.addInput("speed", speed);
-        System.out.println(system.evaluate());
+        for (double speed: new double[]{40,45,50,55,60,65,70,75,80}) {
+            system.addInput("speed", speed);
+            System.out.println(system.evaluate());
+        }
     }
 
 }
