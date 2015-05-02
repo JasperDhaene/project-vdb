@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.analysis.integration.RombergIntegrator;
+import org.apache.commons.math3.analysis.integration.BaseAbstractUnivariateIntegrator;
+import org.apache.commons.math3.analysis.integration.MidPointIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 
 /**
@@ -14,11 +15,10 @@ import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
  */
 public class FuzzySystem {
 
-    // Maximum integration evaluation
-    private static final int MAX_EVAL = 9001;
-    private static final UnivariateIntegrator integrator = new RombergIntegrator();
+    private static final int MAX_EVAL = BaseAbstractUnivariateIntegrator.DEFAULT_MAX_ITERATIONS_COUNT;
+    private static final UnivariateIntegrator integrator = new MidPointIntegrator(1.0e-3, 1.0e-15, 3, 64);
 
-    // Integration interval
+    // TODO: integration interval
     private static final int MIN_VAL = 0;
     private static final int MAX_VAL = 1600;
 
@@ -65,7 +65,14 @@ public class FuzzySystem {
             UnivariateFunction g = new Denominator(l);
             UnivariateFunction f = new Numerator(g);
 
+
+//            System.out.println("==> DENOMINATOR");
+//            Utils.visualizeFunc(g, 0, 1600, 100);
+//            System.out.println("==> END DENOMINATOR");
+
+            Utils.tic();
             double denominator = FuzzySystem.integrator.integrate(MAX_EVAL, g, MIN_VAL, MAX_VAL);
+            Utils.toc();
             if(denominator != 0) {
                 double numerator = FuzzySystem.integrator.integrate(MAX_EVAL, f, MIN_VAL, MAX_VAL);
                 crisp.put(s, (numerator / denominator));

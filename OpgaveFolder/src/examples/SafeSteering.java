@@ -4,8 +4,6 @@ import fuzzy.Consequence;
 import fuzzy.FuzzySystem;
 import fuzzy.Rule;
 import fuzzy.Utils;
-import fuzzy.expression.Conjunction;
-import fuzzy.expression.Expression;
 import fuzzy.expression.Premise;
 import fuzzy.membership.PIFunction;
 
@@ -13,7 +11,7 @@ import fuzzy.membership.PIFunction;
  *
  * @author Florian Dejonckheere <florian@floriandejonckheere.be>
  */
-public class Speed {
+public class SafeSteering {
 
     public static void main(String[] args) {
         FuzzySystem system = new FuzzySystem();
@@ -25,24 +23,19 @@ public class Speed {
         Premise speedHigh = new Premise("speed",
                 new PIFunction.TrapezoidPIFunction(50, 80, 100, 100));
 
-        Premise distanceLow = new Premise("distanceFront",
-                new PIFunction.TrapezoidPIFunction(0, 0, 0, 0));
-        Premise distanceHigh = new Premise("distanceFront",
-                new PIFunction.TrapezoidPIFunction(0, 0, 0, 0));
-
         Consequence accelLow = new Consequence("acceleration",
                 new PIFunction.TrapezoidPIFunction(0, 0, 480, 960), 0, 1600);
         Consequence accelHigh = new Consequence("acceleration",
                 new PIFunction.TrapezoidPIFunction(640, 1120, 1600, 1600), 0, 1600);
-//
-//        for(double d: new double[]{40, 45, 50, 55, 60, 65, 70, 75, 80}) {
-//            double low = speedLow.membership.value(d);
-//            double med = speedMed.membership.value(d);
-//            double high = speedHigh.membership.value(d);
-//            System.out.println(d + " => {" + Utils.visMem(low) + ", " + Utils.visMem(med) + ", " + Utils.visMem(high) + "} , " + String.format("{%1.3f; %1.3f; %1.3f}", low, med, high));
-//        }
+        Consequence accelNone = new Consequence("acceleration",
+                new PIFunction.TrapezoidPIFunction(0, 0, 0, 0), 0, 1600);
 
-        Expression e1 = new Conjunction(speedLow, distanceHigh);
+        for(double d: new double[]{40, 45, 50, 55, 60, 65, 70, 75, 80}) {
+            double low = speedLow.membership.value(d);
+            double med = speedMed.membership.value(d);
+            double high = speedHigh.membership.value(d);
+            System.out.println(d + " => {" + Utils.visMem(low) + ", " + Utils.visMem(med) + ", " + Utils.visMem(high) + "} , " + String.format("{%1.3f; %1.3f; %1.3f}", low, med, high));
+        }
 
         // SPEED = low => ACCEL = high
         Rule r1 = new Rule(speedLow, accelHigh);

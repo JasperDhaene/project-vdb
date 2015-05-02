@@ -17,7 +17,7 @@ public class Consequence implements UnivariateFunction {
 
     public Consequence(String variable, UnivariateFunction membership){
         this.variable = variable;
-        this.limit = Double.MIN_VALUE;
+        this.limit = Double.MAX_VALUE;
         this.membership = membership;
         this.integrationMin = 100;
         this.integrationMax = 100;

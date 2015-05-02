@@ -9,17 +9,26 @@ import org.apache.commons.math3.analysis.function.Identity;
  */
 public class PIFunction implements UnivariateFunction {
 
-    private final int alpha, beta, gamma, delta;
+    // Arbitrary small number
+    public final double eps = Math.pow(10, -10);
+
+    private final double alpha, beta, gamma, delta;
     private final UnivariateFunction pi1, pi3;
 
-    public PIFunction(int alpha, int beta, int gamma, int delta, UnivariateFunction pi1, UnivariateFunction pi3) {
+    public PIFunction(double alpha, double beta, double gamma, double delta, UnivariateFunction pi1, UnivariateFunction pi3) {
         if(alpha > beta || beta > gamma || gamma > delta)
             throw new RuntimeException(new IllegalArgumentException("Arguments must be serially smaller than or equal to each other."));
 
-        this.alpha = alpha;
+        /**
+         * FP-math doesn't like it when alpha == beta or gamma == delta.
+         * Apply a small fix to make sure the functions are rendered correctly.
+         */
+        this.alpha = (alpha == beta ? (alpha - eps) : alpha);
         this.beta = beta;
         this.gamma = gamma;
-        this.delta = delta;
+        this.delta = (gamma == delta ? (delta + eps) : delta);
+
+        System.out.println(String.format("%f, %f, %f, %f", this.alpha, this.beta, this.gamma, this.delta));
 
         // pi1, pi3 validity testing ommitted
 
