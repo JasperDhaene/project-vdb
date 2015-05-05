@@ -29,7 +29,8 @@ public class Consequence implements UnivariateFunction {
 
     @Override
     public double value(double x){
-        return Math.min(this.limit, this.membership.value(x));
+        return Math.min(this.limit, this.membership.value(x));  //TODO: this is never used. It's necessary as a univariateFunction,
+                                                                //but never called for in code, so we have no idea how it behaves.
     }
 
 }

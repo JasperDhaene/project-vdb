@@ -28,10 +28,10 @@ public class SafeSpeed {
         Premise speedHigh = new Premise("speed",
                 new PIFunction.TrapezoidPIFunction(50, 80, 100, 100));
 
-        Premise distanceLow = new Premise("distanceFront",
-                new PIFunction.TrapezoidPIFunction(0, 0, 30, 50));
-        Premise distanceHigh = new Premise("distanceFront",
-                new PIFunction.TrapezoidPIFunction(40, 80, Integer.MAX_VALUE, Integer.MAX_VALUE));
+        Premise distanceLow = new Premise("frontSensorDistance",
+                new PIFunction.TrapezoidPIFunction(0, 0, 50, 70));
+        Premise distanceHigh = new Premise("frontSensorDistance",
+                new PIFunction.TrapezoidPIFunction(80, 100, Integer.MAX_VALUE, Integer.MAX_VALUE));
 
         /**
          * Actuators
@@ -40,29 +40,30 @@ public class SafeSpeed {
                 new PIFunction.TrapezoidPIFunction(0, 0, 480, 960), 0, 1600);
         Consequence accelHigh = new Consequence("acceleration",
                 new PIFunction.TrapezoidPIFunction(640, 1120, 1600, 1600), 0, 1600);
+        Consequence accelNone = new Consequence("acceleration",
+                new PIFunction.TrapezoidPIFunction(0, 0, 0, 0), 0, 1600);
         
         Consequence brakeNone = new Consequence("brake",
                 new PIFunction.TrapezoidPIFunction(0, 0, 0, 0), 0, 40);
+        Consequence brakeMed = new Consequence("brake",
+                new PIFunction.TrapezoidPIFunction(15, 17, 23, 25), 0, 40);
         Consequence brakeHigh = new Consequence("brake",
-                new PIFunction.TrapezoidPIFunction(20, 30, 40, 40), 0, 40);
-//
-//        for(double d: new double[]{40, 45, 50, 55, 60, 65, 70, 75, 80}) {
-//            double low = speedLow.membership.value(d);
-//            double med = speedMed.membership.value(d);
-//            double high = speedHigh.membership.value(d);
-//            System.out.println(d + " => {" + Utils.visMem(low) + ", " + Utils.visMem(med) + ", " + Utils.visMem(high) + "} , " + String.format("{%1.3f; %1.3f; %1.3f}", low, med, high));
-//        }
+                new PIFunction.TrapezoidPIFunction(30, 40, 40, 40), 0, 40);
 
         // SPEED = low => ACCEL = high
         Rule r1 = new Rule(new Conjunction(speedLow, distanceHigh), accelHigh);
         // SPEED = med => ACCEL = low
-        Rule r2 = new Rule(speedMed, accelLow);
+        Rule r2 = new Rule(new Conjunction(speedMed, distanceHigh), accelLow);
         // DISTANCE = low => BRAKE = high
         Rule r3 = new Rule(distanceLow, brakeHigh);
+        // DISTANCE = low => BRAKE = high
+        Rule r4 = new Rule(distanceLow, accelNone);
 
         system.addRule(r1);
         system.addRule(r2);
         system.addRule(r3);
+        system.addRule(r4);
+        
         
         /**
          * EVALUATION
@@ -81,7 +82,8 @@ public class SafeSpeed {
             add(new Pair(0, 20));
             add(new Pair(40, 10));
             add(new Pair(40, 5));
-            add(new Pair(50, 1));
+            add(new Pair(45, 20));
+            add(new Pair(100, 1));
         }};
         
         for(Pair p: input) {

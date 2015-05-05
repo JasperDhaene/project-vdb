@@ -11,6 +11,6 @@ public class Pair {
 
     @Override
     public String toString() {
-        return "{" + "v=" + speed + ", d=" + distanceFront + "}";
+        return "{" + "speed=" + speed + ", distFront=" + distanceFront + "}";
     }
 }

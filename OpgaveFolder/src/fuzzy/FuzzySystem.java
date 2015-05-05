@@ -41,8 +41,8 @@ public class FuzzySystem {
          * 1. Evaluation: evaluate each rule for a given variable
          */
         Map<String, List<Consequence>> consequences = new HashMap<>();
-        this.rules.forEach((r) -> {
-            Consequence c = r.evaluate(this.inputs);
+        this.rules.forEach((rule) -> {
+            Consequence c = rule.evaluate(this.inputs);
 
             if(!consequences.containsKey(c.variable))
                 consequences.put(c.variable, new ArrayList<>());
@@ -56,53 +56,58 @@ public class FuzzySystem {
          */
         Map<String, Double> crisp = new HashMap<>();
 
-        consequences.forEach((s, l) -> {
+        consequences.forEach((string, consequenceList) -> {
 
-            Denominator g = new Denominator(l);
+            Denominator g = new Denominator(consequenceList);
             Numerator f = new Numerator(g);
 
             // Numerator and denominator have the same integration boundaries
             double denominator = FuzzySystem.integrator.integrate(MAX_EVAL, g, g.integrationMin, g.integrationMax);
             if(denominator != 0) {
                 double numerator = FuzzySystem.integrator.integrate(MAX_EVAL, f, g.integrationMin, g.integrationMax);
-                crisp.put(s, (numerator / denominator));
-            } else crisp.put(s, 0.0);
+                crisp.put(string, (numerator / denominator));
+            } else crisp.put(string, 0.0);
         });
 
         return crisp;
     }
 
     // f(x) gives the maximum of all aggregate functions
+    // @nl: Noemer. Onder de breukstreep.
     private class Denominator implements UnivariateFunction {
 
-        private final List<Consequence> functions;
+        private final List<Consequence> consequences;
         public int integrationMin, integrationMax;
 
         public Denominator(List<Consequence> functions) {
-            this.functions = functions;
-            for (Consequence f: functions) {
-                if (f.integrationMin < this.integrationMin)
-                    this.integrationMin = f.integrationMin;
-                if (f.integrationMax > this.integrationMax)
-                    this.integrationMax = f.integrationMax;
+            this.consequences = functions;
+            for (Consequence c: functions) {
+                if (c.integrationMin < this.integrationMin)
+                    this.integrationMin = c.integrationMin;
+                if (c.integrationMax > this.integrationMax)
+                    this.integrationMax = c.integrationMax;
             }
         }
 
         @Override
         public double value(double x) {
             double max = 0;
-            for(UnivariateFunction f: functions){
-                max = Math.max(f.value(x), max);
+            // 4. Unification of rules: evaluate to the pointwise maximum.
+            // This simulates the unification of various membership functions from
+            // different consequences
+            for(UnivariateFunction c: consequences){ 
+                max = Math.max(c.value(x), max);
             }
             return max;
         }
     }
 
     // f(x) gives x*f(x)
+    // @nl: Teller. Boven de breukstreep.
     private class Numerator implements UnivariateFunction {
 
         private final UnivariateFunction f;
-        public int integrationMin, integrationMax;
+        //public int integrationMin, integrationMax;
 
         public Numerator(UnivariateFunction f) {
             this.f = f;
