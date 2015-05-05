@@ -17,11 +17,7 @@ public class FuzzySystem {
 
     private static final int MAX_EVAL = BaseAbstractUnivariateIntegrator.DEFAULT_MAX_ITERATIONS_COUNT;
     private static final UnivariateIntegrator integrator = new MidPointIntegrator(1.0e-3, 1.0e-15, 3, 64);
-
-    // TODO: integration interval
-    private static final int MIN_VAL = 0;
-    private static final int MAX_VAL = 1600;
-
+    
     private final List<Rule> rules;
     private final Map<String, Double> inputs;
 
@@ -44,7 +40,7 @@ public class FuzzySystem {
         /**
          * 1. Evaluation: evaluate each rule for a given variable
          */
-        Map<String, List<UnivariateFunction>> consequences = new HashMap<>();
+        Map<String, List<Consequence>> consequences = new HashMap<>();
         this.rules.forEach((r) -> {
             Consequence c = r.evaluate(this.inputs);
 
@@ -62,19 +58,13 @@ public class FuzzySystem {
 
         consequences.forEach((s, l) -> {
 
-            UnivariateFunction g = new Denominator(l);
-            UnivariateFunction f = new Numerator(g);
+            Denominator g = new Denominator(l);
+            Numerator f = new Numerator(g);
 
-
-//            System.out.println("==> DENOMINATOR");
-//            Utils.visualizeFunc(g, 0, 1600, 100);
-//            System.out.println("==> END DENOMINATOR");
-
-            Utils.tic();
-            double denominator = FuzzySystem.integrator.integrate(MAX_EVAL, g, MIN_VAL, MAX_VAL);
-            Utils.toc();
+            // Numerator and denominator have the same integration boundaries
+            double denominator = FuzzySystem.integrator.integrate(MAX_EVAL, g, g.integrationMin, g.integrationMax);
             if(denominator != 0) {
-                double numerator = FuzzySystem.integrator.integrate(MAX_EVAL, f, MIN_VAL, MAX_VAL);
+                double numerator = FuzzySystem.integrator.integrate(MAX_EVAL, f, g.integrationMin, g.integrationMax);
                 crisp.put(s, (numerator / denominator));
             } else crisp.put(s, 0.0);
         });
@@ -85,10 +75,17 @@ public class FuzzySystem {
     // f(x) gives the maximum of all aggregate functions
     private class Denominator implements UnivariateFunction {
 
-        private final List<UnivariateFunction> functions;
+        private final List<Consequence> functions;
+        public int integrationMin, integrationMax;
 
-        public Denominator(List<UnivariateFunction> functions) {
+        public Denominator(List<Consequence> functions) {
             this.functions = functions;
+            for (Consequence f: functions) {
+                if (f.integrationMin < this.integrationMin)
+                    this.integrationMin = f.integrationMin;
+                if (f.integrationMax > this.integrationMax)
+                    this.integrationMax = f.integrationMax;
+            }
         }
 
         @Override
@@ -105,6 +102,7 @@ public class FuzzySystem {
     private class Numerator implements UnivariateFunction {
 
         private final UnivariateFunction f;
+        public int integrationMin, integrationMax;
 
         public Numerator(UnivariateFunction f) {
             this.f = f;

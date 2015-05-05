@@ -22,7 +22,9 @@ public class Main {
 	Controller controller = new SafeController();
 	String trackname = "texas1024";
 
-	RaceCar app = new RaceCar("defaultname", trackname, controller, false);
+	RaceCar app = new RaceCar("defaultname", trackname, controller, true);
+        app.setDisplayFps(false);
+        app.setDisplayStatView(false);
 	app.start();
     }
 

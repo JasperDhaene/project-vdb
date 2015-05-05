@@ -34,9 +34,9 @@ public class Funding {
         PIFunction small = new PIFunction.TrapezoidPIFunction(0, 0, 30, 65);
         PIFunction large = new PIFunction.TrapezoidPIFunction(50, 70, 100, 100);
 
-        Consequence c1 = new Consequence("riskLow", new PIFunction.TrapezoidPIFunction(30, 40, 100, 100));
-        Consequence c2 = new Consequence("riskNormal", new PIFunction.TrapezoidPIFunction(30, 40, 100, 100));
-        Consequence c3 = new Consequence("riskHigh", new PIFunction.TrapezoidPIFunction(30, 40, 100, 100));
+        Consequence c1 = new Consequence("riskLow", new PIFunction.TrapezoidPIFunction(30, 40, 100, 100), 0, 100);
+        Consequence c2 = new Consequence("riskNormal", new PIFunction.TrapezoidPIFunction(30, 40, 100, 100), 0, 100);
+        Consequence c3 = new Consequence("riskHigh", new PIFunction.TrapezoidPIFunction(30, 40, 100, 100), 0, 100);
         Expression e1 = new Disjunction(new Premise("funding", adequate), new Premise("staffing", small));
         Expression e2 = new Conjunction(new Premise("funding", marginal), new Premise("staffing", large));
         Expression e3 = new Premise("funding", inadequate);

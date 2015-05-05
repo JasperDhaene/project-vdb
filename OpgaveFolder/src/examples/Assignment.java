@@ -22,13 +22,13 @@ public class Assignment {
         Premise p1a = new Premise("var1", new PIFunction.TrapezoidPIFunction(0, 0, 15, 35));
         Premise p1b = new Premise("var2", new PIFunction.TrapezoidPIFunction(0, 0, 15, 35));
         Expression e1 = new Conjunction(p1a, p1b);
-        Consequence c1 = new Consequence("out1", new PIFunction.TrapezoidPIFunction(60, 85, 100, 100));
+        Consequence c1 = new Consequence("out1", new PIFunction.TrapezoidPIFunction(60, 85, 100, 100), 0, 100);
         Rule r1 = new Rule(e1, c1);
 
         Premise p2a = new Premise("var3", new PIFunction.TrapezoidPIFunction(0, 0, 15, 25));
         Premise p2b = new Premise("var4", new PIFunction.TriangularPIFunction(40, 50, 70));
         Expression e2 = new Conjunction(p2a, p2b);
-        Consequence c2 = new Consequence("out1", new PIFunction.TriangularPIFunction(30, 50, 70));
+        Consequence c2 = new Consequence("out1", new PIFunction.TriangularPIFunction(30, 50, 70), 0, 100);
         Rule r2 = new Rule(e2, c2);
 
         system.addInput("var1", 25);
