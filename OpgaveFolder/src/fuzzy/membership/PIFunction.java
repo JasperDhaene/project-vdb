@@ -58,7 +58,7 @@ public class PIFunction implements UnivariateFunction {
 
     public static class TrapezoidPIFunction extends PIFunction {
 
-        public TrapezoidPIFunction(int alpha, int beta, int gamma, int delta) {
+        public TrapezoidPIFunction(double alpha, double beta, double gamma, double delta) {
             super(alpha, beta, gamma, delta, new Identity(), new Complement());
         }
 
@@ -66,7 +66,7 @@ public class PIFunction implements UnivariateFunction {
 
     public static class TriangularPIFunction extends TrapezoidPIFunction {
 
-        public TriangularPIFunction(int alpha, int beta, int delta) {
+        public TriangularPIFunction(double alpha, double beta, double delta) {
             super(alpha, beta, beta, delta);
         }
 

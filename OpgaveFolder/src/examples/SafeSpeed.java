@@ -28,9 +28,9 @@ public class SafeSpeed {
         Premise speedHigh = new Premise("speed",
                 new PIFunction.TrapezoidPIFunction(50, 80, 100, 100));
 
-        Premise distanceLow = new Premise("frontSensorDistance",
+        Premise distanceLow = new Premise("distanceFront",
                 new PIFunction.TrapezoidPIFunction(0, 0, 50, 70));
-        Premise distanceHigh = new Premise("frontSensorDistance",
+        Premise distanceHigh = new Premise("distanceFront",
                 new PIFunction.TrapezoidPIFunction(80, 100, Integer.MAX_VALUE, Integer.MAX_VALUE));
 
         /**
@@ -87,8 +87,8 @@ public class SafeSpeed {
         }};
         
         for(Pair p: input) {
-            system.addInput("speed", p.speed);
-            system.addInput("distanceFront", p.distanceFront);
+            system.addInput("speed", p.left);
+            system.addInput("distanceFront", p.right);
             System.out.println(p + " => " + system.evaluate());
         }
     }

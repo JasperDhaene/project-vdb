@@ -32,6 +32,17 @@ public class SafeController implements Controller {
         Premise distanceHigh = new Premise("frontSensorDistance",
                 new PIFunction.TrapezoidPIFunction(80, 100, Integer.MAX_VALUE, Integer.MAX_VALUE));
 
+        Premise ratioLow = new Premise("frontDistanceRatio",
+                new PIFunction.TrapezoidPIFunction(
+                        -Double.MAX_VALUE,
+                        -Double.MAX_VALUE,
+                        -100, -40));
+        Premise ratioHigh = new Premise("frontDistanceRatio",
+                new PIFunction.TrapezoidPIFunction(
+                        40, 100,
+                        Double.MAX_VALUE,
+                        Double.MAX_VALUE));
+        
         /**
          * Actuators
          */
@@ -48,20 +59,24 @@ public class SafeController implements Controller {
                 new PIFunction.TrapezoidPIFunction(15, 17, 23, 25), 0, 40);
         Consequence brakeHigh = new Consequence("brake",
                 new PIFunction.TrapezoidPIFunction(30, 40, 40, 40), 0, 40);
+        
+        Consequence steerLeft = new Consequence("steering",
+                new PIFunction.TriangularPIFunction(-1, -1, -0.5), -1, 1);
+        Consequence steerRight = new Consequence("steering",
+                new PIFunction.TriangularPIFunction(0.5, 1, 1), -1, 1);
 
         // SPEED = low => ACCEL = high
-        Rule r1 = new Rule(new Conjunction(speedLow, distanceHigh), accelHigh);
+        system.addRule(new Rule(new Conjunction(speedLow, distanceHigh), accelHigh));
         // SPEED = med => ACCEL = low
-        Rule r2 = new Rule(new Conjunction(speedMed, distanceHigh), accelLow);
+        system.addRule(new Rule(new Conjunction(speedMed, distanceHigh), accelLow));
         // DISTANCE = low => BRAKE = high
-        Rule r3 = new Rule(distanceLow, brakeHigh);
+        system.addRule(new Rule(distanceLow, brakeHigh));
         // DISTANCE = low => BRAKE = high
-        Rule r4 = new Rule(distanceLow, accelNone);
-
-        system.addRule(r1);
-        system.addRule(r2);
-        system.addRule(r3);
-        system.addRule(r4);
+        system.addRule(new Rule(distanceLow, accelNone));
+        // RATIO = low => STEERING = right (high)
+        system.addRule(new Rule(ratioLow, steerRight));
+        // RATIO = high => STEERING = left (low)
+        system.addRule(new Rule(ratioHigh, steerLeft));
     }
 
     @Override
@@ -74,12 +89,15 @@ public class SafeController implements Controller {
 
         system.addInput("speed", vp.getCurrentCarSpeedKph());
         system.addInput("frontSensorDistance", vp.getDistanceFromFrontSensor());
+        system.addInput("frontDistanceRatio", 
+                (vp.getDistanceFromFrontSensor() - vp.getDistanceFromRightSensor()));
         Map<String, Double> output = system.evaluate();
 
         /**
          * Steering
          */
-
+        steering = output.get("steering");
+        
         /**
          * Acceleration
          */
