@@ -49,20 +49,25 @@ public class SafeSpeed {
                 new PIFunction.TrapezoidPIFunction(15, 17, 23, 25), 0, 40);
         Consequence brakeHigh = new Consequence("brake",
                 new PIFunction.TrapezoidPIFunction(30, 40, 40, 40), 0, 40);
-
+        
+        
+        // 1. Accelerate if nothing's in front of you, but mind your speed
         // SPEED = low => ACCEL = high
-        Rule r1 = new Rule(new Conjunction(speedLow, distanceHigh), accelHigh);
+        system.addRule(new Rule(new Conjunction(speedLow, distanceHigh), accelHigh));
         // SPEED = med => ACCEL = low
-        Rule r2 = new Rule(new Conjunction(speedMed, distanceHigh), accelLow);
-        // DISTANCE = low => BRAKE = high
-        Rule r3 = new Rule(distanceLow, brakeHigh);
-        // DISTANCE = low => BRAKE = high
-        Rule r4 = new Rule(distanceLow, accelNone);
-
-        system.addRule(r1);
-        system.addRule(r2);
-        system.addRule(r3);
-        system.addRule(r4);
+        system.addRule(new Rule(new Conjunction(speedMed, distanceHigh), accelLow));
+        // SPEED = med => ACCEL = none
+        system.addRule(new Rule(new Conjunction(speedHigh, distanceHigh), accelNone));
+        
+        // 2. If something comes up in front of you, don't accelerate and use your brakes
+        // SPEED = High /\ DISTANCE = low => BRAKE = high
+        system.addRule(new Rule(new Conjunction(speedHigh, distanceLow), brakeHigh));
+        // DISTANCE = low => ACCEL = none
+        system.addRule(new Rule(new Conjunction(speedHigh, distanceLow), accelNone));
+        
+        // 3. Whatever happens, always have a base speed
+        // DISTANCE = low /\ SPEED = low => ACCEL = low
+        system.addRule(new Rule(new Conjunction(speedLow, distanceLow), accelLow));
         
         
         /**
@@ -84,6 +89,8 @@ public class SafeSpeed {
             add(new Pair(40, 5));
             add(new Pair(45, 20));
             add(new Pair(100, 1));
+            
+            add(new Pair(5, 40));
         }};
         
         for(Pair p: input) {

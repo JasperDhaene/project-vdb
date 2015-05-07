@@ -23,9 +23,9 @@ public class SafeController implements Controller {
         Premise speedLow = new Premise("speed",
                 new PIFunction.TrapezoidPIFunction(0, 0, 40, 70));
         Premise speedMed = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(40, 50, 70, 80));
+                new PIFunction.TrapezoidPIFunction(40, 70, 90, 100));
         Premise speedHigh = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(50, 80, 100, 100));
+                new PIFunction.TrapezoidPIFunction(90, 100, 400, 400));
 
         Premise distanceLow = new Premise("frontSensorDistance",
                 new PIFunction.TrapezoidPIFunction(0, 0, 30, 50));
@@ -36,10 +36,10 @@ public class SafeController implements Controller {
                 new PIFunction.TrapezoidPIFunction(
                         -Double.MAX_VALUE,
                         -Double.MAX_VALUE,
-                        -100, -40));
+                        -100, -20));
         Premise ratioHigh = new Premise("frontDistanceRatio",
                 new PIFunction.TrapezoidPIFunction(
-                        40, 100,
+                        20, 100,
                         Double.MAX_VALUE,
                         Double.MAX_VALUE));
         
@@ -65,11 +65,7 @@ public class SafeController implements Controller {
         Consequence steerRight = new Consequence("steering",
                 new PIFunction.TriangularPIFunction(0.5, 1, 1), -1, 1);
 
-        // 1. Always have a base speed
-        // DISTANCE = low /\ SPEED = low => ACCEL = low
-        system.addRule(new Rule(new Conjunction(speedLow, distanceLow), accelHigh));
-        
-        // 2. Accelerate if nothing's in front of you, but mind your speed
+        // 1. Accelerate if nothing's in front of you, but mind your speed
         // SPEED = low => ACCEL = high
         system.addRule(new Rule(new Conjunction(speedLow, distanceHigh), accelHigh));
         // SPEED = med => ACCEL = low
@@ -77,11 +73,15 @@ public class SafeController implements Controller {
         // SPEED = med => ACCEL = none
         system.addRule(new Rule(new Conjunction(speedHigh, distanceHigh), accelNone));
         
-        // 3. If something comes up in front of you, don't accelerate and use your brakes
-        // DISTANCE = low => BRAKE = high
-        system.addRule(new Rule(distanceLow, brakeHigh));
+        // 2. If something comes up in front of you, don't accelerate and use your brakes
+        // SPEED = High /\ DISTANCE = low => BRAKE = high
+        system.addRule(new Rule(new Conjunction(speedHigh, distanceLow), brakeHigh));
         // DISTANCE = low => ACCEL = none
-        system.addRule(new Rule(distanceLow, accelNone));
+        system.addRule(new Rule(new Conjunction(speedHigh, distanceLow), accelNone));
+        
+        // 3. Whatever happens, always have a base speed
+        // DISTANCE = low /\ SPEED = low => ACCEL = low
+        system.addRule(new Rule(new Conjunction(speedLow, distanceLow), accelLow));
         
         // 4. Strive for a stable left/right ratio
         // RATIO = low => STEERING = right (high)
@@ -119,6 +119,15 @@ public class SafeController implements Controller {
          */
         
         brake = output.get("brake");
+        
+        /**
+         * Debug output
+         */
+        
+        System.out.println("steering: " + steering);
+        System.out.println("acceleration: " + acceleration);
+        System.out.println("brake: " + brake);
+        System.out.println("#######################");
 
         fc = new FrameControl((float) steering,
                                 (float) acceleration,
