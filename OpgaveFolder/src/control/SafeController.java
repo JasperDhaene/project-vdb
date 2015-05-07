@@ -69,6 +69,10 @@ public class SafeController implements Controller {
         system.addRule(new Rule(new Conjunction(speedLow, distanceHigh), accelHigh));
         // SPEED = med => ACCEL = low
         system.addRule(new Rule(new Conjunction(speedMed, distanceHigh), accelLow));
+        // SPEED = med => ACCEL = low
+        system.addRule(new Rule(new Conjunction(speedHigh, distanceHigh), accelNone));
+        // DISTANCE = low /\ SPEED = low => ACCEL = low
+        system.addRule(new Rule(new Conjunction(speedLow, distanceLow), accelLow));
         // DISTANCE = low => BRAKE = high
         system.addRule(new Rule(distanceLow, brakeHigh));
         // DISTANCE = low => BRAKE = high
