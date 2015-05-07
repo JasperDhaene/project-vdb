@@ -65,18 +65,25 @@ public class SafeController implements Controller {
         Consequence steerRight = new Consequence("steering",
                 new PIFunction.TriangularPIFunction(0.5, 1, 1), -1, 1);
 
+        // 1. Always have a base speed
+        // DISTANCE = low /\ SPEED = low => ACCEL = low
+        system.addRule(new Rule(new Conjunction(speedLow, distanceLow), accelHigh));
+        
+        // 2. Accelerate if nothing's in front of you, but mind your speed
         // SPEED = low => ACCEL = high
         system.addRule(new Rule(new Conjunction(speedLow, distanceHigh), accelHigh));
         // SPEED = med => ACCEL = low
         system.addRule(new Rule(new Conjunction(speedMed, distanceHigh), accelLow));
-        // SPEED = med => ACCEL = low
+        // SPEED = med => ACCEL = none
         system.addRule(new Rule(new Conjunction(speedHigh, distanceHigh), accelNone));
-        // DISTANCE = low /\ SPEED = low => ACCEL = low
-        system.addRule(new Rule(new Conjunction(speedLow, distanceLow), accelLow));
+        
+        // 3. If something comes up in front of you, don't accelerate and use your brakes
         // DISTANCE = low => BRAKE = high
         system.addRule(new Rule(distanceLow, brakeHigh));
-        // DISTANCE = low => BRAKE = high
+        // DISTANCE = low => ACCEL = none
         system.addRule(new Rule(distanceLow, accelNone));
+        
+        // 4. Strive for a stable left/right ratio
         // RATIO = low => STEERING = right (high)
         system.addRule(new Rule(ratioLow, steerRight));
         // RATIO = high => STEERING = left (low)
@@ -94,7 +101,7 @@ public class SafeController implements Controller {
         system.addInput("speed", vp.getCurrentCarSpeedKph());
         system.addInput("frontSensorDistance", vp.getDistanceFromFrontSensor());
         system.addInput("frontDistanceRatio", 
-                (vp.getDistanceFromFrontSensor() - vp.getDistanceFromRightSensor()));
+                (vp.getDistanceFromLeftSensor() - vp.getDistanceFromRightSensor()));
         Map<String, Double> output = system.evaluate();
 
         /**
