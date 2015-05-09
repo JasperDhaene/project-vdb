@@ -21,10 +21,10 @@ public class SafeSteering {
                 new PIFunction.TrapezoidPIFunction(
                         -Double.MAX_VALUE,
                         -Double.MAX_VALUE,
-                        -100, -40));
+                        -50, 20));
         Premise ratioHigh = new Premise("frontDistanceRatio",
                 new PIFunction.TrapezoidPIFunction(
-                        40, 100,
+                        -20, 50,
                         Double.MAX_VALUE,
                         Double.MAX_VALUE));
 
@@ -32,14 +32,12 @@ public class SafeSteering {
                 new PIFunction.TriangularPIFunction(-1, -1, -0.5), -1, 1);
         Consequence steerRight = new Consequence("steering",
                 new PIFunction.TriangularPIFunction(0.5, 1, 1), -1, 1);
-
+        
+        // 4. Strive for a stable left/right ratio
         // RATIO = low => STEERING = right (high)
-        Rule r1 = new Rule(ratioLow, steerRight);
+        system.addRule(new Rule(ratioLow, steerRight));
         // RATIO = high => STEERING = left (low)
-        Rule r2 = new Rule(ratioHigh, steerLeft);
-
-        system.addRule(r1);
-        system.addRule(r2);
+        system.addRule(new Rule(ratioHigh, steerLeft));
 
         List<Pair> input = new ArrayList<Pair>(){{
             // Straight on road
@@ -52,9 +50,14 @@ public class SafeSteering {
             add(new Pair(300, 30));
         }};
         
-        for(Pair p: input) {
-            system.addInput("frontDistanceRatio", (p.left - p.right));
-            System.out.println(p + " => " + system.evaluate());
+//        for(Pair p: input) {
+//            system.addInput("frontDistanceRatio", (p.left - p.right));
+//            System.out.println(p + " => " + system.evaluate());
+//        }
+        
+        for(double d: new double[]{-150,-100,-50,0,50,100,150}) {
+            system.addInput("frontDistanceRatio", d);
+            System.out.println(d + " => " + system.evaluate());
         }
     }
 

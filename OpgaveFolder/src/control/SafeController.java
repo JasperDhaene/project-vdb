@@ -38,10 +38,10 @@ public class SafeController implements Controller {
                 new PIFunction.TrapezoidPIFunction(
                         -Double.MAX_VALUE,
                         -Double.MAX_VALUE,
-                        -100, -20));
+                        -50, -10));
         Premise ratioHigh = new Premise("frontDistanceRatio",
                 new PIFunction.TrapezoidPIFunction(
-                        20, 100,
+                        10, 50,
                         Double.MAX_VALUE,
                         Double.MAX_VALUE));
         
@@ -74,7 +74,7 @@ public class SafeController implements Controller {
         system.addRule(new Rule(new Conjunction(speedLow, distanceHigh), accelHigh));
         // SPEED = med => ACCEL = low
         system.addRule(new Rule(new Conjunction(speedMed, distanceHigh), accelMed));
-        // SPEED = med => ACCEL = none
+        // SPEED = high => ACCEL = none
         system.addRule(new Rule(new Conjunction(speedHigh, distanceHigh), accelLow));
         
         // 2. If something comes up in front of you, don't accelerate and use your brakes
@@ -99,10 +99,11 @@ public class SafeController implements Controller {
     @Override
     public FrameControl getFrameControl(VehicleProperties vp) {
         FrameControl fc;
-
+        
         double steering = 0,
             acceleration = 0,
-            brake = 0;
+            brake = 0,
+            scanAngle = 0;
 
         system.addInput("speed", vp.getCurrentCarSpeedKph());
         system.addInput("frontSensorDistance", vp.getDistanceFromFrontSensor());
@@ -114,6 +115,7 @@ public class SafeController implements Controller {
          * Steering
          */
         steering = output.get("steering");
+        steering -= (steering - vp.getAngleFrontWheels())/2;
         
         /**
          * Acceleration
@@ -127,18 +129,26 @@ public class SafeController implements Controller {
         brake = output.get("brake");
         
         /**
+         * Scanangle
+         */
+        scanAngle = 0.9;
+        
+        /**
          * Debug output
          */
         
         System.out.println("steering: " + steering);
         System.out.println("acceleration: " + acceleration);
         System.out.println("brake: " + brake);
+        System.out.println("ratio: " + 
+                (vp.getDistanceFromLeftSensor() - vp.getDistanceFromRightSensor()) + 
+                " => " + steering);
         System.out.println("#######################");
 
         fc = new FrameControl((float) steering,
                                 (float) acceleration,
                                 (float) brake,
-                                vp.getScanAngle());
+                                scanAngle);
 
         return fc;
     }

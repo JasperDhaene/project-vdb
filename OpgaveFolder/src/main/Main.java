@@ -20,7 +20,7 @@ public class Main {
 	 */
 
 	Controller controller = new SafeController();
-	String trackname = "spafrancorchamps1024";
+	String trackname = "interlagos1024";
 
 	RaceCar app = new RaceCar("Lightning McQueen", trackname, controller, false);
         app.setDisplayFps(false);
