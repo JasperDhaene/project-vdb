@@ -6,6 +6,7 @@ import fuzzy.FuzzySystem;
 import fuzzy.Rule;
 import fuzzy.expression.Conjunction;
 import fuzzy.expression.Disjunction;
+import fuzzy.expression.Not;
 import fuzzy.expression.Premise;
 import fuzzy.membership.PIFunction;
 import java.util.Map;
@@ -28,25 +29,41 @@ public class SpeedController implements Controller {
         Premise speedHigh = new Premise("speed",
                 new PIFunction.TrapezoidPIFunction(100, 130, 170, 190));
         Premise speedNitro = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(180, 210, 400, 400));
-        Premise speedBackwards = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(-20, -20, 0, 0));
-
+                new PIFunction.TrapezoidPIFunction(180, 210, 230, 280));
+        Premise speedInsane = new Premise("speed",
+                new PIFunction.TrapezoidPIFunction(270, 290, 310, 400));
+        /*
         Premise distanceLow = new Premise("frontSensorDistance",
                 new PIFunction.TrapezoidPIFunction(0, 0, 30, 50));
         Premise distanceMed = new Premise("frontSensorDistance",
                 new PIFunction.TrapezoidPIFunction(40, 50, 70, 90));
         Premise distanceHigh = new Premise("frontSensorDistance",
-                new PIFunction.TrapezoidPIFunction(80, 100, Integer.MAX_VALUE, Integer.MAX_VALUE));
+                new PIFunction.TrapezoidPIFunction(80, 100, 110, 130));
+        Premise distanceEndless = new Premise("frontSensorDistance",
+                new PIFunction.TrapezoidPIFunction(120, 130, Integer.MAX_VALUE, Integer.MAX_VALUE));
+        */
+        Premise distanceLow = new Premise("frontSensorDistance",
+                new PIFunction.TrapezoidPIFunction(0, 0, 30, 50));
+        Premise distanceMed = new Premise("frontSensorDistance",
+                new PIFunction.TrapezoidPIFunction(40, 60, 90, 100));
+        Premise distanceHigh = new Premise("frontSensorDistance",
+                new PIFunction.TrapezoidPIFunction(90, 110, 130, 150));
+        Premise distanceEndless = new Premise("frontSensorDistance",
+                new PIFunction.TrapezoidPIFunction(140, 160, Integer.MAX_VALUE, Integer.MAX_VALUE));
 
-        Premise ratioLow = new Premise("frontDistanceRatio",
+        Premise ratioLeft = new Premise("leftRightDistanceRatio",
                 new PIFunction.TrapezoidPIFunction(
                         -Double.MAX_VALUE,
                         -Double.MAX_VALUE,
-                        -50, -10));
-        Premise ratioHigh = new Premise("frontDistanceRatio",
+                        -50, -15));
+        Premise ratioMiddle = new Premise("leftRightDistanceRatio",
                 new PIFunction.TrapezoidPIFunction(
-                        10, 50,
+                        -20,
+                        -15,
+                        15, 20));
+        Premise ratioRight = new Premise("leftRightDistanceRatio",
+                new PIFunction.TrapezoidPIFunction(
+                        15, 50,
                         Double.MAX_VALUE,
                         Double.MAX_VALUE));
         
@@ -72,6 +89,8 @@ public class SpeedController implements Controller {
                 new PIFunction.TrapezoidPIFunction(15, 20, 30, 35), 0, 40);
         Consequence brakeHigh = new Consequence("brake",
                 new PIFunction.TrapezoidPIFunction(30, 35, 40, 40), 0, 40);
+        Consequence brakeExtreme = new Consequence("brake",
+                new PIFunction.TrapezoidPIFunction(30, 38, 40, 40), 0, 40);
         
         Consequence steerLeft = new Consequence("steering",
                 new PIFunction.TriangularPIFunction(-1, -1, -0.5), -1, 1);
@@ -81,24 +100,29 @@ public class SpeedController implements Controller {
         
         // 1. Accelerate if nothing's in front of you, but mind your speed
         // SPEED = low \/ med \/ high => ACCEL = nitro
-        system.addRule(new Rule(new Conjunction(new Disjunction(new Disjunction(speedLow,speedMed),speedHigh),distanceHigh), accelNitro));
-        system.addRule(new Rule(new Conjunction(speedNitro,distanceHigh), accelLow));
+        system.addRule(new Rule(new Conjunction(new Disjunction(new Disjunction(speedLow,speedMed),speedHigh),new Disjunction(distanceHigh,distanceEndless)), accelNitro));
+        system.addRule(new Rule(new Conjunction(new Conjunction(speedNitro,distanceEndless),ratioMiddle), accelMed));
         //system.addRule(new Rule(new Conjunction(new Disjunction(speedLow,speedMed),distanceHigh), accelNitro));
         
         // Note: Bochten kunnen veilig genomen worden aan max ~90 
         // 2. If something comes up in front of you, don't accelerate and use your brakes
         // SPEED = High /\ DISTANCE = low => BRAKE = high
         system.addRule(new Rule(new Conjunction(new Disjunction(speedHigh,speedNitro),new Disjunction(distanceLow,distanceMed)), brakeHigh));
+        system.addRule(new Rule(new Conjunction(new Disjunction(speedNitro,speedInsane),new Disjunction(new Disjunction(distanceLow,distanceMed),distanceHigh)), brakeExtreme));
         
         // 3. Whatever happens, always have a base speed
         // DISTANCE = low /\ SPEED = low => ACCEL = low
-        system.addRule(new Rule(new Conjunction(speedLow, distanceLow), accelLow));
+        system.addRule(new Rule(new Conjunction(new Disjunction(speedLow,speedMed), distanceLow), accelLow));
         
+        // Note: er mag pas gedraaid worden onder de 300
         // 4. Strive for a stable left/right ratio
         // RATIO = low => STEERING = right (high)
-        system.addRule(new Rule(ratioLow, steerRight));
+        system.addRule(new Rule(new Conjunction(ratioLeft,new Not(new Disjunction(speedNitro,speedInsane))), steerRight));
         // RATIO = high => STEERING = left (low)
-        system.addRule(new Rule(ratioHigh, steerLeft));
+        system.addRule(new Rule(new Conjunction(ratioRight,new Not(new Disjunction(speedNitro,speedInsane))), steerLeft));
+        
+        // 5. Don't turn on high speeds, but brake
+        system.addRule(new Rule(new Conjunction(ratioMiddle,new Disjunction(speedNitro,speedInsane)), brakeExtreme));
         
         //system.addRule(new Rule(speedBackwards, brakeHigh));
     }
@@ -114,7 +138,7 @@ public class SpeedController implements Controller {
 
         system.addInput("speed", vp.getCurrentCarSpeedKph());
         system.addInput("frontSensorDistance", vp.getDistanceFromFrontSensor());
-        system.addInput("frontDistanceRatio", 
+        system.addInput("leftRightDistanceRatio", 
                 (vp.getDistanceFromLeftSensor() - vp.getDistanceFromRightSensor()));
         Map<String, Double> output = system.evaluate();
 
@@ -122,7 +146,7 @@ public class SpeedController implements Controller {
          * Steering
          */
         steering = output.get("steering");
-        steering -= (steering - vp.getAngleFrontWheels())/2;
+        steering -= (steering - vp.getAngleFrontWheels())/8;
         
         /**
          * Acceleration
@@ -146,6 +170,7 @@ public class SpeedController implements Controller {
         
         System.out.println("steering: " + steering);
         System.out.println("acceleration: " + acceleration);
+        System.out.println("speed: " + vp.getCurrentCarSpeedKph());
         System.out.println("brake: " + brake);
         System.out.println("ratio: " + 
                 (vp.getDistanceFromLeftSensor() - vp.getDistanceFromRightSensor()) + 

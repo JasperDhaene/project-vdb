@@ -23,23 +23,26 @@ public class SpeedSpeed {
 
     public static void main(String[] args) {
         FuzzySystem system = new FuzzySystem();
+        
         Premise speedLow = new Premise("speed",
                 new PIFunction.TrapezoidPIFunction(0, 0, 40, 60));
         Premise speedMed = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(50, 70, 80, 100));
+                new PIFunction.TrapezoidPIFunction(50, 70, 90, 110));
         Premise speedHigh = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(90, 110, 150, 170));
+                new PIFunction.TrapezoidPIFunction(100, 130, 170, 190));
         Premise speedNitro = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(160, 200, 400, 400));
-        Premise speedBackwards = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(-20, -20, 0, 0));
+                new PIFunction.TrapezoidPIFunction(180, 210, 230, 280));
+        Premise speedInsane = new Premise("speed",
+                new PIFunction.TrapezoidPIFunction(270, 290, 310, 400));
 
         Premise distanceLow = new Premise("frontSensorDistance",
                 new PIFunction.TrapezoidPIFunction(0, 0, 30, 50));
         Premise distanceMed = new Premise("frontSensorDistance",
-                new PIFunction.TrapezoidPIFunction(40, 60, 80, 100));
+                new PIFunction.TrapezoidPIFunction(40, 50, 70, 90));
         Premise distanceHigh = new Premise("frontSensorDistance",
-                new PIFunction.TrapezoidPIFunction(90, 110, Integer.MAX_VALUE, Integer.MAX_VALUE));
+                new PIFunction.TrapezoidPIFunction(80, 100, 110, 130));
+        Premise distanceEndless = new Premise("frontSensorDistance",
+                new PIFunction.TrapezoidPIFunction(120, 130, Integer.MAX_VALUE, Integer.MAX_VALUE));
 
 
 
@@ -65,27 +68,26 @@ public class SpeedSpeed {
                 new PIFunction.TrapezoidPIFunction(15, 20, 30, 35), 0, 40);
         Consequence brakeHigh = new Consequence("brake",
                 new PIFunction.TrapezoidPIFunction(30, 35, 40, 40), 0, 40);
+        Consequence brakeExtreme = new Consequence("brake",
+                new PIFunction.TrapezoidPIFunction(30, 38, 40, 40), 0, 40);
 
         Consequence steerLeft = new Consequence("steering",
                 new PIFunction.TriangularPIFunction(-1, -1, -0.5), -1, 1);
         Consequence steerRight = new Consequence("steering",
                 new PIFunction.TriangularPIFunction(0.5, 1, 1), -1, 1);
 
-        // 1. Accelerate if nothing's in front of you, but mind your speed
-        // SPEED = low => ACCEL = high
-        /*system.addRule(new Rule(new Conjunction(speedLow, distanceHigh), accelHigh));
-         // SPEED = med => ACCEL = low
-         system.addRule(new Rule(new Conjunction(speedMed, distanceHigh), accelMed));
-         // SPEED = high => ACCEL = none
-         system.addRule(new Rule(new Conjunction(speedHigh, distanceHigh), accelLow));*/
-        // 1. Accelerate if nothing's in front of you, but mind your speed
-        // SPEED = low => ACCEL = high
-                system.addRule(new Rule(new Conjunction(new Disjunction(new Disjunction(speedLow,speedMed),speedHigh),distanceHigh), accelNitro));
 
+        // 1. Accelerate if nothing's in front of you, but mind your speed
+        // SPEED = low \/ med \/ high => ACCEL = nitro
+        system.addRule(new Rule(new Conjunction(new Disjunction(new Disjunction(speedLow,speedMed),speedHigh),new Disjunction(distanceHigh,distanceEndless)), accelNitro));
+        system.addRule(new Rule(new Conjunction(speedNitro,distanceEndless), accelMed));
+        //system.addRule(new Rule(new Conjunction(new Disjunction(speedLow,speedMed),distanceHigh), accelNitro));
+        
+        // Note: Bochten kunnen veilig genomen worden aan max ~90 
         // 2. If something comes up in front of you, don't accelerate and use your brakes
         // SPEED = High /\ DISTANCE = low => BRAKE = high
-        //system.addRule(new Rule(new Conjunction(new Disjunction(speedMed,speedHigh), new Disjunction(distanceLow,distanceMed)), brakeHigh));
-        system.addRule(new Rule(new Conjunction(new Disjunction(speedHigh,speedNitro),distanceMed), brakeMed));
+        //system.addRule(new Rule(new Conjunction(new Disjunction(speedHigh,speedNitro),new Disjunction(distanceLow,distanceMed)), brakeHigh));
+        system.addRule(new Rule(new Conjunction(new Disjunction(speedNitro,speedInsane),new Disjunction(new Disjunction(distanceLow,distanceMed),distanceHigh)), brakeExtreme));
         // DISTANCE = low => ACCEL = none
         //system.addRule(new Rule(new Conjunction(speedMed, distanceLow), accelNone));
 
@@ -121,6 +123,9 @@ public class SpeedSpeed {
             add(new Pair(160, Integer.MAX_VALUE));
             add(new Pair(170, Integer.MAX_VALUE));
             add(new Pair(180, Integer.MAX_VALUE));
+            //Nitro if distanceHigh
+            add(new Pair(180, 100));
+            add(new Pair(180, 110));
             
             //brake if wall close
             add(new Pair(170, 100));
@@ -133,6 +138,17 @@ public class SpeedSpeed {
             add(new Pair(170, 30));
             add(new Pair(170, 20));
             add(new Pair(150, 10));
+            
+            //brakeExtreme if distanceHigh\/distanceMed /\ speedNitro
+            add(new Pair(250, 110));
+            add(new Pair(210, 100));
+            add(new Pair(250, 80));
+            add(new Pair(270, 80));
+            add(new Pair(280, 80));
+            add(new Pair(280, 50));
+            add(new Pair(200, 30));
+            add(new Pair(300, 10));
+            add(new Pair(270, 100));
             
         }};
         
