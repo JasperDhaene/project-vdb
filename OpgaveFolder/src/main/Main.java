@@ -2,7 +2,9 @@ package main;
 
 import car.RaceCar;
 import control.Controller;
+import control.RallyController;
 import control.SpeedController;
+import control.SafeController;
 
 /**
  * Loader for the project. Define your own controller, set username, track and manual control to launch a run.
@@ -19,10 +21,10 @@ public class Main {
 	 * controller, written by you - manual control, only non-manual laps are recorded for the leaderboard
 	 */
 
-	Controller controller = new SpeedController();
+	Controller controller = new RallyController();
 	String trackname = "interlagos1024";
 
-	RaceCar app = new RaceCar("Lightning McQueen", trackname, controller, false);
+	RaceCar app = new RaceCar("DK Lightning McQueen", trackname, controller, false);
         app.setDisplayFps(false);
         app.setDisplayStatView(false);
 	app.start();
