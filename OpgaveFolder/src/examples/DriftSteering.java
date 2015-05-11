@@ -127,11 +127,16 @@ public class DriftSteering {
                 new PIFunction.TrapezoidPIFunction(-1, -1, -0.45, -0.4), -1, 1);
         Consequence steerRight = new Consequence("steering",
                 new PIFunction.TrapezoidPIFunction(0.4, 0.45, 1, 1), -1, 1);
-        
+        /*
         Consequence driftLeft = new Consequence("steering",
                 new PIFunction.TrapezoidPIFunction(-1, -1, 0, 0.5), -1, 1);
         Consequence driftRight = new Consequence("steering",
                 new PIFunction.TrapezoidPIFunction(-0.5, 0, 1, 1), -1, 1);
+        */
+        Consequence driftLeft = new Consequence("steering",
+                new PIFunction.TriangularPIFunction(-1, -1, -0.5), -1, 1);
+        Consequence driftRight = new Consequence("steering",
+                new PIFunction.TriangularPIFunction(0.5, 1, 1), -1, 1);
         
         /* ACCEL */
         // (SPEED = low \/ med \/ high) /\ (DISTANCE = high \/ endless) => ACCEL = nitro
@@ -162,21 +167,21 @@ public class DriftSteering {
         /* DRIFTING */
         
 //STEER IN TURN      
-        // RATIO = left => DRIFT = left
-        system.addRule(new Rule(new Conjunction(new Conjunction(ratioLowDrift,distanceLow),new Conjunction(noFrontLeftFriction,noBackLeftFriction)), driftRight));
-        // RATIO = right => STEERING = left
-        system.addRule(new Rule(new Conjunction(new Conjunction(ratioHighDrift,distanceLow),new Conjunction(noFrontRightFriction,noBackRightFriction)), driftLeft));
+        // RATIO = low /\ DISTANCE = low /\ FRICTION on front wheels (not drifting out of control) => DRIFT = left
+        system.addRule(new Rule(new Conjunction(new Conjunction(ratioLowDrift,distanceLow),new Conjunction(new Not(noFrontLeftFriction),new Not(noFrontRightFriction))), driftRight));
+        // RATIO = high /\ DISTANCE = low /\ FRICTION on front wheels (not drifting out of control) => DRIFT = right
+        system.addRule(new Rule(new Conjunction(new Conjunction(ratioHighDrift,distanceLow),new Conjunction(new Not(noFrontLeftFriction),new Not(noFrontRightFriction))), driftLeft));
 
 //ACCEL WHILE DRIFT        
         // (DISTANCE = low \/ med) /\ (SPEED = high) /\ Drifting => ACCEL = med
         system.addRule(new Rule(new Conjunction(new Conjunction(new Disjunction(distanceLow,distanceMed ),speedHigh),new Not(notDrifting)), accelMed));
 
 //OVERSTEERING       
-        // Drifting /\ ratioLeftDrift  => STEERING = right
-        //system.addRule(new Rule(new Conjunction(new Conjunction(new Not(notDrifting),ratioLeftDrift),distanceLow), driftRight));
+        // noRightWheelfriction /\ STEERING = ratioLowDrift /\ DISTANCE = low  => DRIFT = right
+        system.addRule(new Rule(new Conjunction(new Conjunction(new Conjunction(noFrontRightFriction,noBackRightFriction),ratioLowDrift),distanceLow), driftRight));
         
-        // Drifting /\ ratioLeftDrift  => STEERING = right
-        //system.addRule(new Rule(new Conjunction(new Conjunction(new Not(notDrifting),ratioRightDrift),distanceLow), driftLeft));
+        // noLeftWheelfriction /\ STEERING = ratioHighDrift /\ DISTANCE = low  => DRIFT = left
+        system.addRule(new Rule(new Conjunction(new Conjunction(new Conjunction(noFrontLeftFriction,noBackLeftFriction),ratioHighDrift),distanceLow), driftLeft));
 
 //BRAKE
         // (DISTANCE = low \/ med) /\ (SPEED = high \/ nitro) => BRAKE = high
@@ -192,11 +197,11 @@ public class DriftSteering {
                     put("speed",(double) 180);
                     put("frontSensorDistance",(double) 30);
                     put("leftRightDistanceRatio",(double) 7);
-                    put("lateralVelocity",(double) 3);
-                    put("frontLeftFriction",(double) 0.3);
-                    put("backLeftFriction",(double) 0.5);
-                    put("frontRightFriction",(double) 1);
-                    put("backRightFriction",(double) 1);
+                    put("lateralVelocity",(double) 1);
+                    put("frontLeftFriction",(double) 0.09);
+                    put("backLeftFriction",(double) 0.09);
+                    put("frontRightFriction",(double) 0.01);
+                    put("backRightFriction",(double) 0.09);
                                 
             }}));
     

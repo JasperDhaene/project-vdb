@@ -27,12 +27,14 @@ public class RallyController implements Controller {
         Premise speedMed = new Premise("speed",
                 new PIFunction.TrapezoidPIFunction(40, 60, 80, 100));
         Premise speedHigh = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(90, 120, 150, 170));
+                new PIFunction.TrapezoidPIFunction(90, 110, 130, 150));
         Premise speedNitro = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(160, 210, 230, 280));
+                new PIFunction.TrapezoidPIFunction(140, 210, 230, 280));
         Premise speedInsane = new Premise("speed",
                 new PIFunction.TrapezoidPIFunction(270, 290, 310, 400));
-
+        
+        Premise distanceVeryLow = new Premise("frontSensorDistance",
+                new PIFunction.TrapezoidPIFunction(0, 0, 10, 15));
         Premise distanceLow = new Premise("frontSensorDistance",
                 new PIFunction.TrapezoidPIFunction(0, 0, 30, 40));
         Premise distanceMed = new Premise("frontSensorDistance",
@@ -69,6 +71,11 @@ public class RallyController implements Controller {
                         1,
                         20,
                         Double.MAX_VALUE, Double.MAX_VALUE));
+        
+        Premise lateralVelocityLow = new Premise("lateralVelocity",
+                new PIFunction.TriangularPIFunction(
+                        -3, 0,
+                        3));
         
         Premise notDrifting = new Premise("lateralVelocity",
                 new PIFunction.TriangularPIFunction(
@@ -126,11 +133,16 @@ public class RallyController implements Controller {
                 new PIFunction.TrapezoidPIFunction(-1, -1, -0.45, -0.4), -1, 1);
         Consequence steerRight = new Consequence("steering",
                 new PIFunction.TrapezoidPIFunction(0.4, 0.45, 1, 1), -1, 1);
-        
+        /*
         Consequence driftLeft = new Consequence("steering",
                 new PIFunction.TrapezoidPIFunction(-1, -1, 0, 0.5), -1, 1);
         Consequence driftRight = new Consequence("steering",
                 new PIFunction.TrapezoidPIFunction(-0.5, 0, 1, 1), -1, 1);
+        */
+        Consequence driftLeft = new Consequence("steering",
+                new PIFunction.TriangularPIFunction(-1, -1, -0.5), -1, 1);
+        Consequence driftRight = new Consequence("steering",
+                new PIFunction.TriangularPIFunction(0.5, 1, 1), -1, 1);
         
         /* ACCEL */
         // (SPEED = low \/ med \/ high) /\ (DISTANCE = high \/ endless) => ACCEL = nitro
@@ -161,26 +173,29 @@ public class RallyController implements Controller {
         /* DRIFTING */
         
 //STEER IN TURN      
-        // RATIO = left => DRIFT = left
-        system.addRule(new Rule(new Conjunction(new Conjunction(ratioLowDrift,distanceLow),new Conjunction(noFrontLeftFriction,noBackLeftFriction)), driftRight));
-        // RATIO = right => STEERING = left
-        system.addRule(new Rule(new Conjunction(new Conjunction(ratioHighDrift,distanceLow),new Conjunction(noFrontRightFriction,noBackRightFriction)), driftLeft));
+        // RATIO = low /\ DISTANCE = low /\ FRICTION on front wheels (not drifting out of control) => DRIFT = left
+        system.addRule(new Rule(new Conjunction(new Conjunction(ratioLowDrift,distanceLow),new Conjunction(new Not(noFrontLeftFriction),new Not(noFrontRightFriction))), driftRight));
+        // RATIO = high /\ DISTANCE = low /\ FRICTION on front wheels (not drifting out of control) => DRIFT = right
+        system.addRule(new Rule(new Conjunction(new Conjunction(ratioHighDrift,distanceLow),new Conjunction(new Not(noFrontLeftFriction),new Not(noFrontRightFriction))), driftLeft));
 
 //ACCEL WHILE DRIFT        
         // (DISTANCE = low \/ med) /\ (SPEED = high) /\ Drifting => ACCEL = med
-        system.addRule(new Rule(new Conjunction(new Conjunction(new Disjunction(distanceLow,distanceMed ),speedHigh),new Not(notDrifting)), accelMed));
-
+        system.addRule(new Rule(new Conjunction(new Disjunction(distanceLow,distanceMed ),new Not(notDrifting)), accelMed));
+        // In horizontal drift, avoid crash by nitro accel to gain grip and turn vertical //TODO: nitro is overkill but high doesn't work with base accel rules
+        system.addRule(new Rule(new Conjunction(distanceVeryLow,new Not(notDrifting)), accelNitro));
 //OVERSTEERING       
-        // Drifting /\ ratioLeftDrift  => STEERING = right
-        system.addRule(new Rule(new Conjunction(new Conjunction(new Not(notDrifting),ratioLowDrift),distanceLow), driftRight));
+        // noRightWheelfriction /\ STEERING = ratioLowDrift /\ DISTANCE = low  => DRIFT = right
+        system.addRule(new Rule(new Conjunction(new Conjunction(new Conjunction(noFrontRightFriction,noBackRightFriction),ratioLowDrift),distanceLow), driftRight));
         
-        // Drifting /\ ratioLeftDrift  => STEERING = right
-        system.addRule(new Rule(new Conjunction(new Conjunction(new Not(notDrifting),ratioHighDrift),distanceLow), driftLeft));
+        // noLeftWheelfriction /\ STEERING = ratioHighDrift /\ DISTANCE = low  => DRIFT = left
+        system.addRule(new Rule(new Conjunction(new Conjunction(new Conjunction(noFrontLeftFriction,noBackLeftFriction),ratioHighDrift),distanceLow), driftLeft));
 
 //BRAKE
         // (DISTANCE = low \/ med) /\ (SPEED = high \/ nitro) => BRAKE = high
-        system.addRule(new Rule(new Conjunction(new Disjunction(speedHigh,speedNitro),new Disjunction(distanceLow,distanceMed)), brakeHigh));
-        
+        system.addRule(new Rule(new Conjunction(new Conjunction(new Disjunction(speedHigh,speedNitro),new Disjunction(distanceLow,distanceMed)),lateralVelocityLow), brakeHigh));
+        // (DISTANCE = low \/ med) /\ (SPEED = high \/ nitro) => BRAKE = high
+        system.addRule(new Rule(new Conjunction(new Conjunction(new Disjunction(speedHigh,speedNitro),new Disjunction(distanceLow,distanceMed)),new Not(lateralVelocityLow)), brakeNone));
+
         
     }
 
