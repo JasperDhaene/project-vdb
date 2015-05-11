@@ -1,6 +1,7 @@
 package control;
 
 import car.VehicleProperties;
+import consequences.RallyConsequences;
 import fuzzy.Consequence;
 import fuzzy.FuzzySystem;
 import fuzzy.Rule;
@@ -9,8 +10,8 @@ import fuzzy.expression.Disjunction;
 import fuzzy.expression.Not;
 import fuzzy.expression.Premise;
 import fuzzy.membership.PIFunction;
-import fuzzy.norm.ProbabilisticNorm;
 import java.util.Map;
+import premises.RallyPremises;
 
 /**
  * RallyController - Controller that gets the job done as awesome as possible
@@ -22,127 +23,55 @@ public class RallyController implements Controller {
 
     public RallyController() {
         this.system = new FuzzySystem();
-        Premise speedLow = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(0, 0, 30, 50));
-        Premise speedMed = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(40, 60, 80, 100));
-        Premise speedHigh = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(90, 110, 130, 150));
-        Premise speedNitro = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(140, 210, 230, 280));
-        Premise speedInsane = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(270, 290, 310, 400));
         
-        Premise distanceVeryLow = new Premise("frontSensorDistance",
-                new PIFunction.TrapezoidPIFunction(0, 0, 10, 15));
-        Premise distanceLow = new Premise("frontSensorDistance",
-                new PIFunction.TrapezoidPIFunction(0, 0, 30, 40));
-        Premise distanceMed = new Premise("frontSensorDistance",
-                new PIFunction.TrapezoidPIFunction(40, 50, 80, 90));
-        Premise distanceHigh = new Premise("frontSensorDistance",
-                new PIFunction.TrapezoidPIFunction(80, 110, 130, 150));
-        Premise distanceEndless = new Premise("frontSensorDistance",
-                new PIFunction.TrapezoidPIFunction(140, 160, Integer.MAX_VALUE, Integer.MAX_VALUE));
+        RallyPremises premises = new RallyPremises();
+        RallyConsequences consequences = new RallyConsequences();
         
-        Premise ratioLow = new Premise("leftRightDistanceRatio",
-                new PIFunction.TrapezoidPIFunction(
-                        -Double.MAX_VALUE,
-                        -Double.MAX_VALUE,
-                        -50, -15));
-        Premise ratioHigh = new Premise("leftRightDistanceRatio",
-                new PIFunction.TrapezoidPIFunction(
-                        15, 50,
-                        Double.MAX_VALUE,
-                        Double.MAX_VALUE));
+        Premise speedLow = premises.get("speedLow");
+        Premise speedMed = premises.get("speedMed");
+        Premise speedHigh = premises.get("speedHigh");
+        Premise speedNitro = premises.get("speedNitro");
+        Premise speedInsane = premises.get("speedInsane");
         
-        Premise ratioMiddle = new Premise("leftRightDistanceRatio",
-                new PIFunction.TrapezoidPIFunction(
-                        -20,
-                        -15,
-                        15, 20));
+        Premise distanceVeryLow = premises.get("distanceVeryLow");
+        Premise distanceLow = premises.get("distanceLow");
+        Premise distanceMed = premises.get("distanceMed");
+        Premise distanceHigh = premises.get("distanceHigh");
+        Premise distanceEndless = premises.get("distanceEndless");
         
-        Premise ratioLowDrift = new Premise("leftRightDistanceRatio",
-                new PIFunction.TrapezoidPIFunction(
-                        -Double.MAX_VALUE,
-                        -Double.MAX_VALUE,
-                        -20, -1));
-        Premise ratioHighDrift = new Premise("leftRightDistanceRatio",
-                new PIFunction.TrapezoidPIFunction(
-                        1,
-                        20,
-                        Double.MAX_VALUE, Double.MAX_VALUE));
+        Premise ratioLow = premises.get("ratioLow");
+        Premise ratioHigh = premises.get("ratioHigh");       
+        Premise ratioMiddle = premises.get("ratioMiddle");
         
-        Premise lateralVelocityLow = new Premise("lateralVelocity",
-                new PIFunction.TriangularPIFunction(
-                        -3, 0,
-                        3));
+        Premise ratioLowDrift = premises.get("ratioLowDrift");
+        Premise ratioHighDrift = premises.get("ratioHighDrift");
         
-        Premise notDrifting = new Premise("lateralVelocity",
-                new PIFunction.TriangularPIFunction(
-                        -0.3, 0,
-                        0.3));
-        Premise noFrontLeftFriction = new Premise("frontLeftFriction",
-                new PIFunction.TrapezoidPIFunction(
-                        0,
-                        0.1,
-                        Double.MAX_VALUE, Double.MAX_VALUE));
-        Premise noBackLeftFriction = new Premise("backLeftFriction",
-                new PIFunction.TrapezoidPIFunction(
-                        0,
-                        0.1,
-                        Double.MAX_VALUE, Double.MAX_VALUE));
-        Premise noFrontRightFriction = new Premise("frontRightFriction",
-                new PIFunction.TrapezoidPIFunction(
-                        0,
-                        0.1,
-                        Double.MAX_VALUE, Double.MAX_VALUE));
-        Premise noBackRightFriction = new Premise("backRightFriction",
-                new PIFunction.TrapezoidPIFunction(
-                        0,
-                        0.1,
-                        Double.MAX_VALUE, Double.MAX_VALUE));
+        Premise lateralVelocityLow = premises.get("lateralVelocityLow");
+        Premise notDrifting = premises.get("notDrifting");
+        
+        Premise noFrontLeftFriction = premises.get("noFrontLeftFriction");
+        Premise noBackLeftFriction = premises.get("noBackLeftFriction");
+        Premise noFrontRightFriction = premises.get("noFrontRightFriction");
+        Premise noBackRightFriction = premises.get("noBackRightFriction");
         
         /////////////////////////////////////
         
-        Consequence accelLow = new Consequence("acceleration",
-                new PIFunction.TrapezoidPIFunction(0, 0, 280, 560), 0, 1600);
-        Consequence accelMed = new Consequence("acceleration",
-                new PIFunction.TrapezoidPIFunction(480, 660, 840, 1120), 0, 1600);
-        Consequence accelHigh = new Consequence("acceleration",
-                new PIFunction.TrapezoidPIFunction(840, 1120, 1200, 1400), 0, 1600);
-        Consequence accelNitro = new Consequence("acceleration",
-                new PIFunction.TrapezoidPIFunction(1200, 1400, 1600, 1600), 0, 1600);
+        Consequence accelLow = consequences.get("accelLow");
+        Consequence accelMed = consequences.get("accelMed");
+        Consequence accelHigh = consequences.get("accelHigh");
+        Consequence accelNitro = consequences.get("accelNitro");
         
-        Consequence brakeNone = new Consequence("brake",
-                new PIFunction.TrapezoidPIFunction(0, 0, 0, 0), 0, 40);
-        Consequence brakeLow = new Consequence("brake",
-                new PIFunction.TrapezoidPIFunction(0, 0, 10, 20), 0, 40);
-        Consequence brakeMed = new Consequence("brake",
-                new PIFunction.TrapezoidPIFunction(15, 20, 30, 35), 0, 40);
-        Consequence brakeHigh = new Consequence("brake",
-                new PIFunction.TrapezoidPIFunction(30, 35, 40, 40), 0, 40);
-        Consequence brakeExtreme = new Consequence("brake",
-                new PIFunction.TrapezoidPIFunction(30, 38, 40, 40), 0, 40);
-        /*
-        Consequence steerLeft = new Consequence("steering",
-                new PIFunction.TriangularPIFunction(-1, -1, -0.5), -1, 1);
-        Consequence steerRight = new Consequence("steering",
-                new PIFunction.TriangularPIFunction(0.5, 1, 1), -1, 1);
-        */
-        Consequence steerLeft = new Consequence("steering",
-                new PIFunction.TrapezoidPIFunction(-1, -1, -0.45, -0.4), -1, 1);
-        Consequence steerRight = new Consequence("steering",
-                new PIFunction.TrapezoidPIFunction(0.4, 0.45, 1, 1), -1, 1);
-        /*
-        Consequence driftLeft = new Consequence("steering",
-                new PIFunction.TrapezoidPIFunction(-1, -1, 0, 0.5), -1, 1);
-        Consequence driftRight = new Consequence("steering",
-                new PIFunction.TrapezoidPIFunction(-0.5, 0, 1, 1), -1, 1);
-        */
-        Consequence driftLeft = new Consequence("steering",
-                new PIFunction.TriangularPIFunction(-1, -1, -0.5), -1, 1);
-        Consequence driftRight = new Consequence("steering",
-                new PIFunction.TriangularPIFunction(0.5, 1, 1), -1, 1);
+        Consequence brakeNone = consequences.get("brakeNone");
+        Consequence brakeLow = consequences.get("brakeLow");
+        Consequence brakeMed = consequences.get("brakeMed");
+        Consequence brakeHigh = consequences.get("brakeHigh");
+        Consequence brakeExtreme = consequences.get("brakeExtreme");
+
+        Consequence steerLeft = consequences.get("steerLeft");
+        Consequence steerRight = consequences.get("steerRight");
+ 
+        Consequence driftLeft = consequences.get("driftLeft");
+        Consequence driftRight = consequences.get("driftRight");
         
         /* ACCEL */
         // (SPEED = low \/ med \/ high) /\ (DISTANCE = high \/ endless) => ACCEL = nitro
