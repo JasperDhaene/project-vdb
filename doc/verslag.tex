@@ -89,22 +89,34 @@
 	\fancyfoot[C]{\thepage}
 
 	%%% DOCUMENT %%%
-	\section{Subsection}
-		\subsection{Subsection}
-			This is a subsection. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore.
+	\section{Generiek vaagregelsysteem}
+		\noindent Beschrijving van het \texttt{FuzzySystem}. \\
 
-			\begin{lstlisting}
-/**
- *
- * HelloWorld.java
- *
- * */
+		\noindent In het project werd gebruik gemaakt van een enkele extra library: de \href{https://commons.apache.org/proper/commons-math/}{Apache Commons Mathematics} library. Deze voorziet een stabiele numerieke implementatie van verscheidene integratiemethoden. Omdat de integratietijd belangrijker is dan de precisie, werd gekozen voor de simpelste implementatie: de \texttt{MidPointIntegrator}.
 
-public class HelloWorld
-{
-	public static void main(String[] args) {
-		System.out.println("Hello World!");
-	}
-}
-			\end{lstlisting}
+	\section{Controllers}
+		\subsection{SafeController}
+			\noindent Beschrijving van de \texttt{SafeController}.
+
+		\subsection{SpeedController}
+			\noindent Beschrijving van de \texttt{SpeedController}.
+
+		\subsection{RallyController}
+			\noindent Beschrijving van de \texttt{RallyController}.
+
+	\section{Performantie}
+		\subsection{Keuze t-norm en t-conorm}
+			%% Is de keuze van t-norm en t-conorm belangrijk voor de prestatie (i.e. de gemiddelde snelheid) van de wagen?
+
+		\subsection{Robuustheid regelsysteem}
+			%% Hoe robuust is uw regelsysteem voor verschillende races? Is de gemiddelde snelheid ongeveer dezelfde als u de wagen verschillende keren laat racen op een welbepaald parcours?
+
+		\subsection{Minder performante parcours}
+			%% Zijn er parcours waar uw controller minder goed presteert? Hoe komt dit?
+
+		\subsection{Veiligheid}
+			%% Hoe veilig is uw wagen, i.e. hoe dikwijls crasht uw wagen?
+
+		\subsection{Exacte controller}
+			%% Wat zijn de verschillen met een exacte controller (beter/slechter)?
 \end{document}
