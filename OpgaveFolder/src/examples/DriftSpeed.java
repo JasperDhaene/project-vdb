@@ -38,7 +38,7 @@ public class DriftSpeed {
         Premise speedInsane = new Premise("speed",
                 new PIFunction.TrapezoidPIFunction(270, 290, 310, 400));
 
-Premise distanceLow = new Premise("frontDistance",
+        Premise distanceLow = new Premise("frontDistance",
                 new PIFunction.TrapezoidPIFunction(0, 0, 20, 40));
         Premise distanceMed = new Premise("frontDistance",
                 new PIFunction.TrapezoidPIFunction(30, 50, 80, 90));
@@ -76,8 +76,8 @@ Premise distanceLow = new Premise("frontDistance",
         
         Premise notDrifting = new Premise("lateralVelocity",
                 new PIFunction.TriangularPIFunction(
-                        -0.1, 0,
-                        0.1));
+                        -0.3, 0,
+                        0.3));
 
         ////////////////////////////////////////
         
@@ -111,8 +111,7 @@ Premise distanceLow = new Premise("frontDistance",
 
 
         /* ACCEL */
-        // (SPEED = low \/ med \/ high) /\ (DISTANCE = high \/ endless) => ACCEL = nitro
-        system.addRule(new Rule(new Conjunction(new Disjunction(new Disjunction(speedLow,speedMed),speedHigh),new Disjunction(distanceHigh,distanceEndless)), accelNitro));
+        system.addRule(new Rule(new Conjunction(new Disjunction(new Disjunction(speedLow,speedMed),speedHigh),new Disjunction(distanceHigh,distanceEndless)), accelHigh));
         // (SPEED = nitro /\ DISTANCE = endless) /\ RATIO = middle  => ACCEL = med
         system.addRule(new Rule(new Conjunction(new Conjunction(speedNitro,distanceEndless),notDrifting), accelLow));
         // DISTANCE = low /\ SPEED = low => ACCEL = low
@@ -125,7 +124,7 @@ Premise distanceLow = new Premise("frontDistance",
         system.addRule(new Rule(new Conjunction(new Disjunction(speedNitro,speedInsane),new Disjunction(new Disjunction(distanceLow,distanceMed),distanceHigh)), brakeExtreme));
         // RATIO = middle /\ (SPEED = nitro \/ insane => BRAKE = extreme
         system.addRule(new Rule(new Conjunction(ratioMiddle,new Disjunction(speedNitro,speedInsane)), brakeExtreme));
-        
+               
         /* STEERING */
         // RATIO = low => STEERING = right (high)
         //system.addRule(new Rule(new Conjunction(ratioLeft,new Not(new Disjunction(speedNitro,speedInsane))), steerRight));
@@ -136,19 +135,29 @@ Premise distanceLow = new Premise("frontDistance",
         // RATIO = high => STEERING = left (low)
         system.addRule(new Rule(new Conjunction(ratioRight,new Not(distanceLow)), steerLeft,new ProbabilisticNorm()));
         
-        /* DRIFTING */
+        /* Drifting */
+        
+//STEER IN TURN      
         // RATIO = left => STEERING = right
-        system.addRule(new Rule(new Conjunction(ratioLeftDrift,distanceLow), driftRight));
+        system.addRule(new Rule(new Conjunction(new Conjunction(new Conjunction(ratioLeftDrift,distanceLow),notDrifting),new Not(speedLow)), driftLeft));
         // RATIO = right => STEERING = left
-        system.addRule(new Rule(new Conjunction(ratioRightDrift,distanceLow), driftLeft));
+        system.addRule(new Rule(new Conjunction(new Conjunction(new Conjunction(ratioRightDrift,distanceLow),notDrifting),new Not(speedLow)), driftRight));
+
+//ACCEL WHILE DRIFT        
+        // (DISTANCE = low \/ med) /\ (SPEED = high \/ nitro) /\ Not(notDrifting) => ACCEL = med
+        system.addRule(new Rule(new Conjunction(new Conjunction(new Disjunction(distanceLow,distanceMed ),new Disjunction(speedHigh,speedNitro)),new Not(notDrifting)), accelMed));
+
+//OVERSTEERING       
+        // Drifting /\ ratioLeftDrift  => STEERING = right
+        system.addRule(new Rule(new Conjunction(new Not(notDrifting),ratioLeftDrift), driftRight));
         
-        // (DISTANCE = low \/ med) /\ (SPEED = high \/ nitro) => ACCEL = med
-        system.addRule(new Rule(new Conjunction(new Disjunction(distanceLow,distanceMed ),new Disjunction(speedHigh,speedNitro)), accelMed));
-        
+        // Drifting /\ ratioLeftDrift  => STEERING = right
+        system.addRule(new Rule(new Conjunction(new Not(notDrifting),ratioRightDrift), driftLeft));
+
+//BRAKE
         // (DISTANCE = low \/ med) /\ (SPEED = high \/ nitro) => BRAKE = high
         system.addRule(new Rule(new Conjunction(new Disjunction(speedHigh,speedNitro),new Disjunction(distanceLow,distanceMed)), brakeHigh));
-        
-        
+     
         
         /**
          * EVALUATION
@@ -156,10 +165,20 @@ Premise distanceLow = new Premise("frontDistance",
         
         List<Input> input = new ArrayList<Input>(){{
             add(new Input(new HashMap<String,Double>(){{
-                    put("speed",(double) 2.0);
+                    put("speed",(double) 210);
                     put("frontDistance",(double) 20);
-                    put("lateralVelocity",(double) 20);
-                    put("leftRightRatio",(double) 20);
+                    put("leftRightRatio",(double) 56);
+                    put("lateralVelocity",(double) 4.5);
+                    
+                    
+            }}));
+            //START POSITION
+            add(new Input(new HashMap<String,Double>(){{
+                    put("speed",(double) 10);
+                    put("frontDistance",(double) 256);
+                    put("leftRightRatio",(double) 10);
+                    put("lateralVelocity",(double) 0.5);
+                    
                     
             }}));
             
