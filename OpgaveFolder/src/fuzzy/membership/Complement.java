@@ -3,7 +3,7 @@ package fuzzy.membership;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
 /**
- *
+ * Complement - complement of value
  * @author Florian Dejonckheere <florian@floriandejonckheere.be>
  */
 public class Complement implements UnivariateFunction {

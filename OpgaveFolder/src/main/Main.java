@@ -3,8 +3,6 @@ package main;
 import car.RaceCar;
 import control.Controller;
 import control.RallyController;
-import control.SpeedController;
-import control.SafeController;
 
 /**
  * Loader for the project. Define your own controller, set username, track and manual control to launch a run.

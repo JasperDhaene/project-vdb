@@ -9,7 +9,10 @@ import org.apache.commons.math3.analysis.function.Identity;
  */
 public class PIFunction implements UnivariateFunction {
 
-    // Arbitrary small number
+    /**
+     * eps - Arbitrary small number. See below.
+     * 
+     */
     public final double eps = Math.pow(10, -10);
 
     private final double alpha, beta, gamma, delta;

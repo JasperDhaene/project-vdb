@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.analysis.integration.BaseAbstractUnivariateIntegrator;
 import org.apache.commons.math3.analysis.integration.MidPointIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 
@@ -15,9 +14,23 @@ import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
  */
 public class FuzzySystem {
 
-    private static final int MAX_EVAL = BaseAbstractUnivariateIntegrator.DEFAULT_MAX_ITERATIONS_COUNT;
-    private static final UnivariateIntegrator integrator = new MidPointIntegrator(1.0e-3, 1.0e-15, 3, 64);
-    
+    /**
+     * Minimum and maximum integration evaluations
+     */
+    private static final int MIN_EVAL = MidPointIntegrator.DEFAULT_MIN_ITERATIONS_COUNT;
+    private static final int MAX_EVAL = MidPointIntegrator.MIDPOINT_MAX_ITERATIONS_COUNT;
+    /**
+     * integrator - used to integrate the union of all rules
+     * Integration efficiency is not the most important aspect in this project,
+     * therefore the most simple implementation is chosen: the midpoint integration
+     * method. Relative accuracy can be kept relatively high (10^-3).
+     */
+    private static final UnivariateIntegrator integrator = new MidPointIntegrator(
+            1.0e-3,     // relative accuracy
+            1.0e-15,    // absolute accuracy
+            MIN_EVAL,   // minimalIterationCount
+            MAX_EVAL);  // maximalIterationCount
+
     private final List<Rule> rules;
     private final Map<String, Double> inputs;
 
@@ -35,7 +48,8 @@ public class FuzzySystem {
     }
 
     public Map<String, Double> evaluate(){
-        if(this.rules.isEmpty()) System.err.println("WARNING: No rules were defined in the system");
+        if(this.rules.isEmpty())
+            System.err.println("WARNING: No rules were defined in the system");
 
         /**
          * 1. Evaluation: evaluate each rule for a given variable
@@ -44,23 +58,27 @@ public class FuzzySystem {
         this.rules.forEach((rule) -> {
             Consequence c = rule.evaluate(this.inputs);
 
+            // Create or append to list of consequences for a given variable
             if(!consequences.containsKey(c.variable))
                 consequences.put(c.variable, new ArrayList<>());
 
             consequences.get(c.variable).add(c);
         });
 
-        /**
-         * 4. Unification of rules
-         * 5. Defuzzification of variables
-         */
         Map<String, Double> crisp = new HashMap<>();
 
         consequences.forEach((string, consequenceList) -> {
-
+            
+            /**
+             * 4. Unification of rules
+             * 
+             * */
             Denominator g = new Denominator(consequenceList);
             Numerator f = new Numerator(g);
 
+            /**
+             * 5. Defuzzification of variables
+             */
             // Numerator and denominator have the same integration boundaries
             double denominator = FuzzySystem.integrator.integrate(MAX_EVAL, g, g.integrationMin, g.integrationMax);
             if(denominator != 0) {
@@ -72,8 +90,10 @@ public class FuzzySystem {
         return crisp;
     }
 
-    // f(x) gives the maximum of all aggregate functions
-    // @nl: Noemer. Onder de breukstreep.
+    /**
+     * Denominator (noemer): g(x) = max(c_1, c_2, ..., c_n)
+     * 
+     */
     private class Denominator implements UnivariateFunction {
 
         private final List<Consequence> consequences;
@@ -92,22 +112,19 @@ public class FuzzySystem {
         @Override
         public double value(double x) {
             double max = 0;
-            // 4. Unification of rules: evaluate to the pointwise maximum.
-            // This simulates the unification of various membership functions from
-            // different consequences
-            for(UnivariateFunction c: consequences){ 
+            for(UnivariateFunction c: consequences)
                 max = Math.max(c.value(x), max);
-            }
             return max;
         }
     }
 
-    // f(x) gives x*f(x)
-    // @nl: Teller. Boven de breukstreep.
+    /**
+     * Numerator (teller): f(x) = x*g(x)
+     * 
+     */
     private class Numerator implements UnivariateFunction {
 
         private final UnivariateFunction f;
-        //public int integrationMin, integrationMax;
 
         public Numerator(UnivariateFunction f) {
             this.f = f;
