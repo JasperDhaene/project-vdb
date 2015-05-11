@@ -4,3 +4,6 @@
 /build/
 /dist/
 *.txt
+*.aux
+*.log
+*.gz
