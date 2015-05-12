@@ -30,18 +30,18 @@ public class RallyPremises {
             put("speedMed",new Premise("speed",
                     new PIFunction.TrapezoidPIFunction(40, 60, 80, 100)));
             put("speedHigh",new Premise("speed",
-                    new PIFunction.TrapezoidPIFunction(90, 110, 130, 150)));
+                    new PIFunction.TrapezoidPIFunction(90, 120, 150, 170)));
             put("speedNitro",new Premise("speed",
-                    new PIFunction.TrapezoidPIFunction(140, 210, 230, 280)));
+                    new PIFunction.TrapezoidPIFunction(160, 210, 230, 280)));
             put("speedInsane",new Premise("speed",
                     new PIFunction.TrapezoidPIFunction(270, 290, 310, 400)));    
             
             put("distanceVeryLow",new Premise("frontSensorDistance",
                     new PIFunction.TrapezoidPIFunction(0, 0, 10, 15)));
             put("distanceLow",new Premise("frontSensorDistance",
-                    new PIFunction.TrapezoidPIFunction(0, 0, 30, 40)));
+                    new PIFunction.TrapezoidPIFunction(0, 0, 30, 45)));
             put("distanceMed",new Premise("frontSensorDistance",
-                    new PIFunction.TrapezoidPIFunction(40, 50, 80, 90)));
+                    new PIFunction.TrapezoidPIFunction(45, 60, 80, 90)));
             put("distanceHigh",new Premise("frontSensorDistance",
                     new PIFunction.TrapezoidPIFunction(80, 110, 130, 150)));
             put("distanceEndless",new Premise("frontSensorDistance",
