@@ -51,17 +51,28 @@ public class RallyPremises {
                     new PIFunction.TrapezoidPIFunction(
                         -Double.MAX_VALUE,
                         -Double.MAX_VALUE,
-                        -50, -15)));
+                        -30, -10)));
             put("ratioHigh",new Premise("leftRightDistanceRatio",
                     new PIFunction.TrapezoidPIFunction(
-                        15, 50,
+                        10, 30,
                         Double.MAX_VALUE,
                         Double.MAX_VALUE)));
+            //Note: ratioLow/HighSpeedy should end whe ratioMiddle does because the consequences are connected.
+            put("ratioLowSpeedy",new Premise("leftRightDistanceRatio",
+                    new PIFunction.TrapezoidPIFunction(
+                        -15,
+                        -15,
+                        -10, -5)));
+            put("ratioHighSpeedy",new Premise("leftRightDistanceRatio",
+                    new PIFunction.TrapezoidPIFunction(
+                        5, 10,
+                        15,
+                        15)));
             put("ratioMiddle",new Premise("leftRightDistanceRatio",
                     new PIFunction.TrapezoidPIFunction(
-                        -20,
                         -15,
-                        15, 20)));
+                        -10,
+                        10, 15)));
             put("ratioLowDrift",new Premise("leftRightDistanceRatio",
                     new PIFunction.TrapezoidPIFunction(
                         -Double.MAX_VALUE,

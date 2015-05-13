@@ -13,17 +13,19 @@ import java.util.Map;
  *
  * @author jasper
  */
-public class GreaterThan implements Expression {
+public class GreaterThanEqual implements Expression {
     
-    private final Expression expression;
+    private final Premise expression;
 
-    public GreaterThan(Expression expression) {
+    public GreaterThanEqual(Premise expression) {
         this.expression = expression;
     }
 
     @Override
     public double evaluate(Norm norm, Map<String, Double> inputs){
-        double value = inputs.get(((Premise) expression).getVariable());
-        return (((PIFunction) ((Premise) expression).getMembership()).getUpperLimit() <= value )? 1: expression.evaluate(norm, inputs);
+        double value = inputs.get(expression.getVariable());
+        return expression.getUpperLimit() <= value ? 1: expression.evaluate(norm, inputs);
     }
+    
+    
 }

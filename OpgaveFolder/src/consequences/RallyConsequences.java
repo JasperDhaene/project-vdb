@@ -25,7 +25,8 @@ public class RallyConsequences {
     
     private void fillMap(){
         this.map = new HashMap(){{
-            
+            put("accelBase",new Consequence("acceleration",
+                new PIFunction.TrapezoidPIFunction(480, 660, 840, 1120), 0, 1600));
             put("accelLow",new Consequence("acceleration",
                 new PIFunction.TrapezoidPIFunction(0, 0, 280, 560), 0, 1600));
             put("accelMed",new Consequence("acceleration",
@@ -34,6 +35,10 @@ public class RallyConsequences {
                 new PIFunction.TrapezoidPIFunction(840, 1120, 1200, 1400), 0, 1600));
             put("accelNitro",new Consequence("acceleration",
                 new PIFunction.TrapezoidPIFunction(1200, 1400, 1600, 1600), 0, 1600));
+            put("accelDriftLow",new Consequence("acceleration",
+                new PIFunction.TrapezoidPIFunction(480, 660, 840, 1120), 0, 1600));
+            put("accelDriftHigh",new Consequence("acceleration",
+                new PIFunction.TrapezoidPIFunction(900, 1100, 1300, 1500), 0, 1600));
             
             put("brakeNone",new Consequence("brake",
                 new PIFunction.TrapezoidPIFunction(0, 0, 0, 0), 0, 40));
@@ -47,14 +52,18 @@ public class RallyConsequences {
                 new PIFunction.TrapezoidPIFunction(30, 38, 40, 40), 0, 40));
         /*
         Consequence steerLeft = new Consequence("steering",
-                new PIFunction.TriangularPIFunction(-1, -1, -0.5), -1, 1);
+                new PIFunction.TriangularPIFunction(-1, -1, -0.5), -1, 1));
         Consequence steerRight = new Consequence("steering",
-                new PIFunction.TriangularPIFunction(0.5, 1, 1), -1, 1);
+                new PIFunction.TriangularPIFunction(0.5, 1, 1), -1, 1));
         */
         put("steerLeft",new Consequence("steering",
                 new PIFunction.TrapezoidPIFunction(-1, -1, -0.45, -0.4), -1, 1));
         put("steerRight",new Consequence("steering",
                 new PIFunction.TrapezoidPIFunction(0.4, 0.45, 1, 1), -1, 1));
+        put("steerGentleLeft",new Consequence("steering",
+                new PIFunction.TriangularPIFunction(-1, -1, 0), -1, 1));
+        put("steerGentleRight",new Consequence("steering",
+                new PIFunction.TriangularPIFunction(0, 1, 1), -1, 1));
         /*
         Consequence driftLeft = new Consequence("steering",
                 new PIFunction.TrapezoidPIFunction(-1, -1, 0, 0.5), -1, 1);
