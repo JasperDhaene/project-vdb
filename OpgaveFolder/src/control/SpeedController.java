@@ -1,15 +1,18 @@
 package control;
 
 import car.VehicleProperties;
+import consequences.RallyConsequences;
 import fuzzy.Consequence;
 import fuzzy.FuzzySystem;
 import fuzzy.Rule;
 import fuzzy.expression.Conjunction;
 import fuzzy.expression.Disjunction;
+import fuzzy.expression.Expression;
 import fuzzy.expression.Not;
 import fuzzy.expression.Premise;
 import fuzzy.membership.PIFunction;
 import java.util.Map;
+import premises.RallyPremises;
 
 /**
  * SpeedController - Controller that gets the job done as fast as possible
@@ -21,6 +24,9 @@ public class SpeedController implements Controller {
 
     public SpeedController() {
         this.system = new FuzzySystem();
+        
+        RallyPremises premises = new RallyPremises();
+        RallyConsequences consequences = new RallyConsequences();
 
         Premise speedLow = new Premise("speed",
                 new PIFunction.TrapezoidPIFunction(0, 0, 40, 60));
@@ -67,6 +73,24 @@ public class SpeedController implements Controller {
                         Double.MAX_VALUE,
                         Double.MAX_VALUE));
         
+        Premise ratioLowDrift = premises.get("ratioLowDrift");
+        Premise ratioHighDrift = premises.get("ratioHighDrift");
+        
+        Premise lateralVelocityLow = premises.get("lateralVelocityLow");
+        Premise notDrifting = premises.get("notDrifting");
+        
+        Premise noFrontLeftFriction = premises.get("noFrontLeftFriction");
+        Premise noBackLeftFriction = premises.get("noBackLeftFriction");
+        Premise noFrontRightFriction = premises.get("noFrontRightFriction");
+        Premise noBackRightFriction = premises.get("noBackRightFriction");
+        Premise frontLeftFriction = premises.get("frontLeftFriction");
+        Premise backLeftFriction = premises.get("backLeftFriction");
+        Premise frontRightFriction = premises.get("frontRightFriction");
+        Premise backRightFriction = premises.get("backRightFriction");
+        Expression driftingFriction = new Disjunction(new Disjunction(frontLeftFriction,frontRightFriction),new Disjunction(backLeftFriction,backRightFriction));
+        Expression notDriftingFriction = new Disjunction(new Disjunction(noFrontLeftFriction,noFrontRightFriction),new Disjunction(noBackLeftFriction,noBackRightFriction));
+
+        
         /**
          * Actuators
          */
@@ -96,6 +120,9 @@ public class SpeedController implements Controller {
                 new PIFunction.TriangularPIFunction(-1, -1, -0.5), -1, 1);
         Consequence steerRight = new Consequence("steering",
                 new PIFunction.TriangularPIFunction(0.5, 1, 1), -1, 1);
+        
+        Consequence driftLeft = consequences.get("driftLeft");
+        Consequence driftRight = consequences.get("driftRight");
 
         
         // 1. Accelerate if nothing's in front of you, but mind your speed
@@ -124,7 +151,15 @@ public class SpeedController implements Controller {
         // 5. Don't turn on high speeds, but brake
         system.addRule(new Rule(new Conjunction(ratioMiddle,new Disjunction(speedNitro,speedInsane)), brakeExtreme));
         
-        //system.addRule(new Rule(speedBackwards, brakeHigh));
+//OVERSTEERING       
+        // noRightWheelfriction /\ STEERING = ratioLowDrift /\ DISTANCE = low  => DRIFT = right
+        system.addRule(new Rule(new Conjunction(new Conjunction(new Disjunction(new Not(notDrifting),driftingFriction),ratioLowDrift),distanceLow), driftRight));
+        
+        // noLeftWheelfriction /\ STEERING = ratioHighDrift /\ DISTANCE = low  => DRIFT = left
+        system.addRule(new Rule(new Conjunction(new Conjunction(new Disjunction(new Not(notDrifting),driftingFriction),ratioHighDrift),distanceLow), driftLeft));
+
+        
+        
     }
 
     @Override
@@ -140,6 +175,11 @@ public class SpeedController implements Controller {
         system.addInput("frontSensorDistance", vp.getDistanceFromFrontSensor());
         system.addInput("leftRightDistanceRatio", 
                 (vp.getDistanceFromLeftSensor() - vp.getDistanceFromRightSensor()));
+        system.addInput("lateralVelocity", vp.getLateralVelocity());
+        system.addInput("frontLeftFriction", vp.getFrontLeftWheelFriction());
+        system.addInput("frontRightFriction", vp.getFrontRightWheelFriction());
+        system.addInput("backLeftFriction", vp.getBackLeftWheelFriction());
+        system.addInput("backRightFriction", vp.getBackRightWheelFriction());
         Map<String, Double> output = system.evaluate();
 
         /**
