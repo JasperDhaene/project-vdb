@@ -60,14 +60,14 @@ public class RallyPremises {
             //Note: ratioLow/HighSpeedy should end whe ratioMiddle does because the consequences are connected.
             put("ratioLowSpeedy",new Premise("leftRightDistanceRatio",
                     new PIFunction.TrapezoidPIFunction(
-                        -15,
-                        -15,
-                        -10, -5)));
+                        -20,
+                        -20,
+                        -20, -5)));
             put("ratioHighSpeedy",new Premise("leftRightDistanceRatio",
                     new PIFunction.TrapezoidPIFunction(
-                        5, 10,
-                        15,
-                        15)));
+                        5, 20,
+                        20,
+                        20)));
             put("ratioMiddle",new Premise("leftRightDistanceRatio",
                     new PIFunction.TrapezoidPIFunction(
                         -15,

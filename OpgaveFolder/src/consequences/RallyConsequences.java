@@ -61,9 +61,9 @@ public class RallyConsequences {
         put("steerRight",new Consequence("steering",
                 new PIFunction.TrapezoidPIFunction(0.4, 0.45, 1, 1), -1, 1));
         put("steerGentleLeft",new Consequence("steering",
-                new PIFunction.TriangularPIFunction(-1, -1, 0), -1, 1));
+                new PIFunction.TriangularPIFunction(-0.5, -0.5, 0), -1, 1));
         put("steerGentleRight",new Consequence("steering",
-                new PIFunction.TriangularPIFunction(0, 1, 1), -1, 1));
+                new PIFunction.TriangularPIFunction(0, 0.5, 0.5), -1, 1));
         /*
         Consequence driftLeft = new Consequence("steering",
                 new PIFunction.TrapezoidPIFunction(-1, -1, 0, 0.5), -1, 1);

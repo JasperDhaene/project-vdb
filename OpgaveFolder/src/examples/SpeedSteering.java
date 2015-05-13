@@ -11,9 +11,10 @@ import fuzzy.FuzzySystem;
 import fuzzy.Rule;
 import fuzzy.expression.Conjunction;
 import fuzzy.expression.Disjunction;
+import fuzzy.expression.GreaterThanEqual;
+import fuzzy.expression.LessThanEqual;
 import fuzzy.expression.Not;
 import fuzzy.expression.Premise;
-import fuzzy.membership.PIFunction;
 import java.util.ArrayList;
 import java.util.List;
 import premises.RallyPremises;
@@ -84,13 +85,13 @@ public class SpeedSteering {
 
         
         /* STEERING */        
-        system.addRule(new Rule(new Conjunction(ratioLow,new Disjunction(new Not(speedNitro),new Not(speedInsane))), steerRight));
+        system.addRule(new Rule(new Conjunction(ratioLow,new LessThanEqual(speedHigh)), steerRight));
         // RATIO = high => STEERING = left (low)
-        system.addRule(new Rule(new Conjunction(ratioHigh,new Disjunction(new Not(speedNitro),new Not(speedInsane))), steerLeft));
+        system.addRule(new Rule(new Conjunction(ratioHigh,new LessThanEqual(speedHigh)), steerLeft));
         
-        system.addRule(new Rule(new Conjunction(ratioLowSpeedy,new Disjunction(speedNitro,speedInsane)), steerGentleRight));
+        system.addRule(new Rule(new Conjunction(ratioLowSpeedy,new GreaterThanEqual(speedNitro)), steerGentleRight));
         // RATIO = high => STEERING = left (low)
-        system.addRule(new Rule(new Conjunction(ratioHighSpeedy,new Disjunction(speedNitro,speedInsane)), steerGentleLeft));
+        system.addRule(new Rule(new Conjunction(ratioHighSpeedy,new GreaterThanEqual(speedNitro)), steerGentleLeft));
             
         
         /**
@@ -111,14 +112,21 @@ public class SpeedSteering {
             add(new Pair(170, -15));
             add(new Pair(170, -20));
             add(new Pair(170, -25));
+            
+            add(new Pair(160, -10));
+            add(new Pair(180, -10));
+            add(new Pair(200, -10));
  
             
         }};
         
         for(Pair p: input) {
+            
             system.addInput("speed", p.left);
             system.addInput("leftRightDistanceRatio", p.right);
             System.out.println(p + " => " + system.evaluate());
         }
+        
+        System.out.println(ratioLowSpeedy.membership.value(-10));
     }
 }

@@ -8,6 +8,8 @@ import fuzzy.Rule;
 import fuzzy.expression.Conjunction;
 import fuzzy.expression.Disjunction;
 import fuzzy.expression.Expression;
+import fuzzy.expression.GreaterThanEqual;
+import fuzzy.expression.LessThanEqual;
 import fuzzy.expression.Not;
 import fuzzy.expression.Premise;
 import fuzzy.membership.PIFunction;
@@ -57,24 +59,43 @@ public class SpeedController implements Controller {
         Premise distanceEndless = new Premise("frontSensorDistance",
                 new PIFunction.TrapezoidPIFunction(140, 160, Integer.MAX_VALUE, Integer.MAX_VALUE));
 
-        Premise ratioLeft = new Premise("leftRightDistanceRatio",
+        Premise ratioLow = new Premise("leftRightDistanceRatio",
                 new PIFunction.TrapezoidPIFunction(
-                        -Double.MAX_VALUE,
-                        -Double.MAX_VALUE,
-                        -50, -15));
+                        0,
+                        0,
+                        0.30, 0.35));
         Premise ratioMiddle = new Premise("leftRightDistanceRatio",
                 new PIFunction.TrapezoidPIFunction(
-                        -20,
-                        -15,
-                        15, 20));
-        Premise ratioRight = new Premise("leftRightDistanceRatio",
+                        0.35,
+                        0.45,
+                        0.55, 0.65));
+        Premise ratioHigh = new Premise("leftRightDistanceRatio",
                 new PIFunction.TrapezoidPIFunction(
-                        15, 50,
-                        Double.MAX_VALUE,
-                        Double.MAX_VALUE));
+                        0.65, 0.7,
+                        1,
+                        1));
         
-        Premise ratioLowDrift = premises.get("ratioLowDrift");
-        Premise ratioHighDrift = premises.get("ratioHighDrift");
+        Premise ratioLowDrift = new Premise("leftRightDistanceRatio",
+                    new PIFunction.TrapezoidPIFunction(
+                        0,
+                        0,
+                        0.35, 0.40));
+        Premise ratioHighDrift = new Premise("leftRightDistanceRatio",
+                    new PIFunction.TrapezoidPIFunction(
+                        0.6,
+                        0.65,
+                        1,1));
+        
+        Premise ratioLowSpeedy = new Premise("leftRightDistanceRatio",
+                    new PIFunction.TrapezoidPIFunction(
+                        0.35,
+                        0.35,
+                        0.4, 0.45));
+        Premise ratioHighSpeedy = new Premise("leftRightDistanceRatio",
+                    new PIFunction.TrapezoidPIFunction(
+                        0.55, 0.6,
+                        0.65,
+                        0.65));
         
         Premise lateralVelocityLow = premises.get("lateralVelocityLow");
         Premise notDrifting = premises.get("notDrifting");
@@ -123,19 +144,22 @@ public class SpeedController implements Controller {
         
         Consequence driftLeft = consequences.get("driftLeft");
         Consequence driftRight = consequences.get("driftRight");
+        Consequence steerGentleLeft = consequences.get("steerGentleLeft");
+        Consequence steerGentleRight = consequences.get("steerGentleRight");
 
+        Expression highSpeedTurning = new Disjunction(ratioLowSpeedy,ratioHighSpeedy);
         
         // 1. Accelerate if nothing's in front of you, but mind your speed
         // SPEED = low \/ med \/ high => ACCEL = nitro
-        system.addRule(new Rule(new Conjunction(new Disjunction(new Disjunction(speedLow,speedMed),speedHigh),new Disjunction(distanceHigh,distanceEndless)), accelNitro));
+        system.addRule(new Rule(new Conjunction(new LessThanEqual(speedHigh),new GreaterThanEqual(distanceHigh)), accelNitro));
         system.addRule(new Rule(new Conjunction(new Conjunction(speedNitro,distanceEndless),ratioMiddle), accelMed));
         //system.addRule(new Rule(new Conjunction(new Disjunction(speedLow,speedMed),distanceHigh), accelNitro));
         
         // Note: Bochten kunnen veilig genomen worden aan max ~90 
         // 2. If something comes up in front of you, don't accelerate and use your brakes
         // SPEED = High /\ DISTANCE = low => BRAKE = high
-        system.addRule(new Rule(new Conjunction(new Disjunction(speedHigh,speedNitro),new Disjunction(distanceLow,distanceMed)), brakeHigh));
-        system.addRule(new Rule(new Conjunction(new Disjunction(speedNitro,speedInsane),new Disjunction(new Disjunction(distanceLow,distanceMed),distanceHigh)), brakeExtreme));
+        system.addRule(new Rule(new Conjunction(new Disjunction(speedHigh,speedNitro),new LessThanEqual(distanceMed)), brakeHigh));
+        system.addRule(new Rule(new Conjunction(new Conjunction(new GreaterThanEqual(speedNitro),new LessThanEqual(distanceHigh)),new Not(highSpeedTurning)), brakeExtreme));
         
         // 3. Whatever happens, always have a base speed
         // DISTANCE = low /\ SPEED = low => ACCEL = low
@@ -144,19 +168,33 @@ public class SpeedController implements Controller {
         // Note: er mag pas gedraaid worden onder de 300
         // 4. Strive for a stable left/right ratio
         // RATIO = low => STEERING = right (high)
-        system.addRule(new Rule(new Conjunction(ratioLeft,new Not(new Disjunction(speedNitro,speedInsane))), steerRight));
+        /* Without GTE/LTE
+        system.addRule(new Rule(new Conjunction(ratioLow,new Not(new Disjunction(speedNitro,speedInsane))), steerRight));
         // RATIO = high => STEERING = left (low)
-        system.addRule(new Rule(new Conjunction(ratioRight,new Not(new Disjunction(speedNitro,speedInsane))), steerLeft));
+        system.addRule(new Rule(new Conjunction(ratioHigh,new Not(new Disjunction(speedNitro,speedInsane))), steerLeft));
         
+        system.addRule(new Rule(new Conjunction(ratioLowSpeedy,new Disjunction(speedNitro,speedInsane)), steerGentleRight));
+        // RATIO = high => STEERING = left (low)
+        system.addRule(new Rule(new Conjunction(ratioHighSpeedy,new Disjunction(speedNitro,speedInsane)), steerGentleLeft));
+        */
+        
+        system.addRule(new Rule(new Conjunction(ratioLow,new LessThanEqual(speedHigh)), steerRight));
+        // RATIO = high => STEERING = left (low)
+        system.addRule(new Rule(new Conjunction(ratioHigh,new LessThanEqual(speedHigh)), steerLeft));
+        
+        //TODO: not working. Drifts because steering is still too violent
+        //system.addRule(new Rule(new Conjunction(ratioLowSpeedy,new GreaterThanEqual(speedNitro)), steerGentleRight));
+        // RATIO = high => STEERING = left (low)
+        //system.addRule(new Rule(new Conjunction(ratioHighSpeedy,new GreaterThanEqual(speedNitro)), steerGentleLeft));
         // 5. Don't turn on high speeds, but brake
         system.addRule(new Rule(new Conjunction(ratioMiddle,new Disjunction(speedNitro,speedInsane)), brakeExtreme));
         
 //OVERSTEERING       
         // noRightWheelfriction /\ STEERING = ratioLowDrift /\ DISTANCE = low  => DRIFT = right
-        system.addRule(new Rule(new Conjunction(new Conjunction(new Disjunction(new Not(notDrifting),driftingFriction),ratioLowDrift),distanceLow), driftRight));
+        //system.addRule(new Rule(new Conjunction(new Conjunction(new Disjunction(new Not(notDrifting),driftingFriction),ratioLowDrift),distanceLow), driftRight));
         
         // noLeftWheelfriction /\ STEERING = ratioHighDrift /\ DISTANCE = low  => DRIFT = left
-        system.addRule(new Rule(new Conjunction(new Conjunction(new Disjunction(new Not(notDrifting),driftingFriction),ratioHighDrift),distanceLow), driftLeft));
+        //system.addRule(new Rule(new Conjunction(new Conjunction(new Disjunction(new Not(notDrifting),driftingFriction),ratioHighDrift),distanceLow), driftLeft));
 
         
         
@@ -174,7 +212,7 @@ public class SpeedController implements Controller {
         system.addInput("speed", vp.getCurrentCarSpeedKph());
         system.addInput("frontSensorDistance", vp.getDistanceFromFrontSensor());
         system.addInput("leftRightDistanceRatio", 
-                (vp.getDistanceFromLeftSensor() - vp.getDistanceFromRightSensor()));
+               vp.getDistanceFromLeftSensor() / (vp.getDistanceFromLeftSensor() + vp.getDistanceFromRightSensor()));
         system.addInput("lateralVelocity", vp.getLateralVelocity());
         system.addInput("frontLeftFriction", vp.getFrontLeftWheelFriction());
         system.addInput("frontRightFriction", vp.getFrontRightWheelFriction());
@@ -208,13 +246,16 @@ public class SpeedController implements Controller {
          * Debug output
          */
         
-        System.out.println("steering: " + steering);
         System.out.println("acceleration: " + acceleration);
         System.out.println("speed: " + vp.getCurrentCarSpeedKph());
         System.out.println("brake: " + brake);
         System.out.println("ratio: " + 
-                (vp.getDistanceFromLeftSensor() - vp.getDistanceFromRightSensor()) + 
+                vp.getDistanceFromLeftSensor() / (vp.getDistanceFromLeftSensor() + vp.getDistanceFromRightSensor()) + 
                 " => " + steering);
+        System.out.println("frontSensor: " + vp.getDistanceFromFrontSensor());
+        System.out.println("lateralVelocity: " + vp.getLateralVelocity());
+        System.out.println("frontFriction: " + vp.getFrontLeftWheelFriction() + " | " + vp.getFrontRightWheelFriction());
+        System.out.println("backFriction: " + vp.getBackLeftWheelFriction() + " | " + vp.getBackRightWheelFriction());
         System.out.println("#######################");
 
         fc = new FrameControl((float) steering,
