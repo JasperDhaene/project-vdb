@@ -89,8 +89,8 @@ public class RallyPremises {
                         3)));
             put("notDrifting",new Premise("lateralVelocity",
                     new PIFunction.TriangularPIFunction(
-                        -0.3, 0,
-                        0.3)));
+                        -0.2, 0,
+                        0.2)));
             put("noFrontLeftFriction",new Premise("frontLeftFriction",
                     new PIFunction.TrapezoidPIFunction(
                         0,
@@ -111,6 +111,26 @@ public class RallyPremises {
                         0,
                         0.1,
                         Double.MAX_VALUE, Double.MAX_VALUE)));
+            put("frontLeftFriction",new Premise("frontLeftFriction",
+                    new PIFunction.TrapezoidPIFunction(
+                        0,
+                        0,
+                        0, 0.1)));
+            put("backLeftFriction",new Premise("frontLeftFriction",
+                    new PIFunction.TrapezoidPIFunction(
+                        0,
+                        0,
+                        0, 0.1)));
+            put("frontRightFriction",new Premise("frontLeftFriction",
+                    new PIFunction.TrapezoidPIFunction(
+                        0,
+                        0,
+                        0, 0.1)));
+            put("backRightFriction",new Premise("frontLeftFriction",
+                    new PIFunction.TrapezoidPIFunction(
+                        0,
+                        0,
+                        0, 0.1)));
         }};
     }
     

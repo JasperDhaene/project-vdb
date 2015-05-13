@@ -7,6 +7,7 @@ import fuzzy.FuzzySystem;
 import fuzzy.Rule;
 import fuzzy.expression.Conjunction;
 import fuzzy.expression.Disjunction;
+import fuzzy.expression.Expression;
 import fuzzy.expression.GreaterThanEqual;
 import fuzzy.expression.LessThanEqual;
 import fuzzy.expression.Not;
@@ -56,6 +57,12 @@ public class RallyController implements Controller {
         Premise noBackLeftFriction = premises.get("noBackLeftFriction");
         Premise noFrontRightFriction = premises.get("noFrontRightFriction");
         Premise noBackRightFriction = premises.get("noBackRightFriction");
+        Premise frontLeftFriction = premises.get("frontLeftFriction");
+        Premise backLeftFriction = premises.get("backLeftFriction");
+        Premise frontRightFriction = premises.get("frontRightFriction");
+        Premise backRightFriction = premises.get("backRightFriction");
+        Expression driftingFriction = new Disjunction(new Disjunction(frontLeftFriction,frontRightFriction),new Disjunction(backLeftFriction,backRightFriction));
+        Expression notDriftingFriction = new Disjunction(new Disjunction(noFrontLeftFriction,noFrontRightFriction),new Disjunction(noBackLeftFriction,noBackRightFriction));
         
         /////////////////////////////////////
         
@@ -113,10 +120,15 @@ public class RallyController implements Controller {
         
 //STEER IN TURN      
         // RATIO = low /\ DISTANCE = low /\ FRICTION on front wheels (not drifting out of control) => DRIFT = left
-        system.addRule(new Rule(new Conjunction(new Conjunction(ratioLowDrift,distanceLow),new Conjunction(new Not(noFrontLeftFriction),new Not(noFrontRightFriction))), driftRight));
+        //system.addRule(new Rule(new Conjunction(new Conjunction(ratioLowDrift,distanceLow),new Disjunction(new Not(noFrontLeftFriction),new Not(noFrontRightFriction))), driftRight));
         // RATIO = high /\ DISTANCE = low /\ FRICTION on front wheels (not drifting out of control) => DRIFT = right
-        system.addRule(new Rule(new Conjunction(new Conjunction(ratioHighDrift,distanceLow),new Conjunction(new Not(noFrontLeftFriction),new Not(noFrontRightFriction))), driftLeft));
+        //system.addRule(new Rule(new Conjunction(new Conjunction(ratioHighDrift,distanceLow),new Disjunction(new Not(noFrontLeftFriction),new Not(noFrontRightFriction))), driftLeft));
+        // RATIO = low /\ DISTANCE = low /\ FRICTION on front wheels (not drifting out of control) => DRIFT = left
+        system.addRule(new Rule(new Conjunction(new Conjunction(ratioLowDrift,distanceLow),new Disjunction(notDrifting,notDriftingFriction)), driftRight));
+        // RATIO = high /\ DISTANCE = low /\ FRICTION on front wheels (not drifting out of control) => DRIFT = right
+        system.addRule(new Rule(new Conjunction(new Conjunction(ratioHighDrift,distanceLow),new Disjunction(notDrifting,notDriftingFriction)), driftLeft));
 
+        
 //ACCEL WHILE DRIFT        
         // (DISTANCE = low \/ med) /\ (SPEED = high) /\ Drifting => ACCEL = med
         system.addRule(new Rule(new Conjunction(new Conjunction(distanceLow ,new Not(notDrifting)),new Not(new Disjunction(speedNitro,speedInsane))), accelDriftLow));
@@ -124,10 +136,10 @@ public class RallyController implements Controller {
         system.addRule(new Rule(new Conjunction(distanceVeryLow,new Not(notDrifting)), accelDriftHigh));
 //OVERSTEERING       
         // noRightWheelfriction /\ STEERING = ratioLowDrift /\ DISTANCE = low  => DRIFT = right
-        system.addRule(new Rule(new Conjunction(new Conjunction(new Conjunction(noFrontRightFriction,noBackRightFriction),ratioLowDrift),distanceLow), driftRight));
+        system.addRule(new Rule(new Conjunction(new Conjunction(new Disjunction(new Not(notDrifting),driftingFriction),ratioLowDrift),distanceLow), driftRight));
         
         // noLeftWheelfriction /\ STEERING = ratioHighDrift /\ DISTANCE = low  => DRIFT = left
-        system.addRule(new Rule(new Conjunction(new Conjunction(new Conjunction(noFrontLeftFriction,noBackLeftFriction),ratioHighDrift),distanceLow), driftLeft));
+        system.addRule(new Rule(new Conjunction(new Conjunction(new Disjunction(new Not(notDrifting),driftingFriction),ratioHighDrift),distanceLow), driftLeft));
 
 //BRAKE
         // (DISTANCE = low \/ med) /\ (SPEED = high \/ nitro) => BRAKE = high
