@@ -19,10 +19,12 @@ public class Main {
 	 * controller, written by you - manual control, only non-manual laps are recorded for the leaderboard
 	 */
 
-	Controller controller = new RallyController();
+
+	Controller controller = new SpeedController();
 	String trackname = "interlagos1024";
 
-	RaceCar app = new RaceCar("DK Lightning McQueen", trackname, controller, false);
+	RaceCar app = new RaceCar("Lightning McQueen SP", trackname, controller, false);
+
         app.setDisplayFps(false);
         app.setDisplayStatView(false);
 	app.start();

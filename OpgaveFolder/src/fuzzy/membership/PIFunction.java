@@ -7,7 +7,7 @@ import org.apache.commons.math3.analysis.function.Identity;
  * PIFunction - Large PI-function
  * @author Florian Dejonckheere <florian@floriandejonckheere.be>
  */
-public class PIFunction implements UnivariateFunction {
+public class PIFunction implements Membership {
 
     /**
      * eps - Arbitrary small number. See below.
@@ -57,6 +57,16 @@ public class PIFunction implements UnivariateFunction {
             else if(gamma == delta) return 1;
         }
         return 0;
+    }
+    
+    @Override
+    public double getUpperLimit(){
+        return this.gamma;
+    }
+    
+    @Override
+    public double getLowerLimit(){
+        return this.beta;
     }
 
     public static class TrapezoidPIFunction extends PIFunction {

@@ -6,7 +6,7 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
  * PiFunction - Small PI-function
  * @author Florian Dejonckheere <florian@floriandejonckheere.be>
  */
-public class PiFunction implements UnivariateFunction {
+public class PiFunction implements Membership {
 
     private final int beta, gamma;
     protected final UnivariateFunction sf1, sf2;
@@ -28,6 +28,16 @@ public class PiFunction implements UnivariateFunction {
         } else {
             return (1 - sf2.value(x));
         }
+    }
+    
+        @Override
+    public double getUpperLimit(){
+        return this.gamma;
+    }
+    
+    @Override
+    public double getLowerLimit(){
+        return this.beta;
     }
 
 }
