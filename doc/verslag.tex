@@ -43,12 +43,13 @@
 	basicstyle=\footnotesize,
 	commentstyle=\color{commentgreen},
 	frame=single,
+	framesep=7pt,
 	keywordstyle=\color{blue},
 	language=Java,
-	numbers=left,
+	numbers=none,
 	numbersep=5pt,
 	numberstyle=\tiny\color{gray},
-	rulecolor=\color{black},
+	rulecolor=\color{gray},
 	stepnumber=1,
 	stringstyle=\color{ugentblue},
 	showspaces=false,
@@ -113,10 +114,38 @@
 
 		\subsection{Minder performante parcours}
 			%% Zijn er parcours waar uw controller minder goed presteert? Hoe komt dit?
+			\noindent Bepaalde parcours zijn zo geschreven dat de sensoren af en toe tekort komen. In een scherpe bocht bijvoorbeeld, kan het zijn dat de vooruitkijkende sensoren de bocht niet opmerken (voornamelijk door de hogere snelheid), en een foutieve meting geven voor de wand ertegenover.
+
+			\begin{figure}[h]
+				\centering
+				\includegraphics[width=5cm]{sensors-corner.png}
+				\caption{Foutieve meting bij scherpe bochten}
+				\label{fig:sensors-corner}
+			\end{figure}
+
+			\noindent Op zich kan dit probleem verholpen worden door de hoek van de sensoren continu adaptief aan te passen -- zodat een scherpe bocht toch opgemerkt wordt -- ware het niet dat de outputvariabelen van een bepaalde iteratie geen enkele invloed hebben op de volgende iteratie. Opnieuw kan dit probleem suboptimaal opgelost worden door het intelligent gebruik maken van \textit{dampening}, waarbij beslist wordt of de output van de huidige iteratie authoritatief wordt doorgevoerd, of dat de vorige iteratie er invloed op hebben. Een goede optimalisatie voor dit karakter is een lokale \textit{cache} van sensoren, zodat het patroon van een semi-zichtbaar obstakel kan gedetecteerd worden. Dit systeem valt echter niet in de scope van dit project en werd dus ook enkel als gedachte-experiment aangehaald.
+
+			\noindent Uiteindelijk werd gekozen om een vaste sensorhoek te hanteren, bepaald uit empirische experimenten op verschillende parcours met verschillende controllers.
 
 		\subsection{Veiligheid}
 			%% Hoe veilig is uw wagen, i.e. hoe dikwijls crasht uw wagen?
 
 		\subsection{Exacte controller}
 			%% Wat zijn de verschillen met een exacte controller (beter/slechter)?
+			\noindent Een exacte controller reageert volgens welbepaalde scherpe grenzen op de input. Het grote verschil met deze systemen is dat er van een graduele aanpak geen sprake kan zijn. Bij een vaag regelsysteem kan de granulariteit van de response aangepast worden volgens constanten of andere (input-) parameters. Er kunnen meerdere regels zijn die betrekking hebben op \'e\'en aspect, en die dus elk tot op een bepaalde mate invloed hebben op de uitkomst van het systeem. \\
+
+			\noindent Beschouw het volgende systeem met als output \texttt{acceleration}: Als er zich geen obstakels bevinden voor de auto, kan hij versnellen. Maar de versnelling moet gematigd zijn als de auto aan het driften is (dus als de laterale snelheid groter dan 0 is).
+			Dit kan eenvoudig gemodelleerd worden door de volgende regels.
+
+			\begin{lstlisting}
+IF (distanceFront IS SMALL) THEN acceleration IS high
+IF (lateralVelocity IS GREATER THAN ZERO) THEN acceleration IS low
+			\end{lstlisting}
+
+			\noindent Door het combineren van deze regels wordt in een drift rekening gehouden met zowel \texttt{acceleration IS high} en \texttt{acceleration IS low}, waardoor een gebalanceerd equilibrium uiteindelijk gekozen wordt als \texttt{acceleration}.
+			Indien men dit in een exacte controller wil implementeren, moeten de twee regels gemultiplexd worden in \'e\'en formule. Dit kan bijvoorbeeld als volgt gebeuren.
+
+			\begin{lstlisting}
+
+			\end{lstlisting}
 \end{document}
