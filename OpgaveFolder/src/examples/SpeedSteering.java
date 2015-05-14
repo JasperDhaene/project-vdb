@@ -15,6 +15,7 @@ import fuzzy.expression.GreaterThanEqual;
 import fuzzy.expression.LessThanEqual;
 import fuzzy.expression.Not;
 import fuzzy.expression.Premise;
+import fuzzy.membership.PIFunction;
 import java.util.ArrayList;
 import java.util.List;
 import premises.RallyPremises;
@@ -44,8 +45,7 @@ public class SpeedSteering {
         
         Premise ratioLow = premises.get("ratioLow");
         Premise ratioHigh = premises.get("ratioHigh");
-        Premise ratioLowSpeedy = premises.get("ratioLowSpeedy");
-        Premise ratioHighSpeedy = premises.get("ratioHighSpeedy");  
+          
         Premise ratioMiddle = premises.get("ratioMiddle");
         
         Premise ratioLowDrift = premises.get("ratioLowDrift");
@@ -58,6 +58,17 @@ public class SpeedSteering {
         Premise noBackLeftFriction = premises.get("noBackLeftFriction");
         Premise noFrontRightFriction = premises.get("noFrontRightFriction");
         Premise noBackRightFriction = premises.get("noBackRightFriction");
+        
+        Premise ratioLowSpeedy = new Premise("leftRightDistanceRatio",
+                    new PIFunction.TrapezoidPIFunction(
+                        -10,
+                        -10,
+                        -10, -5));
+        Premise ratioHighSpeedy = new Premise("leftRightDistanceRatio",
+                    new PIFunction.TrapezoidPIFunction(
+                        5, 10,
+                        10,
+                        10));
         
         /////////////////////////////////////
         
@@ -77,8 +88,10 @@ public class SpeedSteering {
 
         Consequence steerLeft = consequences.get("steerLeft");
         Consequence steerRight = consequences.get("steerRight");
-        Consequence steerGentleLeft = consequences.get("steerGentleLeft");
-        Consequence steerGentleRight = consequences.get("steerGentleRight");
+        Consequence steerGentleLeft = new Consequence("steering",
+                new PIFunction.TriangularPIFunction(-0.4, -0.05, 0), -1, 1);
+        Consequence steerGentleRight = new Consequence("steering",
+                new PIFunction.TriangularPIFunction(0, 0.05, 0.4), -1, 1);
  
         Consequence driftLeft = consequences.get("driftLeft");
         Consequence driftRight = consequences.get("driftRight");
@@ -114,8 +127,8 @@ public class SpeedSteering {
             add(new Pair(170, -25));
             
             add(new Pair(160, -10));
-            add(new Pair(180, -10));
-            add(new Pair(200, -10));
+            add(new Pair(300, -5));
+            add(new Pair(300, -10));
  
             
         }};

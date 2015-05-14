@@ -23,15 +23,17 @@ public class SpeedConsequences {
     
     private void fillMap(){
         this.map = new HashMap(){{
-           
+        
+        put("accelBase",new Consequence("acceleration",
+                new PIFunction.TrapezoidPIFunction(480, 660, 840, 1120), 0, 1600));   
         put("accelLow",new Consequence("acceleration",
-                new PIFunction.TrapezoidPIFunction(0, 0, 280, 560), 0, 1600));
+                new PIFunction.TrapezoidPIFunction(0, 0, 300, 600), 0, 1600));
         put("accelMed",new Consequence("acceleration",
-                new PIFunction.TrapezoidPIFunction(480, 660, 840, 1120), 0, 1600));
+                new PIFunction.TrapezoidPIFunction(500, 600, 800, 1100), 0, 1600));
         put("accelHigh",new Consequence("acceleration",
-                new PIFunction.TrapezoidPIFunction(840, 1120, 1200, 1400), 0, 1600));
+                new PIFunction.TrapezoidPIFunction(800, 1100, 1300, 1400), 0, 1600));
         put("accelNitro",new Consequence("acceleration",
-                new PIFunction.TrapezoidPIFunction(1200, 1400, 1600, 1600), 0, 1600));
+                new PIFunction.TrapezoidPIFunction(1300, 1400, 1600, 1600), 0, 1600));
         put("accelNone",new Consequence("acceleration",
                 new PIFunction.TrapezoidPIFunction(0, 0, 0, 0), 0, 1600));
 
@@ -52,9 +54,9 @@ public class SpeedConsequences {
         put("steerRight",new Consequence("steering",
                 new PIFunction.TriangularPIFunction(0.5, 1, 1), -1, 1));
         put("steerGentleLeft",new Consequence("steering",
-                new PIFunction.TriangularPIFunction(-0.5, -0.5, 0), -1, 1));
+                new PIFunction.TriangularPIFunction(-0.4, -0.05, 0), -1, 1));
         put("steerGentleRight",new Consequence("steering",
-                new PIFunction.TriangularPIFunction(0, 0.5, 0.5), -1, 1));
+                new PIFunction.TriangularPIFunction(0, 0.05, 0.4), -1, 1));
 
         put("driftLeft",new Consequence("steering",
                 new PIFunction.TriangularPIFunction(-1, -1, -0.5), -1, 1));
