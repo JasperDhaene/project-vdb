@@ -146,6 +146,12 @@ IF (lateralVelocity IS GREATER THAN ZERO) THEN acceleration IS low
 			Indien men dit in een exacte controller wil implementeren, moeten de twee regels gemultiplexd worden in \'e\'en formule. Dit kan bijvoorbeeld als volgt gebeuren.
 
 			\begin{lstlisting}
+int factor = 1;
+if (lateralVelocity > 0)
+	factor = 0.5;
 
+return (1400 * (distanceFront / 200) * factor);
 			\end{lstlisting}
+
+			\noindent Deze formule bevat significant meer complexiteit en is ook sensitiever dan een vaagregelsysteem. Ook als er (foutieve) waarden optreden die buiten het definitiegebied vallen, kan de output een ongewenste waarde aannemen. Vage regelsystemen hebben hiertegen een intrinsieke bescherming, aangezien $\mu = 0$ buiten het definitiegebied van de lidmaatschapsfunctie.
 \end{document}
