@@ -1,5 +1,6 @@
 package premises;
 
+import fuzzy.Consequence;
 import fuzzy.expression.Premise;
 import fuzzy.membership.Membership;
 import fuzzy.membership.PIFunction;
@@ -19,13 +20,13 @@ import org.json.simple.parser.ParseException;
  * PremiseReader - deserialize from JSON
  * @author florian
  */
-public class PremiseReader {
+public class ConsequenceReader {
 
     private static final JSONParser parser = new JSONParser();
 
-    public static Map<String, Premise> read(String input)
+    public static Map<String, Consequence> read(String input)
             throws FileNotFoundException, IOException, ParseException {
-        Map<String, Premise> map = new HashMap<>();
+        Map<String, Consequence> map = new HashMap<>();
         JSONArray array = (JSONArray) parser.parse(
                 new BufferedReader(
                         new InputStreamReader(
@@ -45,18 +46,21 @@ public class PremiseReader {
                     break;
                 case "triangular":
                     mem = new PIFunction.TriangularPIFunction(
-                            (double) params.get(0),
-                            (double) params.get(1),
-                            (double) params.get(2)
+                            ((Number) params.get(0)).doubleValue(),
+                            ((Number) params.get(1)).doubleValue(),
+                            ((Number) params.get(2)).doubleValue()
                     );
                     break;
             }
-            Premise p = new Premise(
+            JSONArray integration = (JSONArray) object.get("integration");
+            Consequence c = new Consequence(
                     (String) object.get("variable"),
-                    mem
+                    mem,
+                    ((Number) integration.get(0)).intValue(),
+                    ((Number) integration.get(1)).intValue()
             );
 
-            map.put((String) object.get("name"), p);
+            map.put((String) object.get("name"), c);
         });
 
         return map;

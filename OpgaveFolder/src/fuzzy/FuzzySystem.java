@@ -17,7 +17,7 @@ public class FuzzySystem {
 
     private static final int MAX_EVAL = BaseAbstractUnivariateIntegrator.DEFAULT_MAX_ITERATIONS_COUNT;
     private static final UnivariateIntegrator integrator = new MidPointIntegrator(1.0e-3, 1.0e-15, 3, 64);
-    
+
     private final List<Rule> rules;
     private final Map<String, Double> inputs;
 
@@ -95,7 +95,7 @@ public class FuzzySystem {
             // 4. Unification of rules: evaluate to the pointwise maximum.
             // This simulates the unification of various membership functions from
             // different consequences
-            for(UnivariateFunction c: consequences){ 
+            for(UnivariateFunction c: consequences){
                 max = Math.max(c.value(x), max);
             }
             return max;

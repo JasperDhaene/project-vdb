@@ -3,6 +3,4 @@
   "variable": "speed",
   "type": "trapezoid",
   "params": [0, 0, 40, 60]
-}, {
-
 }]
