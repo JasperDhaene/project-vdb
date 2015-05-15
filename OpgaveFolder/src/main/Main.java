@@ -2,7 +2,7 @@ package main;
 
 import car.RaceCar;
 import control.Controller;
-import control.SafeController;
+import control.RallyController;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,10 +25,10 @@ public class Main {
              */
 
 
-            Controller controller = new SafeController();
+            Controller controller = new RallyController();
             String trackname = "interlagos1024";
 
-            RaceCar app = new RaceCar("Lightning McQueen SP", trackname, controller, false);
+            RaceCar app = new RaceCar("DK Lightning McQueen", trackname, controller, false);
 
             app.setDisplayFps(false);
             app.setDisplayStatView(false);
