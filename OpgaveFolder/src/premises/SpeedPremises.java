@@ -23,60 +23,63 @@ public class SpeedPremises {
     
     private void fillMap(){
         this.map = new HashMap(){{
+            
+
 
             put("speedLow",new Premise("speed",
-                    new PIFunction.TrapezoidPIFunction(0, 0, 50, 70)));
+                    new PIFunction.TrapezoidPIFunction(0, 0, 60, 90)));
             put("speedMed",new Premise("speed",
-                    new PIFunction.TrapezoidPIFunction(60, 80, 100, 120)));
+                    new PIFunction.TrapezoidPIFunction(80, 90, 100, 110)));
             put("speedHigh",new Premise("speed",
-                    new PIFunction.TrapezoidPIFunction(110, 140, 180, 200)));
+                    new PIFunction.TrapezoidPIFunction(100, 150, 190, 210)));
+            put("speedVeryHigh",new Premise("speed",
+                    new PIFunction.TrapezoidPIFunction(200, 210, 250, 260)));
             put("speedNitro",new Premise("speed",
-                    new PIFunction.TrapezoidPIFunction(190, 220, 250, 280)));
-            put("speedInsane",new Premise("speed",
-                    new PIFunction.TrapezoidPIFunction(270, 290, 310, 400)));
+                    new PIFunction.TrapezoidPIFunction(250, 260, Integer.MAX_VALUE, Integer.MAX_VALUE)));
+            //put("speedInsane",new Premise("speed",
+            //        new PIFunction.TrapezoidPIFunction(270, 290, 310, 400)));
             
-            put("distanceVeryLow",new Premise("frontSensorDistance",
-                    new PIFunction.TrapezoidPIFunction(0, 0, 20, 30)));
+
+            
+
             put("distanceLow",new Premise("frontSensorDistance",
-                    new PIFunction.TrapezoidPIFunction(25, 30, 40, 50)));
+                    new PIFunction.TrapezoidPIFunction(0, 0, 35, 50)));
             put("distanceMed",new Premise("frontSensorDistance",
-                    new PIFunction.TrapezoidPIFunction(45, 65, 90, 110)));
+                    new PIFunction.TrapezoidPIFunction(45, 75, 100, 120)));
             put("distanceHigh",new Premise("frontSensorDistance",
-                    new PIFunction.TrapezoidPIFunction(100, 120, 150, 160)));
-            put("distanceVeryHigh",new Premise("frontSensorDistance",
-                    new PIFunction.TrapezoidPIFunction(150, 160, 200, 220)));
+                    new PIFunction.TrapezoidPIFunction(110, 150, 180, 200)));
             put("distanceEndless",new Premise("frontSensorDistance",
-                    new PIFunction.TrapezoidPIFunction(210, 220, Integer.MAX_VALUE, Integer.MAX_VALUE)));
+                    new PIFunction.TrapezoidPIFunction(190, 210, Integer.MAX_VALUE, Integer.MAX_VALUE)));
         
             
             put("ratioLow",new Premise("leftRightDistanceRatio",
                 new PIFunction.TrapezoidPIFunction(
                         0,
                         0,
-                        0.30, 0.35)));
+                        0.20, 0.35)));
             put("ratioHigh",new Premise("leftRightDistanceRatio",
                 new PIFunction.TrapezoidPIFunction(
-                        0.65, 0.7,
+                        0.65, 0.8,
                         1,
                         1)));
             
             put("ratioMiddle",new Premise("leftRightDistanceRatio",
                 new PIFunction.TrapezoidPIFunction(
-                        0.30,
                         0.35,
-                        0.65, 0.7)));
+                        0.40,
+                        0.60, 0.65)));
             
             //Note: ratioLow/HighSpeedy should end whe ratioMiddle does because the consequences are connected.
             put("ratioLowSpeedy",new Premise("leftRightDistanceRatio",
                     new PIFunction.TrapezoidPIFunction(
-                        0.40,
+                        0.20,
                         0.40,
                         0.40, 0.45)));
             put("ratioHighSpeedy",new Premise("leftRightDistanceRatio",
                     new PIFunction.TrapezoidPIFunction(
                         0.55,
                         0.6,
-                        0.6,0.6)));
+                        0.6,0.8)));
             
             put("ratioLowDrift",new Premise("leftRightDistanceRatio",
                     new PIFunction.TrapezoidPIFunction(

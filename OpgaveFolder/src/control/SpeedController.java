@@ -34,14 +34,14 @@ public class SpeedController implements Controller {
         Premise speedLow = premises.get("speedLow");
         Premise speedMed = premises.get("speedMed");
         Premise speedHigh = premises.get("speedHigh");
+        Premise speedVeryHigh = premises.get("speedVeryHigh");
         Premise speedNitro = premises.get("speedNitro");
-        Premise speedInsane = premises.get("speedInsane");
+        //Premise speedInsane = premises.get("speedInsane");
         
-        Premise distanceVeryLow = premises.get("distanceVeryLow");
+
         Premise distanceLow = premises.get("distanceLow");
         Premise distanceMed = premises.get("distanceMed");
         Premise distanceHigh = premises.get("distanceHigh");
-        Premise distanceVeryHigh = premises.get("distanceVeryHigh");
         Premise distanceEndless = premises.get("distanceEndless");
 
         Premise ratioLow = premises.get("ratioLow");
@@ -86,6 +86,7 @@ public class SpeedController implements Controller {
         Consequence brakeMed = consequences.get("brakeMed");
         Consequence brakeHigh = consequences.get("brakeHigh");
         Consequence brakeExtreme = consequences.get("brakeExtreme");
+        Consequence brakeEpic = consequences.get("brakeEpic");
         
         Consequence steerLeft = consequences.get("steerLeft");
         Consequence steerRight = consequences.get("steerRight");
@@ -96,78 +97,35 @@ public class SpeedController implements Controller {
         Consequence steerGentleRight = consequences.get("steerGentleRight");
 
         
+        // 1. Accelerate if nothing's in front of you, but mind your speed
+        // SPEED = low \/ med \/ high => ACCEL = nitro
+        system.addRule(new Rule(new Conjunction(new LessThanEqual(speedVeryHigh),new GreaterThanEqual(distanceHigh)), accelNitro));
+        system.addRule(new Rule(new Conjunction(new Conjunction(speedNitro,distanceEndless),ratioMiddle), accelMed));
+        //system.addRule(new Rule(new Conjunction(new Disjunction(speedLow,speedMed),distanceHigh), accelNitro));
         
-//ACCEL
-        //system.addRule(new Rule(new Conjunction(new LessThanEqual(speedHigh),new GreaterThanEqual(distanceHigh)), accelNitro));
-        //system.addRule(new Rule(new Conjunction(new Conjunction(new GreaterThanEqual(speedNitro),distanceEndless),ratioMiddle), accelMed));
-        //system.addRule(new Rule(new Conjunction(new LessThanEqual(speedMed),distanceLow), accelLow));
+        // Note: Bochten kunnen veilig genomen worden aan max ~90 
+        // 2. If something comes up in front of you, don't accelerate and use your brakes
+        // SPEED = High /\ DISTANCE = low => BRAKE = high
+        //system.addRule(new Rule(new Conjunction(new Disjunction(speedHigh,speedNitro),new Disjunction(distanceLow,distanceMed)), brakeHigh));
+        system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedHigh),new LessThanEqual(distanceMed)), brakeExtreme));
+        //system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedVeryHigh),new LessThanEqual(distanceHigh)), brakeEpic));
+        
         // 3. Whatever happens, always have a base speed
         // DISTANCE = low /\ SPEED = low => ACCEL = low
-        //system.addRule(new Rule(speedLow, accelBase));
+        system.addRule(new Rule(new Conjunction(new Disjunction(speedLow,speedMed), distanceLow), accelLow));
         
-        //system.addRule(new Rule(new Conjunction(distanceEndless,ratioMiddle), accelHigh));
-        //system.addRule(new Rule(new Conjunction(distanceHigh,new LessThanEqual(speedHigh)), accelNitro));
-        //system.addRule(new Rule(new Conjunction(distanceMed,new LessThanEqual(speedMed)), accelLow));
-        //system.addRule(new Rule(new Conjunction(distanceLow,speedLow), accelMed));
-        
-        system.addRule(new Rule(new Conjunction(new LessThanEqual(speedNitro),new GreaterThanEqual(distanceHigh)), accelNitro));
-        system.addRule(new Rule(new Conjunction(new LessThanEqual(speedMed),new LessThanEqual(distanceMed)), accelMed));
-        //system.addRule(new Rule(new Conjunction(new LessThanEqual(speedNitro),distanceHigh), accelMed));
-        //system.addRule(new Rule(new Conjunction(new Conjunction(new Not(drifting),new LessThanEqual(speedHigh)),new LessThanEqual(distanceMed)), accelLow));
-        //system.addRule(new Rule(new Conjunction(new Conjunction(drifting,new LessThanEqual(speedHigh)),new LessThanEqual(distanceMed)), accelHigh));
-        //system.addRule(new Rule(new Conjunction(new LessThanEqual(speedNitro),distanceVeryLow), accelHigh));
-        
+//NORMAL STEERING
+        system.addRule(new Rule(new Conjunction(ratioLow,new LessThanEqual(distanceMed)), steerRight));
+        system.addRule(new Rule(new Conjunction(ratioHigh,new LessThanEqual(distanceMed)), steerLeft));
 
-//BRAKE
-        //system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedHigh),distanceLow), brakeMed));
-        //system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedHigh),distanceMed), brakeExtreme));
-        system.addRule(new Rule(new Conjunction(new LessThanEqual(distanceMed),new GreaterThanEqual(speedMed)), brakeExtreme));
-        //system.addRule(new Rule(new Conjunction(distanceHigh,speedInsane), brakeExtreme));
-        system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedNitro),new Not(ratioMiddle)), brakeHigh));
-        //system.addRule(new Rule(new Conjunction(distanceMed,new GreaterThanEqual(speedHigh)), brakeHigh));
-        //system.addRule(new Rule(new Conjunction(distanceLow,new GreaterThanEqual(speedHigh)), brakeMed));
+//SPEED STEERING
+        system.addRule(new Rule(new Conjunction(new Conjunction(ratioLowSpeedy,new GreaterThanEqual(distanceHigh)),new LessThanEqual(speedHigh)), steerGentleRight));
+        system.addRule(new Rule(new Conjunction(new Conjunction(ratioHighSpeedy,new GreaterThanEqual(distanceHigh)),new LessThanEqual(speedHigh)), steerGentleLeft));
         
-        system.addRule(new Rule(new Conjunction(ratioMiddle,new Disjunction(speedNitro,speedInsane)), brakeMed));
-        //system.addRule(new Rule(drifting, brakeMed));
-        
-//STEERING   
-        // Note: er mag pas gedraaid worden onder de 300
-        // 4. Strive for a stable left/right ratio
-        // RATIO = low => STEERING = right (high)
-        /* Without GTE/LTE
-        system.addRule(new Rule(new Conjunction(ratioLow,new Not(new Disjunction(speedNitro,speedInsane))), steerRight));
-        // RATIO = high => STEERING = left (low)
-        system.addRule(new Rule(new Conjunction(ratioHigh,new Not(new Disjunction(speedNitro,speedInsane))), steerLeft));
-        
-        system.addRule(new Rule(new Conjunction(ratioLowSpeedy,new Disjunction(speedNitro,speedInsane)), steerGentleRight));
-        // RATIO = high => STEERING = left (low)
-        system.addRule(new Rule(new Conjunction(ratioHighSpeedy,new Disjunction(speedNitro,speedInsane)), steerGentleLeft));
-        */
-        
-        system.addRule(new Rule(new Conjunction(ratioLow,new LessThanEqual(speedHigh)), steerRight));
-        system.addRule(new Rule(new Conjunction(ratioHigh,new LessThanEqual(speedHigh)), steerLeft));
-        
-        //system.addRule(new Rule(new Conjunction(distanceLow, new Conjunction(new LessThanEqual(speedMed),ratioLow)), steerRight));
-        //system.addRule(new Rule(new Conjunction(distanceLow, new Conjunction(new LessThanEqual(speedMed),ratioHigh)), steerLeft));
-        
-        //system.addRule(new Rule(new Conjunction(new GreaterThanEqual(distanceMed), new Conjunction(new LessThanEqual(speedMed),ratioLow)), steerGentleRight));
-        //system.addRule(new Rule(new Conjunction(new GreaterThanEqual(distanceMed), new Conjunction(new LessThanEqual(speedMed),ratioHigh)), steerGentleLeft));
-        
-        //system.addRule(new Rule(new Conjunction(new LessThanEqual(distanceLow),new Conjunction(ratioLowSpeedy,new GreaterThanEqual(speedNitro))), driftRight));
-        //system.addRule(new Rule(new Conjunction(new LessThanEqual(distanceLow),new Conjunction(ratioHighSpeedy,new GreaterThanEqual(speedNitro))), driftLeft));
-        
-        //TODO: not working. Drifts because steering is still too violent
-        system.addRule(new Rule(new Conjunction(new GreaterThanEqual(distanceMed),new Conjunction(ratioLowSpeedy,new GreaterThanEqual(speedNitro))), steerGentleRight));
-        // RATIO = high => STEERING = left (low)
-        system.addRule(new Rule(new Conjunction(new GreaterThanEqual(distanceMed),new Conjunction(ratioHighSpeedy,new GreaterThanEqual(speedNitro))), steerGentleLeft));
         // 5. Don't turn on high speeds, but brake
-        //system.addRule(new Rule(new Conjunction(ratioMiddle,new Disjunction(speedNitro,speedInsane)), brakeExtreme));
+        system.addRule(new Rule(new Conjunction(ratioMiddle,speedNitro), brakeHigh));
         
-//OVERSTEERING
-        //system.addRule(new Rule(new Conjunction(new Conjunction(drifting,ratioLowDrift),distanceLow), driftRight));
-        //system.addRule(new Rule(new Conjunction(new Conjunction(drifting,ratioHighDrift),distanceLow), driftLeft));
-
-        
+        //system.addRule(new Rule(speedBackwards, brakeHigh));
         
     }
 
@@ -197,13 +155,13 @@ public class SpeedController implements Controller {
         steering = output.get("steering");
         //steering -= (steering - vp.getAngleFrontWheels())/8;
         
-        Premise speedNitro = premises.get("speedNitro");
-        
-        if(vp.getCurrentCarSpeedKph() > speedNitro.getLowerLimit()){
+        //Premise speedNitro = premises.get("speedNitro");
+        steering -= (steering - vp.getAngleFrontWheels())/8;
+        /*if(vp.getCurrentCarSpeedKph() > speedNitro.getLowerLimit()){
             steering -= (steering - vp.getAngleFrontWheels())/256;
         }else{
             steering -= (steering - vp.getAngleFrontWheels())/8;
-        }
+        }*/
         
         /**
          * Acceleration
@@ -219,7 +177,7 @@ public class SpeedController implements Controller {
         /**
          * Scanangle
          */
-        scanAngle = 0.8;
+        scanAngle = 0.9;
         
         /**
          * Debug output
