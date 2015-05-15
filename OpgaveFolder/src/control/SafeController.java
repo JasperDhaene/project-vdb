@@ -6,7 +6,6 @@ import fuzzy.FuzzySystem;
 import fuzzy.Rule;
 import fuzzy.expression.Conjunction;
 import fuzzy.expression.Premise;
-import fuzzy.membership.PIFunction;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
@@ -30,30 +29,40 @@ public class SafeController implements Controller {
         Map<String, Consequence> consequences = ConsequenceReader.read("SafeConsequences");
 
         // 1. Accelerate if nothing's in front of you, but mind your speed
-        // SPEED = low => ACCEL = high
-        system.addRule(new Rule(new Conjunction(premises.get("speedLow"), premises.get("distanceHigh")), consequences.get("accelHigh")));
-        // SPEED = med => ACCEL = low
-        system.addRule(new Rule(new Conjunction(premises.get("speedMed"), premises.get("distanceHigh")), consequences.get("accelMed")));
-        // SPEED = high => ACCEL = none
-        system.addRule(new Rule(new Conjunction(premises.get("speedHigh"), premises.get("distanceHigh")), consequences.get("accelLow")));
+        // SPEED = low AND distance = high => ACCEL = high
+        system.addRule(new Rule(new Conjunction(premises.get("speedLow"), premises.get("distanceHigh")),
+                consequences.get("accelHigh")));
+        // SPEED = med AND distance = high => ACCEL = low
+        system.addRule(new Rule(new Conjunction(premises.get("speedMed"), premises.get("distanceHigh")),
+                consequences.get("accelMed")));
+        // SPEED = high AND distance = high => ACCEL = none
+        system.addRule(new Rule(new Conjunction(premises.get("speedHigh"), premises.get("distanceHigh")),
+                consequences.get("accelLow")));
 
         // 2. If something comes up in front of you, don't accelerate and use your brakes
-        // SPEED = High /\ DISTANCE = low => BRAKE = high
-        system.addRule(new Rule(new Conjunction(premises.get("speedMed"), premises.get("distanceLow")), consequences.get("brakeHigh")));
+        // DISTANCE = low => BRAKE = high
+        system.addRule(new Rule(premises.get("distanceLow"),
+                consequences.get("brakeHigh")));
         // DISTANCE = low => ACCEL = none
-        system.addRule(new Rule(new Conjunction(premises.get("speedMed"), premises.get("distanceLow")), consequences.get("accelNone")));
+        system.addRule(new Rule(premises.get("distanceLow"),
+                consequences.get("accelNone")));
 
         // 3. Whatever happens, always have a base speed
-        // DISTANCE = low /\ SPEED = low => ACCEL = low
-        system.addRule(new Rule(new Conjunction(premises.get("speedLow"), premises.get("distanceLow")), consequences.get("accelLow")));
+        // DISTANCE = low AND SPEED = low => ACCEL = low
+        system.addRule(new Rule(new Conjunction(premises.get("speedLow"), premises.get("distanceLow")),
+                consequences.get("accelLow")));
 
         // 4. Strive for a stable left/right ratio
         // RATIO = low => STEERING = right (high)
-        system.addRule(new Rule(premises.get("ratioLow"), consequences.get("steerRight")));
+        system.addRule(new Rule(premises.get("ratioLow"),
+                consequences.get("steerRight")));
         // RATIO = high => STEERING = left (low)
-        system.addRule(new Rule(premises.get("ratioHigh"), consequences.get("steerLeft")));
+        system.addRule(new Rule(premises.get("ratioHigh"),
+                consequences.get("steerLeft")));
 
-        system.addRule(new Rule(premises.get("speedBackwards"), consequences.get("brakeHigh")));
+        // 5. Don't go backwards
+        system.addRule(new Rule(premises.get("speedBackwards"),
+                consequences.get("brakeHigh")));
     }
 
     @Override
@@ -68,14 +77,13 @@ public class SafeController implements Controller {
         system.addInput("speed", vp.getCurrentCarSpeedKph());
         system.addInput("frontSensorDistance", vp.getDistanceFromFrontSensor());
         system.addInput("frontDistanceRatio",
-                (vp.getDistanceFromLeftSensor() - vp.getDistanceFromRightSensor()));
+                Ratio.calc(vp.getDistanceFromLeftSensor(), vp.getDistanceFromRightSensor()));
         Map<String, Double> output = system.evaluate();
 
         /**
          * Steering
          */
         steering = output.get("steering");
-        steering -= (steering - vp.getAngleFrontWheels())/2;
 
         /**
          * Acceleration
@@ -101,7 +109,7 @@ public class SafeController implements Controller {
         System.out.println("acceleration: " + acceleration);
         System.out.println("brake: " + brake);
         System.out.println("ratio: " +
-                (vp.getDistanceFromLeftSensor() - vp.getDistanceFromRightSensor()) +
+                Ratio.calc(vp.getDistanceFromLeftSensor(), vp.getDistanceFromRightSensor()) +
                 " => " + steering);
         System.out.println("#######################");
 

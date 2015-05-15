@@ -1,9 +1,11 @@
 package premises;
 
 import fuzzy.Consequence;
-import fuzzy.expression.Premise;
 import fuzzy.membership.Membership;
 import fuzzy.membership.PIFunction;
+import fuzzy.membership.SFunction;
+import fuzzy.transformation.Negative;
+import fuzzy.transformation.Symmetric;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -49,6 +51,19 @@ public class ConsequenceReader {
                             ((Number) params.get(0)).doubleValue(),
                             ((Number) params.get(1)).doubleValue(),
                             ((Number) params.get(2)).doubleValue()
+                    );
+                    break;
+                case "s":
+                    mem = new SFunction(
+                            ((Number) params.get(0)).doubleValue(),
+                            ((Number) params.get(1)).doubleValue()
+                    );
+                    break;
+                case "symmetric_s": // Don't mind this
+                    mem = new Symmetric(new SFunction(
+                            ((Number) params.get(0)).doubleValue(),
+                            ((Number) params.get(1)).doubleValue()),
+                        ((Number) object.get("axis")).doubleValue()
                     );
                     break;
             }
