@@ -7,12 +7,15 @@ import fuzzy.FuzzySystem;
 import fuzzy.Rule;
 import fuzzy.expression.Conjunction;
 import fuzzy.expression.Disjunction;
-import fuzzy.expression.Expression;
 import fuzzy.expression.GreaterThanEqual;
 import fuzzy.expression.LessThanEqual;
-import fuzzy.expression.Not;
 import fuzzy.expression.Premise;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Map;
+import org.json.simple.parser.ParseException;
+import premises.ConsequenceReader;
+import premises.PremiseReader;
 import premises.SpeedPremises;
 
 /**
@@ -26,17 +29,18 @@ public class SpeedController implements Controller {
     private SpeedConsequences consequences;
 
 
-    public SpeedController() {
+    public SpeedController() 
+            throws IOException, FileNotFoundException, ParseException {
+        
         this.system = new FuzzySystem();
-        this.premises = new SpeedPremises();        
-        this.consequences = new SpeedConsequences();
+        Map<String, Premise> premises = PremiseReader.read("SpeedPremises");
+        Map<String, Consequence> consequences = ConsequenceReader.read("SpeedConsequences");
 
         Premise speedLow = premises.get("speedLow");
         Premise speedMed = premises.get("speedMed");
         Premise speedHigh = premises.get("speedHigh");
         Premise speedVeryHigh = premises.get("speedVeryHigh");
         Premise speedNitro = premises.get("speedNitro");
-        //Premise speedInsane = premises.get("speedInsane");
         
 
         Premise distanceLow = premises.get("distanceLow");
@@ -48,40 +52,20 @@ public class SpeedController implements Controller {
         Premise ratioHigh = premises.get("ratioHigh");
         Premise ratioMiddle = premises.get("ratioMiddle");
         
-        Premise ratioLowDrift = premises.get("ratioLowDrift");
-        Premise ratioHighDrift = premises.get("ratioHighDrift");
-        
         Premise ratioLowSpeedy = premises.get("ratioLowSpeedy");
         Premise ratioHighSpeedy = premises.get("ratioHighSpeedy");
         
-        Premise lateralVelocityLow = premises.get("lateralVelocityLow");
-        Premise notDrifting = premises.get("notDrifting");
-        
-        Premise noFrontLeftFriction = premises.get("noFrontLeftFriction");
-        Premise noBackLeftFriction = premises.get("noBackLeftFriction");
-        Premise noFrontRightFriction = premises.get("noFrontRightFriction");
-        Premise noBackRightFriction = premises.get("noBackRightFriction");
-        Premise frontLeftFriction = premises.get("frontLeftFriction");
-        Premise backLeftFriction = premises.get("backLeftFriction");
-        Premise frontRightFriction = premises.get("frontRightFriction");
-        Premise backRightFriction = premises.get("backRightFriction");
-        Expression frictionNotDrifting = new Disjunction(new Disjunction(frontLeftFriction,frontRightFriction),new Disjunction(backLeftFriction,backRightFriction));
-        Expression noFrictionDrifting = new Disjunction(new Disjunction(noFrontLeftFriction,noFrontRightFriction),new Disjunction(noBackLeftFriction,noBackRightFriction));
-
-        Expression highSpeedTurning = new Disjunction(ratioLowSpeedy,ratioHighSpeedy);
-        Expression drifting = new Disjunction(noFrictionDrifting,new Not(notDrifting));
+    
         
         /**
          * Actuators
          */
-        Consequence accelBase = consequences.get("accelBase");
+
         Consequence accelLow = consequences.get("accelLow");
         Consequence accelMed = consequences.get("accelMed");
         Consequence accelHigh = consequences.get("accelHigh");
         Consequence accelNitro = consequences.get("accelNitro");
-        Consequence accelNone = consequences.get("accelNone");
         
-        Consequence brakeNone = consequences.get("brakeNone");
         Consequence brakeLow = consequences.get("brakeLow");
         Consequence brakeMed = consequences.get("brakeMed");
         Consequence brakeHigh = consequences.get("brakeHigh");
@@ -91,8 +75,6 @@ public class SpeedController implements Controller {
         Consequence steerLeft = consequences.get("steerLeft");
         Consequence steerRight = consequences.get("steerRight");
         
-        Consequence driftLeft = consequences.get("driftLeft");
-        Consequence driftRight = consequences.get("driftRight");
         Consequence steerGentleLeft = consequences.get("steerGentleLeft");
         Consequence steerGentleRight = consequences.get("steerGentleRight");
 

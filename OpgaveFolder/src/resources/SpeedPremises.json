@@ -2,5 +2,84 @@
   "name": "speedLow",
   "variable": "speed",
   "type": "trapezoid",
-  "params": [0, 0, 40, 60]
+  "params": [0, 0, 60, 90]
+},{
+  "name": "speedMed",
+  "variable": "speed",
+  "type": "trapezoid",
+  "params": [80, 90, 100, 110]
+},{
+  "name": "speedHigh",
+  "variable": "speed",
+  "type": "trapezoid",
+  "params": [100, 150, 190, 210]
+},{
+  "name": "speedVeryHigh",
+  "variable": "speed",
+  "type": "trapezoid",
+  "params": [200, 210, 250, 260]
+},{
+  "name": "speedNitro",
+  "variable": "speed",
+  "type": "trapezoid",
+  "params": [250, 260, 2147483647, 2147483647]
+},
+
+{
+  "name": "distanceLow",
+  "variable": "frontSensorDistance",
+  "type": "trapezoid",
+  "params": [0, 0, 35, 50]
+},{
+  "name": "distanceMed",
+  "variable": "frontSensorDistance",
+  "type": "trapezoid",
+  "params": [45, 75, 100, 120]
+},{
+  "name": "distanceHigh",
+  "variable": "frontSensorDistance",
+  "type": "trapezoid",
+  "params": [110, 150, 180, 200]
+},{
+  "name": "distanceEndless",
+  "variable": "frontSensorDistance",
+  "type": "trapezoid",
+  "params": [190, 210, 2147483647, 2147483647]
+},
+
+{
+  "name": "ratioLow",
+  "variable": "leftRightDistanceRatio",
+  "type": "trapezoid",
+  "params": [0,0,0.20,0.35]
+},{
+  "name": "ratioHigh",
+  "variable": "leftRightDistanceRatio",
+  "type": "trapezoid",
+  "params": [0.65, 0.8,1,1]
+},{
+  "name": "ratioMiddle",
+  "variable": "leftRightDistanceRatio",
+  "type": "trapezoid",
+  "params": [0.35,0.40,0.60,0.65]
+},{
+  "name": "ratioLowSpeedy",
+  "variable": "leftRightDistanceRatio",
+  "type": "trapezoid",
+  "params": [0.20,0.40,0.40, 0.45]
+},{
+  "name": "ratioHighSpeedy",
+  "variable": "leftRightDistanceRatio",
+  "type": "trapezoid",
+  "params": [0.55,0.6,0.6,0.8]
+},{
+  "name": "ratioLowDrift",
+  "variable": "leftRightDistanceRatio",
+  "type": "trapezoid",
+  "params": [0,0,0.35, 0.40]
+},{
+  "name": "ratioHighDrift",
+  "variable": "leftRightDistanceRatio",
+  "type": "trapezoid",
+  "params": [0.6,0.65,1,1]
 }]

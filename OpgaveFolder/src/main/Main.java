@@ -2,9 +2,7 @@ package main;
 
 import car.RaceCar;
 import control.Controller;
-import control.RallyController;
 import control.SpeedController;
-import control.SafeController;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,7 +26,12 @@ public class Main {
              */
 
 
-            Controller controller = new SpeedController();
+            Controller controller = null;
+            try {
+                controller = new SpeedController();
+            } catch (IOException|ParseException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
             String trackname = "interlagos1024";
 
             RaceCar app = new RaceCar("Lightning McQueen SP", trackname, controller, false);
