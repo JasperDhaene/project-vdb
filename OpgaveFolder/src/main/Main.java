@@ -3,6 +3,8 @@ package main;
 import car.RaceCar;
 import control.Controller;
 import control.SpeedController;
+import control.SafeController;
+import control.RallyController;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,16 +27,16 @@ public class Main {
              * controller, written by you - manual control, only non-manual laps are recorded for the leaderboard
              */
 
-
             Controller controller = null;
             try {
                 controller = new SpeedController();
             } catch (IOException|ParseException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
+
             String trackname = "interlagos1024";
 
-            RaceCar app = new RaceCar("Lightning McQueen SP", trackname, controller, false);
+            RaceCar app = new RaceCar("DK Lightning McQueen", trackname, controller, false);
 
             app.setDisplayFps(false);
             app.setDisplayStatView(false);

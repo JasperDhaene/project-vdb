@@ -45,9 +45,9 @@ public class PremiseReader {
                     break;
                 case "triangular":
                     mem = new PIFunction.TriangularPIFunction(
-                            (double) params.get(0),
-                            (double) params.get(1),
-                            (double) params.get(2)
+                            ((Number) params.get(0)).doubleValue(),
+                            ((Number) params.get(1)).doubleValue(),
+                            ((Number) params.get(2)).doubleValue()
                     );
                     break;
             }
