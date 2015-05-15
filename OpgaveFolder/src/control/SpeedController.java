@@ -97,20 +97,16 @@ public class SpeedController implements Controller {
         Consequence steerGentleRight = consequences.get("steerGentleRight");
 
         
-        // 1. Accelerate if nothing's in front of you, but mind your speed
-        // SPEED = low \/ med \/ high => ACCEL = nitro
+//ACCEL
         system.addRule(new Rule(new Conjunction(new LessThanEqual(speedVeryHigh),new GreaterThanEqual(distanceHigh)), accelNitro));
         system.addRule(new Rule(new Conjunction(new Conjunction(speedNitro,distanceEndless),ratioMiddle), accelMed));
-        //system.addRule(new Rule(new Conjunction(new Disjunction(speedLow,speedMed),distanceHigh), accelNitro));
         
-        // Note: Bochten kunnen veilig genomen worden aan max ~90 
-        // 2. If something comes up in front of you, don't accelerate and use your brakes
-        // SPEED = High /\ DISTANCE = low => BRAKE = high
+//BRAKE
         //system.addRule(new Rule(new Conjunction(new Disjunction(speedHigh,speedNitro),new Disjunction(distanceLow,distanceMed)), brakeHigh));
         system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedHigh),new LessThanEqual(distanceMed)), brakeExtreme));
         //system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedVeryHigh),new LessThanEqual(distanceHigh)), brakeEpic));
         
-        // 3. Whatever happens, always have a base speed
+//BASE ACCEL
         // DISTANCE = low /\ SPEED = low => ACCEL = low
         system.addRule(new Rule(new Conjunction(new Disjunction(speedLow,speedMed), distanceLow), accelLow));
         
@@ -121,11 +117,11 @@ public class SpeedController implements Controller {
 //SPEED STEERING
         system.addRule(new Rule(new Conjunction(new Conjunction(ratioLowSpeedy,new GreaterThanEqual(distanceHigh)),new LessThanEqual(speedHigh)), steerGentleRight));
         system.addRule(new Rule(new Conjunction(new Conjunction(ratioHighSpeedy,new GreaterThanEqual(distanceHigh)),new LessThanEqual(speedHigh)), steerGentleLeft));
-        
+
+//SPEED BRAKE
         // 5. Don't turn on high speeds, but brake
         system.addRule(new Rule(new Conjunction(ratioMiddle,speedNitro), brakeHigh));
-        
-        //system.addRule(new Rule(speedBackwards, brakeHigh));
+
         
     }
 
