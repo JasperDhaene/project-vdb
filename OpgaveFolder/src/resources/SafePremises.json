@@ -1,0 +1,41 @@
+[{
+  "name": "speedLow",
+  "variable": "speed",
+  "type": "trapezoid",
+  "params": [0, 0, 40, 60]
+},{
+  "name": "speedMed",
+  "variable": "speed",
+  "type": "trapezoid",
+  "params": [50, 70, 80, 90]
+},{
+  "name": "speedHigh",
+  "variable": "speed",
+  "type": "trapezoid",
+  "params": [80, 90, 100, 110]
+},{
+  "name": "speedBackwards",
+  "variable": "speed",
+  "type": "trapezoid",
+  "params": [-20, -20, 0, 0]
+},{
+  "name": "distanceLow",
+  "variable": "frontSensorDistance",
+  "type": "trapezoid",
+  "params": [0, 0, 40, 60]
+},{
+  "name": "distanceHigh",
+  "variable": "frontSensorDistance",
+  "type": "trapezoid",
+  "params": [50, 70, 2147483647, 2147483647]
+},{
+  "name": "ratioLow",
+  "variable": "frontDistanceRatio",
+  "type": "trapezoid",
+  "params": [-2147483648, -2147483648, -50, -10]
+},{
+  "name": "ratioHigh",
+  "variable": "frontDistanceRatio",
+  "type": "trapezoid",
+  "params": [10, 50, 2147483647, 2147483647]
+}]

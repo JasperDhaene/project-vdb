@@ -7,7 +7,12 @@ import fuzzy.Rule;
 import fuzzy.expression.Conjunction;
 import fuzzy.expression.Premise;
 import fuzzy.membership.PIFunction;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Map;
+import org.json.simple.parser.ParseException;
+import premises.ConsequenceReader;
+import premises.PremiseReader;
 
 /**
  * SafeController - Controller that gets the job done as safe as possible
@@ -17,89 +22,44 @@ public class SafeController implements Controller {
 
     private final FuzzySystem system;
 
-    public SafeController() {
+    public SafeController()
+            throws IOException, FileNotFoundException, ParseException {
         this.system = new FuzzySystem();
 
-        Premise speedLow = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(0, 0, 40, 60));
-        Premise speedMed = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(50, 70, 80, 90));
-        Premise speedHigh = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(80, 90, 100, 110));
-        Premise speedBackwards = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(-20, -20, 0, 0));
-
-        Premise distanceLow = new Premise("frontSensorDistance",
-                new PIFunction.TrapezoidPIFunction(0, 0, 40, 60));
-        Premise distanceHigh = new Premise("frontSensorDistance",
-                new PIFunction.TrapezoidPIFunction(50, 70, Integer.MAX_VALUE, Integer.MAX_VALUE));
-
-        Premise ratioLow = new Premise("frontDistanceRatio",
-                new PIFunction.TrapezoidPIFunction(
-                        -Double.MAX_VALUE,
-                        -Double.MAX_VALUE,
-                        -50, -10));
-        Premise ratioHigh = new Premise("frontDistanceRatio",
-                new PIFunction.TrapezoidPIFunction(
-                        10, 50,
-                        Double.MAX_VALUE,
-                        Double.MAX_VALUE));
-        
-        /**
-         * Actuators
-         */
-        Consequence accelLow = new Consequence("acceleration",
-                new PIFunction.TrapezoidPIFunction(0, 0, 280, 560), 0, 1600);
-        Consequence accelMed = new Consequence("acceleration",
-                new PIFunction.TrapezoidPIFunction(480, 660, 840, 1120), 0, 1600);
-        Consequence accelHigh = new Consequence("acceleration",
-                new PIFunction.TrapezoidPIFunction(840, 1120, 1600, 1600), 0, 1600);
-        Consequence accelNone = new Consequence("acceleration",
-                new PIFunction.TrapezoidPIFunction(0, 0, 0, 0), 0, 1600);
-        
-        Consequence brakeNone = new Consequence("brake",
-                new PIFunction.TrapezoidPIFunction(0, 0, 0, 0), 0, 40);
-        Consequence brakeMed = new Consequence("brake",
-                new PIFunction.TrapezoidPIFunction(15, 17, 23, 25), 0, 40);
-        Consequence brakeHigh = new Consequence("brake",
-                new PIFunction.TrapezoidPIFunction(30, 40, 40, 40), 0, 40);
-        
-        Consequence steerLeft = new Consequence("steering",
-                new PIFunction.TriangularPIFunction(-1, -1, -0.5), -1, 1);
-        Consequence steerRight = new Consequence("steering",
-                new PIFunction.TriangularPIFunction(0.5, 1, 1), -1, 1);
+        Map<String, Premise> premises = PremiseReader.read("SafePremises");
+        Map<String, Consequence> consequences = ConsequenceReader.read("SafeConsequences");
 
         // 1. Accelerate if nothing's in front of you, but mind your speed
         // SPEED = low => ACCEL = high
-        system.addRule(new Rule(new Conjunction(speedLow, distanceHigh), accelHigh));
+        system.addRule(new Rule(new Conjunction(premises.get("speedLow"), premises.get("distanceHigh")), consequences.get("accelHigh")));
         // SPEED = med => ACCEL = low
-        system.addRule(new Rule(new Conjunction(speedMed, distanceHigh), accelMed));
+        system.addRule(new Rule(new Conjunction(premises.get("speedMed"), premises.get("distanceHigh")), consequences.get("accelMed")));
         // SPEED = high => ACCEL = none
-        system.addRule(new Rule(new Conjunction(speedHigh, distanceHigh), accelLow));
-        
+        system.addRule(new Rule(new Conjunction(premises.get("speedHigh"), premises.get("distanceHigh")), consequences.get("accelLow")));
+
         // 2. If something comes up in front of you, don't accelerate and use your brakes
         // SPEED = High /\ DISTANCE = low => BRAKE = high
-        system.addRule(new Rule(new Conjunction(speedMed, distanceLow), brakeHigh));
+        system.addRule(new Rule(new Conjunction(premises.get("speedMed"), premises.get("distanceLow")), consequences.get("brakeHigh")));
         // DISTANCE = low => ACCEL = none
-        system.addRule(new Rule(new Conjunction(speedMed, distanceLow), accelNone));
-        
+        system.addRule(new Rule(new Conjunction(premises.get("speedMed"), premises.get("distanceLow")), consequences.get("accelNone")));
+
         // 3. Whatever happens, always have a base speed
         // DISTANCE = low /\ SPEED = low => ACCEL = low
-        system.addRule(new Rule(new Conjunction(speedLow, distanceLow), accelLow));
-        
+        system.addRule(new Rule(new Conjunction(premises.get("speedLow"), premises.get("distanceLow")), consequences.get("accelLow")));
+
         // 4. Strive for a stable left/right ratio
         // RATIO = low => STEERING = right (high)
-        system.addRule(new Rule(ratioLow, steerRight));
+        system.addRule(new Rule(premises.get("ratioLow"), consequences.get("steerRight")));
         // RATIO = high => STEERING = left (low)
-        system.addRule(new Rule(ratioHigh, steerLeft));
-        
-        system.addRule(new Rule(speedBackwards, brakeHigh));
+        system.addRule(new Rule(premises.get("ratioHigh"), consequences.get("steerLeft")));
+
+        system.addRule(new Rule(premises.get("speedBackwards"), consequences.get("brakeHigh")));
     }
 
     @Override
     public FrameControl getFrameControl(VehicleProperties vp) {
         FrameControl fc;
-        
+
         double steering = 0,
             acceleration = 0,
             brake = 0,
@@ -107,7 +67,7 @@ public class SafeController implements Controller {
 
         system.addInput("speed", vp.getCurrentCarSpeedKph());
         system.addInput("frontSensorDistance", vp.getDistanceFromFrontSensor());
-        system.addInput("frontDistanceRatio", 
+        system.addInput("frontDistanceRatio",
                 (vp.getDistanceFromLeftSensor() - vp.getDistanceFromRightSensor()));
         Map<String, Double> output = system.evaluate();
 
@@ -116,7 +76,7 @@ public class SafeController implements Controller {
          */
         steering = output.get("steering");
         steering -= (steering - vp.getAngleFrontWheels())/2;
-        
+
         /**
          * Acceleration
          */
@@ -125,23 +85,23 @@ public class SafeController implements Controller {
         /**
          * Brake
          */
-        
+
         brake = output.get("brake");
-        
+
         /**
          * Scanangle
          */
         scanAngle = 0.9;
-        
+
         /**
          * Debug output
          */
-        
+
         System.out.println("steering: " + steering);
         System.out.println("acceleration: " + acceleration);
         System.out.println("brake: " + brake);
-        System.out.println("ratio: " + 
-                (vp.getDistanceFromLeftSensor() - vp.getDistanceFromRightSensor()) + 
+        System.out.println("ratio: " +
+                (vp.getDistanceFromLeftSensor() - vp.getDistanceFromRightSensor()) +
                 " => " + steering);
         System.out.println("#######################");
 
