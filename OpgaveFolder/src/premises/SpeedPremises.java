@@ -14,13 +14,13 @@ import java.util.Map;
  *
  * @author jasper
  */
-public class SpeedPremises {      
+public class SpeedPremises {
     Map<String,Premise> map;
-    
+
     public SpeedPremises(){
         fillMap();
     }
-    
+
     private void fillMap(){
         this.map = new HashMap(){{
             
@@ -36,11 +36,11 @@ public class SpeedPremises {
                     new PIFunction.TrapezoidPIFunction(200, 210, 250, 260)));
             put("speedNitro",new Premise("speed",
                     new PIFunction.TrapezoidPIFunction(250, 260, Integer.MAX_VALUE, Integer.MAX_VALUE)));
-            //put("speedInsane",new Premise("speed",
-            //        new PIFunction.TrapezoidPIFunction(270, 290, 310, 400)));
+
             
 
             
+
 
             put("distanceLow",new Premise("frontSensorDistance",
                     new PIFunction.TrapezoidPIFunction(0, 0, 35, 50)));
@@ -52,6 +52,7 @@ public class SpeedPremises {
                     new PIFunction.TrapezoidPIFunction(190, 210, Integer.MAX_VALUE, Integer.MAX_VALUE)));
         
             
+
             put("ratioLow",new Premise("leftRightDistanceRatio",
                 new PIFunction.TrapezoidPIFunction(
                         0,
@@ -62,13 +63,14 @@ public class SpeedPremises {
                         0.65, 0.8,
                         1,
                         1)));
-            
+
             put("ratioMiddle",new Premise("leftRightDistanceRatio",
                 new PIFunction.TrapezoidPIFunction(
                         0.35,
                         0.40,
                         0.60, 0.65)));
             
+
             //Note: ratioLow/HighSpeedy should end whe ratioMiddle does because the consequences are connected.
             put("ratioLowSpeedy",new Premise("leftRightDistanceRatio",
                     new PIFunction.TrapezoidPIFunction(
@@ -81,6 +83,7 @@ public class SpeedPremises {
                         0.6,
                         0.6,0.8)));
             
+
             put("ratioLowDrift",new Premise("leftRightDistanceRatio",
                     new PIFunction.TrapezoidPIFunction(
                         0,
@@ -91,7 +94,7 @@ public class SpeedPremises {
                         0.6,
                         0.65,
                         1,1)));
-            
+
             put("lateralVelocityLow",new Premise("lateralVelocity",
                     new PIFunction.TriangularPIFunction(
                         -3, 0,
@@ -142,8 +145,8 @@ public class SpeedPremises {
                         0, 0.1)));
         }};
     }
-    
+
     public Premise get(String key){
         return map.get(key);
-    } 
+    }
 }
