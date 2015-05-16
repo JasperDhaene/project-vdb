@@ -62,7 +62,6 @@
 },{
   "name": "brakeHigh",
   "variable": "brake",
-
   "type": "trapezoid",
   "params": [30, 35, 40, 40],
   "integration": [0, 40]

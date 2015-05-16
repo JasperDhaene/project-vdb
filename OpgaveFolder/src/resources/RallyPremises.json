@@ -56,29 +56,17 @@
   "name": "ratioLow",
   "variable": "leftRightDistanceRatio",
   "type": "trapezoid",
-  "params": [-2147483648, -2147483648, -30, -10]
+  "params": [-2147483648, -2147483648, -50, -15]
 },{
   "name": "ratioHigh",
   "variable": "leftRightDistanceRatio",
   "type": "trapezoid",
-  "params": [10, 30, 2147483647, 2147483647]
-},
-
-{
-  "name": "ratioLowSpeedy",
-  "variable": "leftRightDistanceRatio",
-  "type": "trapezoid",
-  "params": [-20, -20, -20, -5]
-},{
-  "name": "ratioHighSpeedy",
-  "variable": "leftRightDistanceRatio",
-  "type": "trapezoid",
-  "params": [5, 20, 20, 20]
+  "params": [15, 50, 2147483647, 2147483647]
 },{
   "name": "ratioMiddle",
   "variable": "leftRightDistanceRatio",
   "type": "trapezoid",
-  "params": [-15, -10, 10, 15]
+  "params": [-20, -15, 15, 20]
 },{
   "name": "ratioLowDrift",
   "variable": "leftRightDistanceRatio",
@@ -100,7 +88,7 @@
   "name": "notDrifting",
   "variable": "lateralVelocity",
   "type": "triangular",
-  "params": [-0.2, 0, 0.2]
+  "params": [-0.3, 0, 0.3]
 },
 
 {
