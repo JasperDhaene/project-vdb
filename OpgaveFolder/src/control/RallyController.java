@@ -32,6 +32,7 @@ public class RallyController implements Controller {
         Map<String, Premise> premises = PremiseReader.read("RallyPremises");
         Map<String, Consequence> consequences = ConsequenceReader.read("RallyConsequences");
 
+        Premise speedVeryLow = premises.get("speedVeryLow");
         Premise speedLow = premises.get("speedLow");
         Premise speedMed = premises.get("speedMed");
         Premise speedHigh = premises.get("speedHigh");
@@ -67,6 +68,7 @@ public class RallyController implements Controller {
         Consequence accelMed = consequences.get("accelMed");
         Consequence accelHigh = consequences.get("accelHigh");
         Consequence accelNitro = consequences.get("accelNitro");
+        Consequence accelDriftHigh = consequences.get("accelDriftHigh");
         
         Consequence brakeNone = consequences.get("brakeNone");
         Consequence brakeLow = consequences.get("brakeLow");
@@ -93,11 +95,12 @@ public class RallyController implements Controller {
         //Note: zet hier accelMed als je niet met 200+kph tegen de muur wil bokken. Maar je kan daarna wel verder rijden.
         system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedVeryHigh),new GreaterThanEqual(distanceEndless)), accelHigh));
         //Note: beter speedMed hier, maar dan slipt ij in een van de begin bochten.
-        system.addRule(new Rule(new Conjunction(new LessThanEqual(speedLow), new LessThanEqual(distanceMed)), accelLow));
+        system.addRule(new Rule(new Conjunction(new LessThanEqual(speedLow), new Disjunction(distanceLow,distanceMed)), accelLow));
         
 /* BRAKE */
         system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedVeryHigh),new LessThanEqual(distanceMed)), brakeExtreme));
         system.addRule(new Rule(new Conjunction(speedNitro,new LessThanEqual(distanceVeryHigh)), brakeHigh));
+        system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedLow),distanceVeryLow), brakeEpic));
         
 /* STEERING */
         system.addRule(new Rule(new Conjunction(ratioLow,new LessThanEqual(speedHigh)), steerRight));
@@ -113,12 +116,12 @@ public class RallyController implements Controller {
  //       system.addRule(new Rule(new Conjunction(new Conjunction(ratioHighDrift,distanceLow),new Conjunction(new Not(noFrontLeftFriction),new Not(noFrontRightFriction))), driftLeft));
 
 //ACCEL WHILE DRIFT
-        system.addRule(new Rule(drifting, accelMed));
+        system.addRule(new Rule(drifting, accelDriftHigh));
         
 //OVERSTEERING       
         // noRightWheelfriction /\ STEERING = ratioLow /\ DISTANCE = low  => DRIFT = right
-        system.addRule(new Rule(new Conjunction(new Conjunction(drifting,ratioLowDrift),new LessThanEqual(distanceMed)), driftRight));
-        system.addRule(new Rule(new Conjunction(new Conjunction(drifting,ratioHighDrift),new LessThanEqual(distanceMed)), driftLeft));
+        system.addRule(new Rule(new Conjunction(new Conjunction(drifting,ratioLowDrift),new LessThanEqual(distanceLow)), driftRight));
+        system.addRule(new Rule(new Conjunction(new Conjunction(drifting,ratioHighDrift),new LessThanEqual(distanceLow)), driftLeft));
 
 //BRAKE
         system.addRule(new Rule(drifting, brakeLow));

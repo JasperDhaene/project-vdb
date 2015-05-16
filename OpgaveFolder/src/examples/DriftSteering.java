@@ -32,9 +32,10 @@ public class DriftSteering {
     public static void main(String[] args) throws IOException, FileNotFoundException, ParseException {
         FuzzySystem system = new FuzzySystem();
         
-        Map<String, Premise> premises = PremiseReader.read("RallyPremises");
+       Map<String, Premise> premises = PremiseReader.read("RallyPremises");
         Map<String, Consequence> consequences = ConsequenceReader.read("RallyConsequences");
 
+        Premise speedVeryLow = premises.get("speedVeryLow");
         Premise speedLow = premises.get("speedLow");
         Premise speedMed = premises.get("speedMed");
         Premise speedHigh = premises.get("speedHigh");
@@ -70,6 +71,7 @@ public class DriftSteering {
         Consequence accelMed = consequences.get("accelMed");
         Consequence accelHigh = consequences.get("accelHigh");
         Consequence accelNitro = consequences.get("accelNitro");
+        Consequence accelDriftHigh = consequences.get("accelDriftHigh");
         
         Consequence brakeNone = consequences.get("brakeNone");
         Consequence brakeLow = consequences.get("brakeLow");
@@ -94,13 +96,14 @@ public class DriftSteering {
 /* ACCEL */      
         system.addRule(new Rule(new Conjunction(new LessThanEqual(speedVeryHigh),new GreaterThanEqual(distanceHigh)), accelNitro));
         //Note: zet hier accelMed als je niet met 200+kph tegen de muur wil bokken. Maar je kan daarna wel verder rijden.
-        system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedVeryHigh),new GreaterThanEqual(distanceVeryHigh)), accelHigh));
+        system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedVeryHigh),new GreaterThanEqual(distanceEndless)), accelHigh));
         //Note: beter speedMed hier, maar dan slipt ij in een van de begin bochten.
-        system.addRule(new Rule(new Conjunction(new LessThanEqual(speedMed), new LessThanEqual(distanceMed)), accelLow));
+        system.addRule(new Rule(new Conjunction(new LessThanEqual(speedLow), new Disjunction(distanceLow,distanceMed)), accelLow));
         
 /* BRAKE */
         system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedVeryHigh),new LessThanEqual(distanceMed)), brakeExtreme));
         system.addRule(new Rule(new Conjunction(speedNitro,new LessThanEqual(distanceVeryHigh)), brakeHigh));
+        system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedVeryLow),distanceVeryLow), brakeEpic));
         
 /* STEERING */
         system.addRule(new Rule(new Conjunction(ratioLow,new LessThanEqual(speedHigh)), steerRight));
@@ -116,17 +119,15 @@ public class DriftSteering {
  //       system.addRule(new Rule(new Conjunction(new Conjunction(ratioHighDrift,distanceLow),new Conjunction(new Not(noFrontLeftFriction),new Not(noFrontRightFriction))), driftLeft));
 
 //ACCEL WHILE DRIFT
-        system.addRule(new Rule(drifting, accelMed));
+        system.addRule(new Rule(new Conjunction(drifting,new GreaterThanEqual(distanceLow)), accelDriftHigh));
         
 //OVERSTEERING       
         // noRightWheelfriction /\ STEERING = ratioLow /\ DISTANCE = low  => DRIFT = right
-        system.addRule(new Rule(new Conjunction(new Conjunction(drifting,ratioLowDrift),new LessThanEqual(distanceMed)), driftRight));
-        system.addRule(new Rule(new Conjunction(new Conjunction(drifting,ratioHighDrift),new LessThanEqual(distanceMed)), driftLeft));
+        system.addRule(new Rule(new Conjunction(new Conjunction(drifting,ratioLowDrift),new LessThanEqual(distanceLow)), driftRight));
+        system.addRule(new Rule(new Conjunction(new Conjunction(drifting,ratioHighDrift),new LessThanEqual(distanceLow)), driftLeft));
 
 //BRAKE
-        // (DISTANCE = low \/ med) /\ (SPEED = high \/ nitro) => BRAKE = high
-        system.addRule(new Rule(drifting, brakeMed));
-        //system.addRule(new Rule(new Conjunction(new Conjunction(new GreaterThanEqual(speedHigh),new LessThanEqual(distanceMed)),new Not(lateralVelocityLow)), brakeNone));
+        system.addRule(new Rule(drifting, brakeLow));
 
    
         /**
@@ -135,14 +136,14 @@ public class DriftSteering {
         
         List<Input> input = new ArrayList<Input>(){{
             add(new Input(new HashMap<String,Double>(){{
-                    put("speed",(double) 92);
-                    put("frontSensorDistance",(double) 11);
-                    put("frontDistanceRatio",(double) 0.3);
-                    put("lateralVelocity",(double) 18);
-                    put("frontLeftFriction",(double) 0.1);
-                    put("frontRightFriction",(double) 0.3);
-                    put("backLeftFriction",(double) 0.04);
-                    put("backRightFriction",(double) 0.05);
+                    put("speed",(double) 98);
+                    put("frontSensorDistance",(double) 23);
+                    put("frontDistanceRatio",(double) 5.7);
+                    put("lateralVelocity",(double) -1);
+                    put("frontLeftFriction",(double) 0.4);
+                    put("frontRightFriction",(double) 0.4);
+                    put("backLeftFriction",(double) 1);
+                    put("backRightFriction",(double) 1);
                                 
             }}));
     
