@@ -14,7 +14,7 @@ import java.util.Map;
  * @author jasper
  */
 public class GreaterThanEqual implements Expression {
-    
+
     private final Premise expression;
 
     public GreaterThanEqual(Premise expression) {
@@ -22,10 +22,13 @@ public class GreaterThanEqual implements Expression {
     }
 
     @Override
-    public double evaluate(Norm norm, Map<String, Double> inputs){
+    public double evaluate(Norm norm, Map<String, Double> inputs) {
+        if(!inputs.containsKey(expression.getVariable()))
+            throw new RuntimeException("No such variable: " + expression.getVariable());
+
         double value = inputs.get(expression.getVariable());
         return expression.getUpperLimit() <= value ? 1: expression.evaluate(norm, inputs);
     }
-    
-    
+
+
 }
