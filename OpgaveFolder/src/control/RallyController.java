@@ -85,8 +85,10 @@ public class RallyController implements Controller {
         
 /* ACCEL */      
         system.addRule(new Rule(new Conjunction(new LessThanEqual(speedVeryHigh),new GreaterThanEqual(distanceHigh)), accelNitro));
+        //Note: zet hier accelMed als je niet met 200+kph tegen de muur wil bokken. Maar je kan daarna wel verder rijden.
         system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedVeryHigh),new GreaterThanEqual(distanceVeryHigh)), accelHigh));
-        system.addRule(new Rule(new Conjunction(new LessThanEqual(speedMed), new LessThanEqual(distanceMed)), accelBase));
+        //Note: beter speedMed hier, maar dan slipt ij in een van de begin bochten.
+        system.addRule(new Rule(new Conjunction(new LessThanEqual(speedLow), new LessThanEqual(distanceMed)), accelLow));
         
 /* BRAKE */
         system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedVeryHigh),new LessThanEqual(distanceMed)), brakeExtreme));
@@ -111,8 +113,8 @@ public class RallyController implements Controller {
         //system.addRule(new Rule(new Conjunction(distanceVeryLow,new Not(notDrifting)), accelHigh));
 //OVERSTEERING       
         // noRightWheelfriction /\ STEERING = ratioLow /\ DISTANCE = low  => DRIFT = right
-        //system.addRule(new Rule(new Conjunction(new Conjunction(new Conjunction(noFrontRightFriction,noBackRightFriction),ratioLow),distanceLow), driftRight));
-        //system.addRule(new Rule(new Conjunction(new Conjunction(new Conjunction(noFrontLeftFriction,noBackLeftFriction),ratioHigh),distanceLow), driftLeft));
+        //system.addRule(new Rule(new Conjunction(new Conjunction(new Conjunction(noFrontRightFriction,noBackRightFriction),ratioLow),new LessThanEqual(distanceMed)), driftRight));
+        //system.addRule(new Rule(new Conjunction(new Conjunction(new Conjunction(noFrontLeftFriction,noBackLeftFriction),ratioHigh),new LessThanEqual(distanceMed)), driftLeft));
 
 //BRAKE
         // (DISTANCE = low \/ med) /\ (SPEED = high \/ nitro) => BRAKE = high

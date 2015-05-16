@@ -2,17 +2,17 @@
   "name": "speedLow",
   "variable": "speed",
   "type": "trapezoid",
-  "params": [0, 0, 60, 90]
+  "params": [0, 0, 70, 100]
 },{
   "name": "speedMed",
   "variable": "speed",
   "type": "trapezoid",
-  "params": [80, 90, 100, 110]
+  "params": [90, 100, 110, 120]
 },{
   "name": "speedHigh",
   "variable": "speed",
   "type": "trapezoid",
-  "params": [100, 150, 190, 210]
+  "params": [110, 150, 190, 210]
 },{
   "name": "speedVeryHigh",
   "variable": "speed",
@@ -39,17 +39,17 @@
   "name": "distanceMed",
   "variable": "frontSensorDistance",
   "type": "trapezoid",
-  "params": [45, 75, 100, 120]
+  "params": [45, 60, 80, 100]
 },{
   "name": "distanceHigh",
   "variable": "frontSensorDistance",
   "type": "trapezoid",
-  "params": [110, 150, 180, 200]
+  "params": [90, 130, 150, 180]
 },{
   "name": "distanceVeryHigh",
   "variable": "frontSensorDistance",
   "type": "trapezoid",
-  "params": [190, 200, 240, 250]
+  "params": [170, 190, 240, 250]
 },{
   "name": "distanceEndless",
   "variable": "frontSensorDistance",
