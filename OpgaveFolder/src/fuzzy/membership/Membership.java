@@ -8,10 +8,18 @@ package fuzzy.membership;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
 /**
- *
+ * Membership interface
  * @author jasper
  */
 public interface Membership extends UnivariateFunction{
+    /**
+    * @return The largest value where the membership evaluates to 1
+    * 
+    */
     public double getUpperLimit();
+    /**
+    * @return The largest value where the membership evaluates to 1
+    * 
+    */
     public double getLowerLimit();
 }

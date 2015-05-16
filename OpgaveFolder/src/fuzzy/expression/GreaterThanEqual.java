@@ -27,7 +27,7 @@ public class GreaterThanEqual implements Expression {
             throw new RuntimeException("No such variable: " + expression.getVariable());
 
         double value = inputs.get(expression.getVariable());
-        return expression.getUpperLimit() <= value ? 1: expression.evaluate(norm, inputs);
+        return expression.getLowerLimit() <= value ? 1: expression.evaluate(norm, inputs);
     }
 
 
