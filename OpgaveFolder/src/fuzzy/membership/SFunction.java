@@ -26,12 +26,8 @@ public class SFunction implements Membership {
     }
 
     @Override
-    public double getUpperLimit() {
+    public double getLimitValue() {
         return this.gamma;
     }
 
-    @Override
-    public double getLowerLimit() {
-        return this.alpha;
-    }
 }

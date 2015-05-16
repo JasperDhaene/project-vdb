@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fuzzy.membership;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -13,13 +8,10 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
  */
 public interface Membership extends UnivariateFunction{
     /**
-    * @return The largest value where the membership evaluates to 1
+    * @return The mean value where the membership evaluates to 1
     * 
+    * This is used in the evaluation of GreaterThanEqual or LessThanEqual expressions.
     */
-    public double getUpperLimit();
-    /**
-    * @return The largest value where the membership evaluates to 1
-    * 
-    */
-    public double getLowerLimit();
+    public double getLimitValue();
+    
 }

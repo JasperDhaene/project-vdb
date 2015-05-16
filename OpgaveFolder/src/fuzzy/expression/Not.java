@@ -4,7 +4,7 @@ import fuzzy.norm.Norm;
 import java.util.Map;
 
 /**
- * Not - Negation
+ * Not - Evaluates to the negation of an expression
  * @author jasper
  */
 public class Not implements Expression {
