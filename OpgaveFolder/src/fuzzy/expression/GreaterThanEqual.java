@@ -1,6 +1,5 @@
 package fuzzy.expression;
 
-import fuzzy.membership.PIFunction;
 import fuzzy.norm.Norm;
 import java.util.Map;
 

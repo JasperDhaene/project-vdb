@@ -14,8 +14,6 @@ import fuzzy.expression.LessThanEqual;
 import fuzzy.expression.Premise;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import org.json.simple.parser.ParseException;
 import premises.ConsequenceReader;
@@ -26,118 +24,37 @@ import premises.PremiseReader;
  * @author jasper
  */
 public class SpeedSteering {
-    public static void main(String[] args) throws IOException, FileNotFoundException, ParseException {
+        public static void main(String[] args) throws IOException, FileNotFoundException, ParseException {
         FuzzySystem system = new FuzzySystem();
 
-        Map<String, Premise> premises = PremiseReader.read("RallyPremises");
-        Map<String, Consequence> consequences = ConsequenceReader.read("RallyConsequences");
+        Map<String, Premise> premises = PremiseReader.read("SpeedPremises");
+        Map<String, Consequence> consequences = ConsequenceReader.read("SpeedConsequences");
 
-        Premise speedLow = premises.get("speedLow");
-        Premise speedMed = premises.get("speedMed");
-        Premise speedHigh = premises.get("speedHigh");
-        Premise speedNitro = premises.get("speedNitro");
-        Premise speedInsane = premises.get("speedInsane");
+        system.addRule(new Rule(new Conjunction(premises.get("ratioLow"), new LessThanEqual(premises.get("speedMed"))),
+                consequences.get("steerRight")));
+        system.addRule(new Rule(new Conjunction(premises.get("ratioHigh"), new LessThanEqual(premises.get("speedMed"))),
+                consequences.get("steerLeft")));
 
-        Premise distanceVeryLow = premises.get("distanceVeryLow");
-        Premise distanceLow = premises.get("distanceLow");
-        Premise distanceMed = premises.get("distanceMed");
-        Premise distanceHigh = premises.get("distanceHigh");
-        Premise distanceEndless = premises.get("distanceEndless");
+        system.addRule(new Rule(new Conjunction(premises.get("ratioLow"), new GreaterThanEqual(premises.get("speedHigh"))),
+                consequences.get("steerGentleRight")));
+        system.addRule(new Rule(new Conjunction(premises.get("ratioHigh"), new GreaterThanEqual(premises.get("speedHigh"))),
+                consequences.get("steerGentleLeft")));
 
-        Premise ratioLow = premises.get("ratioLow");
-        Premise ratioHigh = premises.get("ratioHigh");
-
-        Premise ratioLowSpeedy = premises.get("ratioLowSpeedy");
-        Premise ratioHighSpeedy = premises.get("ratioHighSpeedy");
-
-        Premise ratioMiddle = premises.get("ratioMiddle");
-
-        Premise ratioLowDrift = premises.get("ratioLowDrift");
-        Premise ratioHighDrift = premises.get("ratioHighDrift");
-
-        Premise lateralVelocityLow = premises.get("lateralVelocityLow");
-        Premise notDrifting = premises.get("notDrifting");
-
-        Premise noFrontLeftFriction = premises.get("noFrontLeftFriction");
-        Premise noBackLeftFriction = premises.get("noBackLeftFriction");
-        Premise noFrontRightFriction = premises.get("noFrontRightFriction");
-        Premise noBackRightFriction = premises.get("noBackRightFriction");
+        double[] ratios = new double[]{0,0.2,0.5,0.75,0.8,1,1.25,1.5,2,2.5,3};
 
 
-        /////////////////////////////////////
-
-        Consequence accelBase = consequences.get("accelBase");
-        Consequence accelLow = consequences.get("accelLow");
-        Consequence accelMed = consequences.get("accelMed");
-        Consequence accelHigh = consequences.get("accelHigh");
-        Consequence accelNitro = consequences.get("accelNitro");
-        Consequence accelDriftLow = consequences.get("accelDriftLow");
-        Consequence accelDriftHigh = consequences.get("accelDriftHigh");
-
-        Consequence brakeNone = consequences.get("brakeNone");
-        Consequence brakeLow = consequences.get("brakeLow");
-        Consequence brakeMed = consequences.get("brakeMed");
-        Consequence brakeHigh = consequences.get("brakeHigh");
-        Consequence brakeExtreme = consequences.get("brakeExtreme");
-
-        Consequence steerLeft = consequences.get("steerLeft");
-        Consequence steerRight = consequences.get("steerRight");
-
-        Consequence steerGentleLeft = consequences.get("steerGentleLeft");
-        Consequence steerGentleRight = consequences.get("steerGentleRight");
-
-        Consequence driftLeft = consequences.get("driftLeft");
-        Consequence driftRight = consequences.get("driftRight");
-
-
-        /* STEERING */
-        system.addRule(new Rule(new Conjunction(ratioLow,new LessThanEqual(speedHigh)), steerRight));
-        // RATIO = high => STEERING = left (low)
-        system.addRule(new Rule(new Conjunction(ratioHigh,new LessThanEqual(speedHigh)), steerLeft));
-
-        system.addRule(new Rule(new Conjunction(ratioLowSpeedy,new GreaterThanEqual(speedNitro)), steerGentleRight));
-        // RATIO = high => STEERING = left (low)
-        system.addRule(new Rule(new Conjunction(ratioHighSpeedy,new GreaterThanEqual(speedNitro)), steerGentleLeft));
-
-
-        /**
-         * EVALUATION
-         */
-
-        List<Pair> input = new ArrayList<Pair>(){{
-
-            add(new Pair(170, 0));
-            add(new Pair(170, 5));
-            add(new Pair(170, 10));
-            add(new Pair(170, 15));
-            add(new Pair(170, 20));
-            add(new Pair(170, 25));
-            add(new Pair(170, -0));
-            add(new Pair(170, -5));
-            add(new Pair(170, -10));
-            add(new Pair(170, -15));
-            add(new Pair(170, -20));
-            add(new Pair(170, -25));
-
-            add(new Pair(160, -10));
-
-            add(new Pair(300, -5));
-            add(new Pair(300, -10));
- 
-            
-
-            add(new Pair(180, -10));
-            add(new Pair(200, -10));
-
-        }};
-
-        for(Pair p: input) {
-
-            system.addInput("speed", p.left);
-            system.addInput("leftRightDistanceRatio", p.right);
-            System.out.println(p + " => " + system.evaluate());
+        // SPEED is LOW
+        for(double d: ratios) {
+            system.addInput("frontDistanceRatio", d);
+            system.addInput("speed", 50);
+            System.out.println(d + " => " + system.evaluate());
         }
-
-        System.out.println(ratioLowSpeedy.membership.value(-10));
+        System.out.println("===========================");
+        // SPEED is HIGH
+        for(double d: ratios) {
+            system.addInput("frontDistanceRatio", d);
+            system.addInput("speed", 200);
+            System.out.println(d + " => " + system.evaluate());
+        }
     }
 }
