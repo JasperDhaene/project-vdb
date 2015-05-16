@@ -99,11 +99,11 @@ public class DriftSteering {
         system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedVeryHigh),new GreaterThanEqual(distanceEndless)), accelHigh));
         //Note: beter speedMed hier, maar dan slipt ij in een van de begin bochten.
         system.addRule(new Rule(new Conjunction(new LessThanEqual(speedLow), new Disjunction(distanceLow,distanceMed)), accelLow));
-        
+
 /* BRAKE */
         system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedVeryHigh),new LessThanEqual(distanceMed)), brakeExtreme));
         system.addRule(new Rule(new Conjunction(speedNitro,new LessThanEqual(distanceVeryHigh)), brakeHigh));
-        system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedVeryLow),distanceVeryLow), brakeEpic));
+        system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedLow),distanceVeryLow), brakeEpic));
         
 /* STEERING */
         system.addRule(new Rule(new Conjunction(ratioLow,new LessThanEqual(speedHigh)), steerRight));
@@ -119,10 +119,9 @@ public class DriftSteering {
  //       system.addRule(new Rule(new Conjunction(new Conjunction(ratioHighDrift,distanceLow),new Conjunction(new Not(noFrontLeftFriction),new Not(noFrontRightFriction))), driftLeft));
 
 //ACCEL WHILE DRIFT
-        system.addRule(new Rule(new Conjunction(drifting,new GreaterThanEqual(distanceLow)), accelDriftHigh));
+        system.addRule(new Rule(drifting, accelDriftHigh));
         
-//OVERSTEERING       
-        // noRightWheelfriction /\ STEERING = ratioLow /\ DISTANCE = low  => DRIFT = right
+//OVERSTEERING
         system.addRule(new Rule(new Conjunction(new Conjunction(drifting,ratioLowDrift),new LessThanEqual(distanceLow)), driftRight));
         system.addRule(new Rule(new Conjunction(new Conjunction(drifting,ratioHighDrift),new LessThanEqual(distanceLow)), driftLeft));
 
@@ -136,14 +135,14 @@ public class DriftSteering {
         
         List<Input> input = new ArrayList<Input>(){{
             add(new Input(new HashMap<String,Double>(){{
-                    put("speed",(double) 98);
-                    put("frontSensorDistance",(double) 23);
-                    put("frontDistanceRatio",(double) 5.7);
-                    put("lateralVelocity",(double) -1);
-                    put("frontLeftFriction",(double) 0.4);
-                    put("frontRightFriction",(double) 0.4);
-                    put("backLeftFriction",(double) 1);
-                    put("backRightFriction",(double) 1);
+                    put("speed",(double) 168);
+                    put("frontSensorDistance",(double) 15);
+                    put("frontDistanceRatio",(double) 0.29864229183199087);
+                    put("lateralVelocity",(double) 15);
+                    put("frontLeftFriction",(double) 0.17);
+                    put("frontRightFriction",(double) 0.27);
+                    put("backLeftFriction",(double) 0.05);
+                    put("backRightFriction",(double) 0.06);
                                 
             }}));
     
