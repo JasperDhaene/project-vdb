@@ -30,14 +30,9 @@ public class PiFunction implements Membership {
         }
     }
     
-        @Override
-    public double getUpperLimit(){
-        return this.gamma;
-    }
-    
     @Override
-    public double getLowerLimit(){
-        return this.beta;
+    public double getLimitValue(){
+        return this.gamma;
     }
 
 }

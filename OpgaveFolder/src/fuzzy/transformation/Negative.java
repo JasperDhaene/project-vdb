@@ -19,14 +19,10 @@ public class Negative implements Membership {
         return (-1) * Math.abs(f.value(d));
     }
 
+    //TODO: nut en gebruik?
     @Override
-    public double getUpperLimit() {
-        return (-1) * Math.abs(f.getLowerLimit());
-    }
-
-    @Override
-    public double getLowerLimit() {
-        return (-1) * Math.abs(f.getUpperLimit());
+    public double getLimitValue() {
+        return (-1) * Math.abs(f.getLimitValue());
     }
 
 }

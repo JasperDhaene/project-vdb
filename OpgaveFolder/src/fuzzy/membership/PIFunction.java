@@ -60,13 +60,8 @@ public class PIFunction implements Membership {
     }
     
     @Override
-    public double getUpperLimit(){
-        return this.gamma;
-    }
-    
-    @Override
-    public double getLowerLimit(){
-        return this.beta;
+    public double getLimitValue(){
+        return (this.beta + this.gamma) / 2;
     }
 
     public static class TrapezoidPIFunction extends PIFunction {

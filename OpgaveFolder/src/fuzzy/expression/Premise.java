@@ -14,7 +14,6 @@ public class Premise implements Expression {
 
     public String variable;
     public Membership membership;
-    public double lowestPoint,highestPoint; //TODO
 
     public Premise(String variable, Membership membership) {
         this.variable = variable;
@@ -29,11 +28,8 @@ public class Premise implements Expression {
         return membership.value(inputs.get(variable));
     }
     
-    public double getUpperLimit(){
-        return membership.getUpperLimit();
-    }
-    public double getLowerLimit(){
-        return membership.getLowerLimit();
+    public double getLimitValue(){
+        return membership.getLimitValue();
     }
     
     public String getVariable(){

@@ -26,14 +26,11 @@ public class Symmetric implements Membership {
         return f.value(axis - value);
     }
 
+    //TODO: gebruik en nut?
     @Override
-    public double getUpperLimit() {
-        return (axis - f.getUpperLimit());
+    public double getLimitValue() {
+        return (axis - f.getLimitValue());
     }
 
-    @Override
-    public double getLowerLimit() {
-        return (axis - f.getLowerLimit());
-    }
 
 }
