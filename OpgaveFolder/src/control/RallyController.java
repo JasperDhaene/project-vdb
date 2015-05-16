@@ -6,7 +6,6 @@ import fuzzy.FuzzySystem;
 import fuzzy.Rule;
 import fuzzy.expression.Conjunction;
 import fuzzy.expression.Disjunction;
-import fuzzy.expression.Expression;
 import fuzzy.expression.GreaterThanEqual;
 import fuzzy.expression.LessThanEqual;
 import fuzzy.expression.Not;
@@ -46,10 +45,10 @@ public class RallyController implements Controller {
         
         Premise ratioLow = premises.get("ratioLow");
         Premise ratioHigh = premises.get("ratioHigh");       
-        Premise ratioMiddle = premises.get("ratioMiddle");
+        //Premise ratioMiddle = premises.get("ratioMiddle");
         
-        Premise ratioLowDrift = premises.get("ratioLowDrift");
-        Premise ratioHighDrift = premises.get("ratioHighDrift");
+        //Premise ratioLowDrift = premises.get("ratioLowDrift");
+        //Premise ratioHighDrift = premises.get("ratioHighDrift");
         
         Premise lateralVelocityLow = premises.get("lateralVelocityLow");
         Premise notDrifting = premises.get("notDrifting");
@@ -74,61 +73,51 @@ public class RallyController implements Controller {
 
         Consequence steerLeft = consequences.get("steerLeft");
         Consequence steerRight = consequences.get("steerRight");
+        
+        Consequence steerGentleLeft = consequences.get("steerGentleLeft");
+        Consequence steerGentleRight = consequences.get("steerGentleRight");
  
         Consequence driftLeft = consequences.get("driftLeft");
         Consequence driftRight = consequences.get("driftRight");
         
-        /* ACCEL */
-        // (SPEED = low \/ med \/ high) /\ (DISTANCE = high \/ endless) => ACCEL = nitro
-        system.addRule(new Rule(new Conjunction(new Disjunction(new Disjunction(speedLow,speedMed),speedHigh),new Disjunction(distanceHigh,distanceEndless)), accelNitro));
+/* ACCEL */      
+        system.addRule(new Rule(new Conjunction(new LessThanEqual(speedHigh),new GreaterThanEqual(distanceHigh)), accelNitro));
         // (SPEED = nitro /\ DISTANCE = endless) /\ RATIO = middle  => ACCEL = med
         //system.addRule(new Rule(new Conjunction(new Conjunction(speedNitro,distanceEndless),notDrifting), accelLow));
         // DISTANCE = low /\ SPEED = low => ACCEL = low
-        system.addRule(new Rule(new Conjunction(new Disjunction(speedLow,speedMed), distanceLow), accelMed));
+        system.addRule(new Rule(new Conjunction(new LessThanEqual(speedMed), distanceLow), accelMed));
         
-        /* BRAKE */
+/* BRAKE */
         // (SPEED = high \/ nitro) /\ (DISTANCE = low \/ med) => BRAKE = med
         system.addRule(new Rule(new Conjunction(new Disjunction(speedHigh,speedNitro),distanceMed), brakeExtreme));
         // (SPEED = nitro \/ insane) /\ (DISTANCE = low \/ med \/ high) => BRAKE = extreme
         system.addRule(new Rule(new Conjunction(new Disjunction(speedNitro,speedInsane),new Disjunction(new Disjunction(distanceLow,distanceMed),distanceHigh)), brakeExtreme));
         // RATIO = middle /\ (SPEED = nitro \/ insane => BRAKE = extreme
-        system.addRule(new Rule(new Conjunction(ratioMiddle,new Disjunction(speedNitro,speedInsane)), brakeExtreme));
+    //    system.addRule(new Rule(new Conjunction(ratioMiddle,new Disjunction(speedNitro,speedInsane)), brakeExtreme));
         
-        /* STEERING */
-        // RATIO = low => STEERING = right (high)
-        //system.addRule(new Rule(new Conjunction(ratioLow,new Not(new Disjunction(speedNitro,speedInsane))), steerRight));
-        // RATIO = high => STEERING = left (low)
-        //system.addRule(new Rule(new Conjunction(ratioHigh,new Not(new Disjunction(speedNitro,speedInsane))), steerLeft));
-        
+/* STEERING */
         system.addRule(new Rule(new Conjunction(ratioLow,new Not(distanceLow)), steerRight));
-        // RATIO = high => STEERING = left (low)
         system.addRule(new Rule(new Conjunction(ratioHigh,new Not(distanceLow)), steerLeft));
-        
-        /* DRIFTING */
         
 //STEER IN TURN      
         // RATIO = low /\ DISTANCE = low /\ FRICTION on front wheels (not drifting out of control) => DRIFT = left
-        system.addRule(new Rule(new Conjunction(new Conjunction(ratioLowDrift,distanceLow),new Conjunction(new Not(noFrontLeftFriction),new Not(noFrontRightFriction))), driftRight));
+ //       system.addRule(new Rule(new Conjunction(new Conjunction(ratioLowDrift,distanceLow),new Conjunction(new Not(noFrontLeftFriction),new Not(noFrontRightFriction))), driftRight));
         // RATIO = high /\ DISTANCE = low /\ FRICTION on front wheels (not drifting out of control) => DRIFT = right
-        system.addRule(new Rule(new Conjunction(new Conjunction(ratioHighDrift,distanceLow),new Conjunction(new Not(noFrontLeftFriction),new Not(noFrontRightFriction))), driftLeft));
+ //       system.addRule(new Rule(new Conjunction(new Conjunction(ratioHighDrift,distanceLow),new Conjunction(new Not(noFrontLeftFriction),new Not(noFrontRightFriction))), driftLeft));
 
-//ACCEL WHILE DRIFT        
-        // (DISTANCE = low \/ med) /\ (SPEED = high) /\ Drifting => ACCEL = med
+//ACCEL WHILE DRIFT
         system.addRule(new Rule(new Conjunction(distanceLow ,new Not(notDrifting)), accelMed));
         // In horizontal drift, avoid crash by nitro accel to gain grip and turn vertical //TODO: nitro is overkill but high doesn't work with base accel rules
         system.addRule(new Rule(new Conjunction(distanceVeryLow,new Not(notDrifting)), accelHigh));
 //OVERSTEERING       
-        // noRightWheelfriction /\ STEERING = ratioLowDrift /\ DISTANCE = low  => DRIFT = right
-        system.addRule(new Rule(new Conjunction(new Conjunction(new Conjunction(noFrontRightFriction,noBackRightFriction),ratioLowDrift),distanceLow), driftRight));
-        
-        // noLeftWheelfriction /\ STEERING = ratioHighDrift /\ DISTANCE = low  => DRIFT = left
-        system.addRule(new Rule(new Conjunction(new Conjunction(new Conjunction(noFrontLeftFriction,noBackLeftFriction),ratioHighDrift),distanceLow), driftLeft));
+        // noRightWheelfriction /\ STEERING = ratioLow /\ DISTANCE = low  => DRIFT = right
+        system.addRule(new Rule(new Conjunction(new Conjunction(new Conjunction(noFrontRightFriction,noBackRightFriction),ratioLow),distanceLow), driftRight));
+        system.addRule(new Rule(new Conjunction(new Conjunction(new Conjunction(noFrontLeftFriction,noBackLeftFriction),ratioHigh),distanceLow), driftLeft));
 
 //BRAKE
         // (DISTANCE = low \/ med) /\ (SPEED = high \/ nitro) => BRAKE = high
-        system.addRule(new Rule(new Conjunction(new Conjunction(new Disjunction(speedHigh,speedNitro),new Disjunction(distanceLow,distanceMed)),lateralVelocityLow), brakeHigh));
-        // (DISTANCE = low \/ med) /\ (SPEED = high \/ nitro) => BRAKE = high
-        system.addRule(new Rule(new Conjunction(new Conjunction(new Disjunction(speedHigh,speedNitro),new Disjunction(distanceLow,distanceMed)),new Not(lateralVelocityLow)), brakeNone));
+        system.addRule(new Rule(new Conjunction(new Conjunction(new GreaterThanEqual(speedHigh),new LessThanEqual(distanceMed)),lateralVelocityLow), brakeHigh));
+        system.addRule(new Rule(new Conjunction(new Conjunction(new GreaterThanEqual(speedHigh),new LessThanEqual(distanceMed)),new Not(lateralVelocityLow)), brakeNone));
 
     }
 
@@ -143,8 +132,8 @@ public class RallyController implements Controller {
 
         system.addInput("speed", vp.getCurrentCarSpeedKph());
         system.addInput("frontSensorDistance", vp.getDistanceFromFrontSensor());
-        system.addInput("leftRightDistanceRatio",
-                (vp.getDistanceFromLeftSensor() - vp.getDistanceFromRightSensor()));
+        system.addInput("frontDistanceRatio",
+                Ratio.calc(vp.getDistanceFromLeftSensor(), vp.getDistanceFromRightSensor()));
         system.addInput("lateralVelocity", vp.getLateralVelocity());
         system.addInput("frontLeftFriction", vp.getFrontLeftWheelFriction());
         system.addInput("frontRightFriction", vp.getFrontRightWheelFriction());

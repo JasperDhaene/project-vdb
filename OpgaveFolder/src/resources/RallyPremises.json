@@ -54,27 +54,29 @@
 
 {
   "name": "ratioLow",
-  "variable": "leftRightDistanceRatio",
-  "type": "trapezoid",
-  "params": [-2147483648, -2147483648, -50, -15]
+  "variable": "frontDistanceRatio",
+  "type": "triangular",
+  "comment": "Effective range: 0 -> 1 (use same scale for ratioHigh)",
+  "params": [-2147483648, 0, 0.9]
 },{
   "name": "ratioHigh",
-  "variable": "leftRightDistanceRatio",
-  "type": "trapezoid",
-  "params": [15, 50, 2147483647, 2147483647]
+  "variable": "frontDistanceRatio",
+  "type": "triangular",
+  "comment": "Effective range: 1 -> 3 (use same scale for ratioLow)",
+  "params": [1.111, 3, 2147483647]
 },{
   "name": "ratioMiddle",
-  "variable": "leftRightDistanceRatio",
+  "variable": "frontDistanceRatio",
   "type": "trapezoid",
   "params": [-20, -15, 15, 20]
 },{
   "name": "ratioLowDrift",
-  "variable": "leftRightDistanceRatio",
+  "variable": "frontDistanceRatio",
   "type": "trapezoid",
   "params": [-2147483648, -2147483648, -20, -1]
 },{
   "name": "ratioHighDrift",
-  "variable": "leftRightDistanceRatio",
+  "variable": "frontDistanceRatio",
   "type": "trapezoid",
   "params": [1, 20, 2147483647, 2147483647]
 },
