@@ -2,7 +2,7 @@
   "name": "accelBase",
   "variable": "acceleration",
   "type": "trapezoid",
-  "params": [480, 660, 840, 1120],
+  "params": [500, 700, 900, 1200],
   "integration": [0, 1600]
 },{
   "name": "accelLow",
@@ -70,6 +70,12 @@
   "variable": "brake",
   "type": "trapezoid",
   "params": [30, 38, 40, 40],
+  "integration": [0, 40]
+},{
+  "name": "brakeEpic",
+  "variable": "brake",
+  "type": "trapezoid",
+  "params": [30, 32, 40, 40],
   "integration": [0, 40]
 },
 

@@ -24,9 +24,9 @@ public class Main {
              */
 
             Controller controller = new RallyController();
-            String trackname = "silverstone1024";
+            String trackname = "interlagos1024";
 
-            RaceCar app = new RaceCar("DK Lightning McQueen", trackname, controller, false);
+            RaceCar app = new RaceCar("DK McQueen", trackname, controller, false);
 
             app.setDisplayFps(false);
             app.setDisplayStatView(false);
