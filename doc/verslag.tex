@@ -96,7 +96,15 @@
 
 		In het project werd gebruik gemaakt van de volgende extra libraries: de \href{https://commons.apache.org/proper/commons-math/}{Apache Commons Mathematics} library en de \href{https://code.google.com/p/json-simple/}{JSON.simple} library. De Apache Commons Math library voorziet een stabiele numerieke implementatie van verscheidene integratiemethoden. Omdat de integratietijd belangrijker is dan de precisie, werd gekozen voor de simpelste implementatie met relatief kleine precisie: de \texttt{MidPointIntegrator}.\\
 
-		Alle parameters die de vorm van de lidmaatschapsfuncties bepalen zijn opgeslagen in de \texttt{src/resources} directory, geserialiseerd in JSON. Deze bestanden worden ingelezen via de JSON.simple library en in het systeem ingevoerd aan de hand van de verscheidene regels.
+		Alle parameters die de vorm van de lidmaatschapsfuncties bepalen zijn opgeslagen in de \texttt{src/resources} directory, geserialiseerd in JSON. Deze bestanden worden ingelezen via de JSON.simple library en in het systeem ingevoerd aan de hand van de verscheidene regels.\\
+
+		Een probleem die al vroeg in de ontwikkeling voorkwam, betreft het limiteren van een aspect in de output. Stel dat er een conditie waarvoor onvoorwaardelijk moet gelden dat een outputvariabele nul is.
+
+		\begin{lstlisting}
+IF distanceFront IS minimal THEN acceleration IS none
+		\end{lstlisting}
+
+		Waarbij de lidmaatschapsfunctie van \texttt{acceleration} een dunne clustering rond $0$ omvat. Deze regel kan zelfstandig niet worden uitgedrukt, aangezien het matchen van de conditie \texttt{distanceFront IS minimal} er niet met zekerheid voor zorgt dat het zwaartepunt van de resterende geaggregeerde lidmaatschapsfunctie op of onder $0$ terecht komt. Mogelijke oplossingen voor dit probleem zijn het combineren van elke regel die invloed heeft op \texttt{acceleration} met een \texttt{distanceFront IS minimal}-clausule, of een set equivalent, maar negatieve regels opstellen voor de positieve acceleratie-bepalende regels, zodat het zwaartepunt exact op $0$ valt. Beide oplossingen zijn omslachtig en onschaalbaar.
 
 	\section{Controllers}
 		\subsection{SafeController}
@@ -109,10 +117,15 @@
 			\end{equation}
 
 			Vervolgens wordt er bijgestuurd afhankelijk van de proportie. Deze methode heeft het voordeel ten opzichte van een simpele plaatsbepaling ($sensor_{left} - sensor_{right}$) dat de breedte van de weg minder invloed heeft op de koerscorrectie.\\
-			De output van de functie (de \texttt{Consequence}) heeft als lidmaatschapsfunctie een S-curve. Op deze manier zal een kleine afwijking ($ratio \approx 1$) zeer weinig invloed hebben, die sterk stijgt naar mate $ratio$ afwijkt van $1$.
+			De output van de functie (de \texttt{Consequence}) heeft als lidmaatschapsfunctie een S-curve. Op deze manier zal een kleine afwijking ($ratio \approx 1$) zeer weinig invloed hebben, die stijgt naar mate $ratio$ afwijkt van $1$. Er werd bewust voor gekozen de outputvariabele \texttt{steering} binnen het domein niet te hoog te laten worden, zodat er zich minder of geen bruuske bewegingen voordoen.
 
 		\subsection{SpeedController}
-			Beschrijving van de \texttt{SpeedController}.
+			\texttt{SpeedController} zal trachten zo snel mogelijk de finish te bereiken. Hierbij wordt gebruik gemaakt van een uitgebreide versie van de snelheidsregels van \texttt{SafeController}. De granulariteit van deze regels is groter: er zijn meer regels vereist om de wagen een gecontroleerde snelheid mee te geven. Ook het remmen schaalt mee, aangezien er bij een groter aantal regels over een component ook een grotere controle over het complementaire aspect gevraagd wordt.\\
+
+			Het koerscorrectie-algoritme uit \texttt{SafeController} werd ook aangepast. Bij lagere snelheden (onder 100 km/h) wordt het systeem uit \texttt{SafeController} gebruikt -- die geeft een distributie van ongeveer $\pm 0.17$ tot $\pm 0.44$ -- maar bij hogere snelheden kan een minder precieze of grote beweging catastrofale gevolgen hebben. Daarom ligt bij hogere snelheden de effectieve drempel hoger, en zijn de bewegingen preciezer.\\
+
+			%% TODO: is dit wel zo?
+			Ter slippreventie is er tenslotte nog een laatste regel van kracht: als er gedraaid moet worden ($ratio \not\approx 1$), treedt de rem ook in werking. Zo kan voorkomen worden dat er tegelijkertijd gedraaid en versneld wordt. \texttt{RallyController} breidt uit op dit concept.
 
 		\subsection{RallyController}
 			Beschrijving van de \texttt{RallyController}.
