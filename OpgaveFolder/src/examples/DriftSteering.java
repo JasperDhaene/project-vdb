@@ -5,14 +5,23 @@ import fuzzy.FuzzySystem;
 import fuzzy.Rule;
 import fuzzy.expression.Conjunction;
 import fuzzy.expression.Disjunction;
+import fuzzy.expression.Expression;
+import fuzzy.expression.GreaterThanEqual;
+import fuzzy.expression.LessThanEqual;
 import fuzzy.expression.Not;
 import fuzzy.expression.Premise;
 import fuzzy.membership.PIFunction;
 import fuzzy.norm.LukasiewicsNorm;
 import fuzzy.norm.ProbabilisticNorm;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import org.json.simple.parser.ParseException;
+import premises.ConsequenceReader;
+import premises.PremiseReader;
 
 /**
  *
@@ -20,173 +29,105 @@ import java.util.List;
  */
 public class DriftSteering {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, FileNotFoundException, ParseException {
         FuzzySystem system = new FuzzySystem();
         
-        Premise speedLow = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(0, 0, 30, 50));
-        Premise speedMed = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(40, 60, 80, 100));
-        Premise speedHigh = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(90, 120, 150, 170));
-        Premise speedNitro = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(160, 210, 230, 280));
-        Premise speedInsane = new Premise("speed",
-                new PIFunction.TrapezoidPIFunction(270, 290, 310, 400));
+        Map<String, Premise> premises = PremiseReader.read("RallyPremises");
+        Map<String, Consequence> consequences = ConsequenceReader.read("RallyConsequences");
 
-        Premise distanceLow = new Premise("frontSensorDistance",
-                new PIFunction.TrapezoidPIFunction(0, 0, 30, 40));
-        Premise distanceMed = new Premise("frontSensorDistance",
-                new PIFunction.TrapezoidPIFunction(40, 50, 80, 90));
-        Premise distanceHigh = new Premise("frontSensorDistance",
-                new PIFunction.TrapezoidPIFunction(80, 110, 130, 150));
-        Premise distanceEndless = new Premise("frontSensorDistance",
-                new PIFunction.TrapezoidPIFunction(140, 160, Integer.MAX_VALUE, Integer.MAX_VALUE));
+        Premise speedLow = premises.get("speedLow");
+        Premise speedMed = premises.get("speedMed");
+        Premise speedHigh = premises.get("speedHigh");
+        Premise speedVeryHigh = premises.get("speedHigh");
+        Premise speedNitro = premises.get("speedNitro");
+
+        Premise distanceVeryLow = premises.get("distanceVeryLow");
+        Premise distanceLow = premises.get("distanceLow");
+        Premise distanceMed = premises.get("distanceMed");
+        Premise distanceHigh = premises.get("distanceHigh");
+        Premise distanceVeryHigh = premises.get("distanceVeryHigh");
+        Premise distanceEndless = premises.get("distanceEndless");
         
-        Premise ratioLow = new Premise("leftRightDistanceRatio",
-                new PIFunction.TrapezoidPIFunction(
-                        -Double.MAX_VALUE,
-                        -Double.MAX_VALUE,
-                        -50, -15));
-        Premise ratioHigh = new Premise("leftRightDistanceRatio",
-                new PIFunction.TrapezoidPIFunction(
-                        15, 50,
-                        Double.MAX_VALUE,
-                        Double.MAX_VALUE));
+        Premise ratioLow = premises.get("ratioLow");
+        Premise ratioHigh = premises.get("ratioHigh");       
+        //Premise ratioMiddle = premises.get("ratioMiddle");
         
-        Premise ratioMiddle = new Premise("leftRightDistanceRatio",
-                new PIFunction.TrapezoidPIFunction(
-                        -20,
-                        -15,
-                        15, 20));
+        Premise ratioLowDrift = premises.get("ratioLowDrift");
+        Premise ratioHighDrift = premises.get("ratioHighDrift");
         
-        Premise ratioLowDrift = new Premise("leftRightDistanceRatio",
-                new PIFunction.TrapezoidPIFunction(
-                        -Double.MAX_VALUE,
-                        -Double.MAX_VALUE,
-                        -20, -1));
-        Premise ratioHighDrift = new Premise("leftRightDistanceRatio",
-                new PIFunction.TrapezoidPIFunction(
-                        1,
-                        20,
-                        Double.MAX_VALUE, Double.MAX_VALUE));
+        Premise lateralVelocityLow = premises.get("lateralVelocityLow");
+        Premise notDriftingLateral = premises.get("notDriftingLateral");
         
-        Premise notDrifting = new Premise("lateralVelocity",
-                new PIFunction.TriangularPIFunction(
-                        -0.3, 0,
-                        0.3));
-        Premise noFrontLeftFriction = new Premise("frontLeftFriction",
-                new PIFunction.TrapezoidPIFunction(
-                        0,
-                        0.1,
-                        Double.MAX_VALUE, Double.MAX_VALUE));
-        Premise noBackLeftFriction = new Premise("backLeftFriction",
-                new PIFunction.TrapezoidPIFunction(
-                        0,
-                        0.1,
-                        Double.MAX_VALUE, Double.MAX_VALUE));
-        Premise noFrontRightFriction = new Premise("frontRightFriction",
-                new PIFunction.TrapezoidPIFunction(
-                        0,
-                        0.1,
-                        Double.MAX_VALUE, Double.MAX_VALUE));
-        Premise noBackRightFriction = new Premise("backRightFriction",
-                new PIFunction.TrapezoidPIFunction(
-                        0,
-                        0.1,
-                        Double.MAX_VALUE, Double.MAX_VALUE));
+        Premise noFrontLeftFriction = premises.get("noFrontLeftFriction");
+        Premise noBackLeftFriction = premises.get("noBackLeftFriction");
+        Premise noFrontRightFriction = premises.get("noFrontRightFriction");
+        Premise noBackRightFriction = premises.get("noBackRightFriction");
         
         /////////////////////////////////////
         
-        Consequence accelLow = new Consequence("acceleration",
-                new PIFunction.TrapezoidPIFunction(0, 0, 280, 560), 0, 1600);
-        Consequence accelMed = new Consequence("acceleration",
-                new PIFunction.TrapezoidPIFunction(480, 660, 840, 1120), 0, 1600);
-        Consequence accelHigh = new Consequence("acceleration",
-                new PIFunction.TrapezoidPIFunction(840, 1120, 1200, 1400), 0, 1600);
-        Consequence accelNitro = new Consequence("acceleration",
-                new PIFunction.TrapezoidPIFunction(1200, 1400, 1600, 1600), 0, 1600);
+        Consequence accelBase = consequences.get("accelBase");
+        Consequence accelLow = consequences.get("accelLow");
+        Consequence accelMed = consequences.get("accelMed");
+        Consequence accelHigh = consequences.get("accelHigh");
+        Consequence accelNitro = consequences.get("accelNitro");
         
-        Consequence brakeNone = new Consequence("brake",
-                new PIFunction.TrapezoidPIFunction(0, 0, 0, 0), 0, 40);
-        Consequence brakeLow = new Consequence("brake",
-                new PIFunction.TrapezoidPIFunction(0, 0, 10, 20), 0, 40);
-        Consequence brakeMed = new Consequence("brake",
-                new PIFunction.TrapezoidPIFunction(15, 20, 30, 35), 0, 40);
-        Consequence brakeHigh = new Consequence("brake",
-                new PIFunction.TrapezoidPIFunction(30, 35, 40, 40), 0, 40);
-        Consequence brakeExtreme = new Consequence("brake",
-                new PIFunction.TrapezoidPIFunction(30, 38, 40, 40), 0, 40);
-        /*
-        Consequence steerLeft = new Consequence("steering",
-                new PIFunction.TriangularPIFunction(-1, -1, -0.5), -1, 1);
-        Consequence steerRight = new Consequence("steering",
-                new PIFunction.TriangularPIFunction(0.5, 1, 1), -1, 1);
-        */
-        Consequence steerLeft = new Consequence("steering",
-                new PIFunction.TrapezoidPIFunction(-1, -1, -0.45, -0.4), -1, 1);
-        Consequence steerRight = new Consequence("steering",
-                new PIFunction.TrapezoidPIFunction(0.4, 0.45, 1, 1), -1, 1);
-        /*
-        Consequence driftLeft = new Consequence("steering",
-                new PIFunction.TrapezoidPIFunction(-1, -1, 0, 0.5), -1, 1);
-        Consequence driftRight = new Consequence("steering",
-                new PIFunction.TrapezoidPIFunction(-0.5, 0, 1, 1), -1, 1);
-        */
-        Consequence driftLeft = new Consequence("steering",
-                new PIFunction.TriangularPIFunction(-1, -1, -0.5), -1, 1);
-        Consequence driftRight = new Consequence("steering",
-                new PIFunction.TriangularPIFunction(0.5, 1, 1), -1, 1);
+        Consequence brakeNone = consequences.get("brakeNone");
+        Consequence brakeLow = consequences.get("brakeLow");
+        Consequence brakeMed = consequences.get("brakeMed");
+        Consequence brakeHigh = consequences.get("brakeHigh");
+        Consequence brakeExtreme = consequences.get("brakeExtreme");
+        Consequence brakeEpic = consequences.get("brakeEpic");
+
+        Consequence steerLeft = consequences.get("steerLeft");
+        Consequence steerRight = consequences.get("steerRight");
         
-        /* ACCEL */
-        // (SPEED = low \/ med \/ high) /\ (DISTANCE = high \/ endless) => ACCEL = nitro
-        system.addRule(new Rule(new Conjunction(new Disjunction(new Disjunction(speedLow,speedMed),speedHigh),new Disjunction(distanceHigh,distanceEndless)), accelHigh));
-        // (SPEED = nitro /\ DISTANCE = endless) /\ RATIO = middle  => ACCEL = med
-        //system.addRule(new Rule(new Conjunction(new Conjunction(speedNitro,distanceEndless),notDrifting), accelLow));
-        // DISTANCE = low /\ SPEED = low => ACCEL = low
-        system.addRule(new Rule(new Conjunction(new Disjunction(speedLow,speedMed), distanceLow), accelLow));
+        Consequence steerGentleLeft = consequences.get("steerGentleLeft");
+        Consequence steerGentleRight = consequences.get("steerGentleRight");
+ 
+        Consequence driftLeft = consequences.get("driftLeft");
+        Consequence driftRight = consequences.get("driftRight");
         
-        /* BRAKE */
-        // (SPEED = high \/ nitro) /\ (DISTANCE = low \/ med) => BRAKE = med
-        system.addRule(new Rule(new Conjunction(new Disjunction(speedHigh,speedNitro),new Disjunction(distanceLow,distanceMed)), brakeHigh));
-        // (SPEED = nitro \/ insane) /\ (DISTANCE = low \/ med \/ high) => BRAKE = extreme
-        system.addRule(new Rule(new Conjunction(new Disjunction(speedNitro,speedInsane),new Disjunction(new Disjunction(distanceLow,distanceMed),distanceHigh)), brakeExtreme));
-        // RATIO = middle /\ (SPEED = nitro \/ insane => BRAKE = extreme
-        system.addRule(new Rule(new Conjunction(ratioMiddle,new Disjunction(speedNitro,speedInsane)), brakeExtreme));
+        Expression driftingNoFriction = new Disjunction(new Disjunction(noFrontLeftFriction,noFrontRightFriction),new Disjunction(noBackLeftFriction,noBackRightFriction));
+        Expression driftingLateral = new Not(notDriftingLateral);
+        Expression drifting = new Conjunction(driftingNoFriction,driftingLateral);
         
-        /* STEERING */
-        // RATIO = low => STEERING = right (high)
-        //system.addRule(new Rule(new Conjunction(ratioLeft,new Not(new Disjunction(speedNitro,speedInsane))), steerRight));
-        // RATIO = high => STEERING = left (low)
-        //system.addRule(new Rule(new Conjunction(ratioRight,new Not(new Disjunction(speedNitro,speedInsane))), steerLeft));
+/* ACCEL */      
+        system.addRule(new Rule(new Conjunction(new LessThanEqual(speedVeryHigh),new GreaterThanEqual(distanceHigh)), accelNitro));
+        //Note: zet hier accelMed als je niet met 200+kph tegen de muur wil bokken. Maar je kan daarna wel verder rijden.
+        system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedVeryHigh),new GreaterThanEqual(distanceVeryHigh)), accelHigh));
+        //Note: beter speedMed hier, maar dan slipt ij in een van de begin bochten.
+        system.addRule(new Rule(new Conjunction(new LessThanEqual(speedMed), new LessThanEqual(distanceMed)), accelLow));
         
-        system.addRule(new Rule(new Conjunction(ratioLow,new Not(distanceLow)), steerRight));
-        // RATIO = high => STEERING = left (low)
-        system.addRule(new Rule(new Conjunction(ratioHigh,new Not(distanceLow)), steerLeft));
+/* BRAKE */
+        system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedVeryHigh),new LessThanEqual(distanceMed)), brakeExtreme));
+        system.addRule(new Rule(new Conjunction(speedNitro,new LessThanEqual(distanceVeryHigh)), brakeHigh));
         
-        /* DRIFTING */
+/* STEERING */
+        system.addRule(new Rule(new Conjunction(ratioLow,new LessThanEqual(speedHigh)), steerRight));
+        system.addRule(new Rule(new Conjunction(ratioHigh,new LessThanEqual(speedHigh)), steerLeft));
+/* SPEED STEERING */
+        system.addRule(new Rule(new Conjunction(ratioLow,new GreaterThanEqual(speedVeryHigh)), steerGentleRight));
+        system.addRule(new Rule(new Conjunction(ratioHigh,new GreaterThanEqual(speedVeryHigh)), steerGentleLeft));
         
 //STEER IN TURN      
         // RATIO = low /\ DISTANCE = low /\ FRICTION on front wheels (not drifting out of control) => DRIFT = left
-        system.addRule(new Rule(new Conjunction(new Conjunction(ratioLowDrift,distanceLow),new Conjunction(new Not(noFrontLeftFriction),new Not(noFrontRightFriction))), driftRight));
+ //       system.addRule(new Rule(new Conjunction(new Conjunction(ratioLowDrift,distanceLow),new Conjunction(new Not(noFrontLeftFriction),new Not(noFrontRightFriction))), driftRight));
         // RATIO = high /\ DISTANCE = low /\ FRICTION on front wheels (not drifting out of control) => DRIFT = right
-        system.addRule(new Rule(new Conjunction(new Conjunction(ratioHighDrift,distanceLow),new Conjunction(new Not(noFrontLeftFriction),new Not(noFrontRightFriction))), driftLeft));
+ //       system.addRule(new Rule(new Conjunction(new Conjunction(ratioHighDrift,distanceLow),new Conjunction(new Not(noFrontLeftFriction),new Not(noFrontRightFriction))), driftLeft));
 
-//ACCEL WHILE DRIFT        
-        // (DISTANCE = low \/ med) /\ (SPEED = high) /\ Drifting => ACCEL = med
-        system.addRule(new Rule(new Conjunction(new Conjunction(new Disjunction(distanceLow,distanceMed ),speedHigh),new Not(notDrifting)), accelMed));
-
-//OVERSTEERING       
-        // noRightWheelfriction /\ STEERING = ratioLowDrift /\ DISTANCE = low  => DRIFT = right
-        system.addRule(new Rule(new Conjunction(new Conjunction(new Conjunction(noFrontRightFriction,noBackRightFriction),ratioLowDrift),distanceLow), driftRight));
+//ACCEL WHILE DRIFT
+        system.addRule(new Rule(drifting, accelMed));
         
-        // noLeftWheelfriction /\ STEERING = ratioHighDrift /\ DISTANCE = low  => DRIFT = left
-        system.addRule(new Rule(new Conjunction(new Conjunction(new Conjunction(noFrontLeftFriction,noBackLeftFriction),ratioHighDrift),distanceLow), driftLeft));
+//OVERSTEERING       
+        // noRightWheelfriction /\ STEERING = ratioLow /\ DISTANCE = low  => DRIFT = right
+        system.addRule(new Rule(new Conjunction(new Conjunction(drifting,ratioLowDrift),new LessThanEqual(distanceMed)), driftRight));
+        system.addRule(new Rule(new Conjunction(new Conjunction(drifting,ratioHighDrift),new LessThanEqual(distanceMed)), driftLeft));
 
 //BRAKE
         // (DISTANCE = low \/ med) /\ (SPEED = high \/ nitro) => BRAKE = high
-        system.addRule(new Rule(new Conjunction(new Disjunction(speedHigh,speedNitro),new Disjunction(distanceLow,distanceMed)), brakeHigh));
-        
+        system.addRule(new Rule(drifting, brakeMed));
+        //system.addRule(new Rule(new Conjunction(new Conjunction(new GreaterThanEqual(speedHigh),new LessThanEqual(distanceMed)),new Not(lateralVelocityLow)), brakeNone));
+
    
         /**
          * EVALUATION
@@ -194,14 +135,14 @@ public class DriftSteering {
         
         List<Input> input = new ArrayList<Input>(){{
             add(new Input(new HashMap<String,Double>(){{
-                    put("speed",(double) 180);
-                    put("frontSensorDistance",(double) 30);
-                    put("leftRightDistanceRatio",(double) 7);
-                    put("lateralVelocity",(double) 1);
-                    put("frontLeftFriction",(double) 0.09);
-                    put("backLeftFriction",(double) 0.09);
-                    put("frontRightFriction",(double) 0.01);
-                    put("backRightFriction",(double) 0.09);
+                    put("speed",(double) 92);
+                    put("frontSensorDistance",(double) 11);
+                    put("frontDistanceRatio",(double) 0.3);
+                    put("lateralVelocity",(double) 18);
+                    put("frontLeftFriction",(double) 0.1);
+                    put("frontRightFriction",(double) 0.3);
+                    put("backLeftFriction",(double) 0.04);
+                    put("backRightFriction",(double) 0.05);
                                 
             }}));
     
