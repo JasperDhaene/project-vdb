@@ -124,7 +124,9 @@ IF distanceFront IS minimal THEN acceleration IS none
 			\end{equation}
 
 			Vervolgens wordt er bijgestuurd afhankelijk van de proportie. Deze methode heeft het voordeel ten opzichte van een simpele plaatsbepaling ($sensor_{left} - sensor_{right}$) dat de breedte van de weg minder invloed heeft op de koerscorrectie.\\
-			De output van de functie (de \texttt{Consequence}) heeft als lidmaatschapsfunctie een S-curve. Op deze manier zal een kleine afwijking ($ratio \approx 1$) zeer weinig invloed hebben, die stijgt naar mate $ratio$ afwijkt van $1$. Er werd bewust voor gekozen de outputvariabele \texttt{steering} binnen het domein niet te hoog te laten worden, zodat er zich minder of geen bruuske bewegingen voordoen.
+			De output van de functie (de \texttt{Consequence}) heeft als lidmaatschapsfunctie een S-curve. Op deze manier zal een kleine afwijking ($ratio \approx 1$) zeer weinig invloed hebben, die stijgt naar mate $ratio$ afwijkt van $1$. Er werd bewust voor gekozen de outputvariabele \texttt{steering} binnen het domein niet te hoog te laten worden, zodat er zich minder of geen bruuske bewegingen voordoen.\\
+
+			Merk ook op dat \texttt{SafeController} de minst geavanceerde controller in de reeks is. Hij wordt als basis gebruikt voor \texttt{SpeedController} en \texttt{RalyController}, en er zijn zodoende ook situaties die minder goed behandeld worden door \texttt{SafeController}.\\
 
 		\subsection{SpeedController}
 			\texttt{SpeedController} zal trachten zo snel mogelijk de finish te bereiken. Hierbij wordt gebruik gemaakt van een uitgebreide versie van de snelheidsregels van \texttt{SafeController}. De granulariteit van deze regels is groter: er zijn meer regels vereist om de wagen een gecontroleerde snelheid mee te geven. Ook het remmen schaalt mee, aangezien er bij een groter aantal regels over een component ook een grotere controle over het complementaire aspect gevraagd wordt.\\
@@ -143,6 +145,9 @@ IF distanceFront IS minimal THEN acceleration IS none
 
 		\subsection{Robuustheid regelsysteem}
 			%% Hoe robuust is uw regelsysteem voor verschillende races? Is de gemiddelde snelheid ongeveer dezelfde als u de wagen verschillende keren laat racen op een welbepaald parcours?
+			\texttt{SafeController} wordt inherent gelimiteerd op snelheid, en daar kan ook effectief geobserveerd worden dat zowel de gemiddelde snelheid en de pieksnelheid dicht bij elkaar liggen. Dit fenomeen doet zich voor op alle parcours, omdat er vrij continu voldaan wordt aan de \texttt{distanceHigh}, terwijl \texttt{distanceLow} (en dus \texttt{brakeHigh}) minder dominant is. Uit dit feit volgt dan ook dat meerdere ritten met deze controller dan ook praktisch dezelfde effectieve gemiddelde en topsnelheid heeft.\\
+
+			Bij \texttt{SpeedController} varieert de snelheid iets meer, omdat de grenzen die de afstand bepalen wat gevoeliger zijn. Op rechte stukken zal de controller proberen een zo groot mogelijke snelheid te halen (binnen het vermogen), terwijl hij bij obstakels al snel zal remmen en corrigeren. Binnen verschillende ritten van deze controller is de performantie nagenoeg gelijk.\\
 
 		\subsection{Minder performante parcours}
 			%% Zijn er parcours waar uw controller minder goed presteert? Hoe komt dit?
@@ -161,8 +166,9 @@ IF distanceFront IS minimal THEN acceleration IS none
 
 		\subsection{Veiligheid}
 			%% Hoe veilig is uw wagen, i.e. hoe dikwijls crasht uw wagen?
-			In dit model bestaat het concept \textit{veiligheid} enkel uit het contact met de wand, waardoor de \texttt{collisionSum} omhoog gaat. \texttt{SafeController} is ontworpen om zo veilig mogelijk de finish te bereiken
+			In dit model bestaat het concept \textit{veiligheid} enkel uit het contact met de wand, waardoor de \texttt{collisionSum} omhoog gaat. Het doel is uiteraard om de finish te bereiken met een zo laag mogelijke \texttt{collisionSum}.
 
+			\texttt{SafeController} is ontworpen om zo veilig mogelijk de finish te bereiken. Door een gecontroleerd gebruik van de snelheid, lukt dit op de meeste parcours. Enkel op het Spa Francorchamps-parcours kan \texttt{SafeController} de laatste scherpe bocht van ongeveer $32 \degree$ net v\'o\'or de finish niet halen.\\
 
 			%%% UITSLAG RITTEN %%%
 			%% SafeController
@@ -206,6 +212,8 @@ return (1400 * (distanceFront / 200) * factor);
 			Het opgegeven systeem is inherent moeilijk te debuggen. De auto start altijd op dezelfde plaats, wat het lastig maakt om bugs in een later deel van het parcours te identificeren en corrigeren. Ook een vorm van temporele controle ontbreekt, waardoor bugtracking een passieve en tijdsintensieve activiteit wordt. Ook het gebrek aan sensoren maakt het detecteren van een catastrofale fout onmogelijk. Als de auto crasht met een voldoende grote snelheid, kan de physics engine ervoor zorgen dat deze uiteindelijk omgekeerd techtkomt. De controllers zijn zich niet bewust van deze ontwikkeling, en rijden na\"ief verder -- de verkeerde richting op.\\
 
 			Ook is er een schijn van non-determinisme aanwezig, waardoor volgens het \href{https://en.wikipedia.org/wiki/Butterfly_effect}{butterfly-effect} elke beweging tot een compleet ander eindresultaat leidt. Daardoor is het ontwikkelen van een algemene controller -- die op alle parcours dezelfde acceptabele performantie heeft -- moeilijk tot zelfs onmogelijk.\\
+
+			Uiteindelijk kunnen de controllers voor elk parcours geoptimaliseerd worden, omdat elk parcours zijn eigen karakteristieken bezit. De Texas Speedway bijvoorbeeld, heeft er baat bij dat er zeer snel gereden wordt, en dat slechts kleine koerscorrecties uitgevoerd worden. Remmen hoeft in principe niet. Omdat in dit project de nadruk wordt gelegd op het ontwikkelen van een algemene controller, wordt dit niet in detail uitgewerkt.\\
 
 			Hoewel een vaag regelsysteem uitstekend geschikt is voor het ontwerpen van praktische toepassingen zoals soft controllers, bevat het opgegeven systeem te weinig invoerdata om een acceptabel resultaat te produceren. Bepaalde situaties kunnen niet gemodelleerd en dus ook niet gedetecteerd en voorkomen worden. Voor bepaalde situaties -- zoals het gebruik van een adaptieve \texttt{scanAngle} -- kan een exact regelsysteem een goede oplossing bieden. De optimale oplossing is dan ook de gulden middenweg: een hybride combinatie van een vaag en een exact regelsysteem die ervoor zorgt dat de controller een gevarieerd gedrag bezit, en die intelligent rekening houdt met de omgeving en de in- en outputvariabelen.
 
