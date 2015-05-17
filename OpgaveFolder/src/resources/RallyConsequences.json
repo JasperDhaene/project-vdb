@@ -45,7 +45,7 @@
   "name": "accelDriftVeryHigh",
   "variable": "acceleration",
   "type": "trapezoid",
-  "params": [1300, 1450, 1600, 1600],
+  "params": [1400, 1500, 1600, 1600],
   "integration": [0, 1600]
 
 },{
@@ -88,7 +88,7 @@
   "name": "brakeDrift",
   "variable": "brake",
   "type": "trapezoid",
-  "params": [20, 25, 35, 40],
+  "params": [5, 10, 15, 20],
   "integration": [0, 40]
 },
 
@@ -122,13 +122,13 @@
   "name": "driftLeft",
   "variable": "steering",
   "type": "triangular",
-  "params": [-20, -0.9, -0.7],
+  "params": [-20, -0.8, -0.7],
   "integration": [-1, 0]
 },{
   "name": "driftRight",
   "variable": "steering",
   "type": "triangular",
-  "params": [0.7, 0.9, 20],
+  "params": [0.7, 0.8, 20],
   "integration": [0, 1]
 },{
   "name": "steerIntoDriftLeft",
