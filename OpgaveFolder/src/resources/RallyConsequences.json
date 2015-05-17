@@ -2,7 +2,7 @@
   "name": "accelBase",
   "variable": "acceleration",
   "type": "trapezoid",
-  "params": [0, 0, 350, 560],
+  "params": [500, 700, 1000, 1200],
   "integration": [0, 1600]
 },{
   "name": "accelLow",
@@ -20,7 +20,7 @@
   "name": "accelHigh",
   "variable": "acceleration",
   "type": "trapezoid",
-  "params": [840, 1120, 1200, 1400],
+  "params": [900, 1200, 1400, 1600],
   "integration": [0, 1600]
 },{
   "name": "accelNitro",
