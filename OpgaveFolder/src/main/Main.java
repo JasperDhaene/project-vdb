@@ -1,8 +1,8 @@
 package main;
 
 import car.RaceCar;
-import control.Controller;
-import control.RallyController;
+import control.BaseController;
+import control.SpeedController;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,7 +23,7 @@ public class Main {
              * controller, written by you - manual control, only non-manual laps are recorded for the leaderboard
              */
 
-            Controller controller = new RallyController();
+            BaseController controller = new SpeedController();
             String trackname = "interlagos1024";
             
 
