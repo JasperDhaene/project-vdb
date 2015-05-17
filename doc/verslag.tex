@@ -79,7 +79,8 @@
 			{\huge \textsf{Project Vage Databanken}}
 			\vskip\baselineskip
 			\noindent
-			\textsf{\textbf{Jasper D'haene} \\
+			\textsf{Groep 8 \\
+				\textbf{Jasper D'haene} \\
 				\textbf{Florian Dejonckheere}}
 		\end{minipage}
 	\end{titlepage}
@@ -107,9 +108,11 @@ IF distanceFront IS minimal THEN acceleration IS none
 
 		Waarbij de lidmaatschapsfunctie van \texttt{acceleration IS none} een dunne clustering rond $0$ omvat. Deze regel kan zelfstandig niet worden uitgedrukt, aangezien het matchen van de conditie \texttt{distanceFront IS minimal} er niet met zekerheid voor zorgt dat het zwaartepunt van de resterende geaggregeerde lidmaatschapsfunctie op of onder $0$ terecht komt. Mogelijke oplossingen voor dit probleem zijn het combineren van elke regel die invloed heeft op \texttt{acceleration} met een \texttt{distanceFront IS minimal}-clausule, of een set equivalent, maar negatieve regels opstellen voor de positieve acceleratie-bepalende regels, zodat het zwaartepunt exact op $0$ valt. Beide oplossingen zijn omslachtig en onschaalbaar.\\
 
+		Analoog vormt het maximum van een lidmaatschapsfunctie ook een probleem. Zoals het vaag regelsysteem gedefinieerd is, is het onmogelijk om de maximumwaarde te behalen van de lidmaatschapsfunctie van een outputvariabele. Als de \texttt{Consequence} van de regel niet gelimiteerd wordt ($\texttt{limit} = 1$) en de regel dus volkomen van kracht is, zal de outputvariabele uiteindelijk het zwaartepunt van de lidmaatschapsfunctie zijn. Dit zal zelden de maximumwaarde zijn, maar meer frequent ongeveer in het midden tussen de begin- en de eindparameter ($\alpha$ en $\beta$ bij trapezo\"idale functies).\\
+
 		Het systeem -- omvat in de \texttt{fuzzy/FuzzySystem} klasse -- wordt vooreerst leeg ge\"instantieerd, en daarna pas worden de regels opgegeven. Deze regels zijn intern opgeslagen in een \texttt{ArrayList}, waarover er ge\"itereerd wordt bij evaluatie. Deze regels hoeven slechts \'e\'enmaal ingevoerd te worden -- in de constructor van de controller (in casu zorgt de \texttt{BaseController} hiervoor).\\
 
-		Daarnaast heeft het systeem ook een nood aan inputvariabelen en -waarden. Deze worden elke frame in de \texttt{getFrameControl()} methode ingevoerd. Intern worden de variabelen en hun bijbehorende waarden opgeslagen in een \texttt{HashMap}, gesorteerd op de naam van de variabele. Later kan dan de geaggregeerde lidmaatschapsfunctie bepaald worden uit een entry in de map. Vervolgens wordt het volledige systeem ge\"evalueerd aan de hand van \\
+		Daarnaast heeft het systeem ook een nood aan inputvariabelen en -waarden. Deze worden elke frame in de \texttt{getFrameControl()} methode ingevoerd. Intern worden de variabelen en hun bijbehorende waarden opgeslagen in een \texttt{HashMap}, gesorteerd op de naam van de variabele. Later kan dan de geaggregeerde lidmaatschapsfunctie bepaald worden uit een entry in de map. Vervolgens wordt het volledige systeem ge\"evalueerd aan de hand van de \texttt{evaluate()} methode.\\
 
 		Hoewel het opgegeven controlesysteem natively gebruik maakt van het \texttt{float} datatype, werd de keuze gemaakt om met \texttt{double} te werken, voornamelijk omdat de Apache Commons Math library als in- en outputtype \texttt{double} heeft.
 
