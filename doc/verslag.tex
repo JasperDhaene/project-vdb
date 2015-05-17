@@ -142,6 +142,7 @@ IF distanceFront IS minimal THEN acceleration IS none
 	\section{Performantie}
 		\subsection{Keuze t-norm en t-conorm}
 			%% Is de keuze van t-norm en t-conorm belangrijk voor de prestatie (i.e. de gemiddelde snelheid) van de wagen?
+			Het verschil tussen het gebruik van de diverse t-normen en t-conormen is verbazend klein. Een kleine test levert op dat het relatieve verschil tussen berekeningen met verschillende t-normen typisch minder dan 2-3\% betreft. Uiteindelijk laat dit zich praktisch niet opmeten in de prestatie van de controllers. Dit is te wijten aan de definitie van de gebruikte lidmaatschapsfuncties voor de premisses in de regels. Deze worden voornamelijk bepaald door trapezo\"idale pi-functies met grenzen die relatief dicht bij elkaar liggen. Hierdoor komt de situatie $\mu = 0.0$ of $\mu = 1.0$ meer voor. Als \'e\'en van de parameters van zo'n conjunctie of disjunctie $1.0$ of $0.0$ is, dan is de uitvoer van elke t-norm of t-conorm gelijk.\\
 
 		\subsection{Robuustheid regelsysteem}
 			%% Hoe robuust is uw regelsysteem voor verschillende races? Is de gemiddelde snelheid ongeveer dezelfde als u de wagen verschillende keren laat racen op een welbepaald parcours?
