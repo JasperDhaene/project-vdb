@@ -94,17 +94,23 @@
 	\section{Generiek vaagregelsysteem}
 		Beschrijving van het \texttt{FuzzySystem}. \\
 
-		In het project werd gebruik gemaakt van de volgende extra libraries: de \href{https://commons.apache.org/proper/commons-math/}{Apache Commons Mathematics} library en de \href{https://code.google.com/p/json-simple/}{JSON.simple} library. De Apache Commons Math library voorziet een stabiele numerieke implementatie van verscheidene integratiemethoden. Omdat de integratietijd belangrijker is dan de precisie, werd gekozen voor de simpelste implementatie met relatief kleine precisie: de \texttt{MidPointIntegrator}.\\
+		In het project werd gebruik gemaakt van de volgende extra libraries: de \href{https://commons.apache.org/proper/commons-math/}{Apache Commons Mathematics} library en de \href{https://code.google.com/p/json-simple/}{JSON.simple} library. De Apache Commons Math library voorziet een stabiele numerieke implementatie van verscheidene integratiemethoden. Omdat de integratieperformantie belangrijker is dan de precisie, werd gekozen voor de simpelste implementatie -- de \texttt{MidPointIntegrator} -- met een relatief kleine precisie.\\
 
-		Alle parameters die de vorm van de lidmaatschapsfuncties bepalen zijn opgeslagen in de \texttt{src/resources} directory, geserialiseerd in JSON. Deze bestanden worden ingelezen via de JSON.simple library en in het systeem ingevoerd aan de hand van de verscheidene regels.\\
+		Alle parameters die de vorm van de lidmaatschapsfuncties bepalen zijn opgeslagen in de \texttt{resources} map, geserialiseerd in JSON. Deze bestanden worden ingelezen via de JSON.simple library en in het systeem ingevoerd aan de hand van de gegeven regels.\\
 
-		Een probleem die al vroeg in de ontwikkeling voorkwam, betreft het limiteren van een aspect in de output. Stel dat er een conditie waarvoor onvoorwaardelijk moet gelden dat een outputvariabele nul is.
+		Een probleem die al vroeg in de ontwikkeling voorkwam, betreft het onconditioneel limiteren van een aspect in de output. Stel dat er een conditie waarvoor onvoorwaardelijk moet gelden dat een outputvariabele nul is.
 
 		\begin{lstlisting}
 IF distanceFront IS minimal THEN acceleration IS none
 		\end{lstlisting}
 
-		Waarbij de lidmaatschapsfunctie van \texttt{acceleration} een dunne clustering rond $0$ omvat. Deze regel kan zelfstandig niet worden uitgedrukt, aangezien het matchen van de conditie \texttt{distanceFront IS minimal} er niet met zekerheid voor zorgt dat het zwaartepunt van de resterende geaggregeerde lidmaatschapsfunctie op of onder $0$ terecht komt. Mogelijke oplossingen voor dit probleem zijn het combineren van elke regel die invloed heeft op \texttt{acceleration} met een \texttt{distanceFront IS minimal}-clausule, of een set equivalent, maar negatieve regels opstellen voor de positieve acceleratie-bepalende regels, zodat het zwaartepunt exact op $0$ valt. Beide oplossingen zijn omslachtig en onschaalbaar.
+		Waarbij de lidmaatschapsfunctie van \texttt{acceleration IS none} een dunne clustering rond $0$ omvat. Deze regel kan zelfstandig niet worden uitgedrukt, aangezien het matchen van de conditie \texttt{distanceFront IS minimal} er niet met zekerheid voor zorgt dat het zwaartepunt van de resterende geaggregeerde lidmaatschapsfunctie op of onder $0$ terecht komt. Mogelijke oplossingen voor dit probleem zijn het combineren van elke regel die invloed heeft op \texttt{acceleration} met een \texttt{distanceFront IS minimal}-clausule, of een set equivalent, maar negatieve regels opstellen voor de positieve acceleratie-bepalende regels, zodat het zwaartepunt exact op $0$ valt. Beide oplossingen zijn omslachtig en onschaalbaar.\\
+
+		Het systeem -- omvat in de \texttt{fuzzy/FuzzySystem} klasse -- wordt vooreerst leeg ge\"instantieerd, en daarna pas worden de regels opgegeven. Deze regels zijn intern opgeslagen in een \texttt{ArrayList}, waarover er ge\"itereerd wordt bij evaluatie. Deze regels hoeven slechts \'e\'enmaal ingevoerd te worden -- in de constructor van de controller (in casu zorgt de \texttt{BaseController} hiervoor).\\
+
+		Daarnaast heeft het systeem ook een nood aan inputvariabelen en -waarden. Deze worden elke frame in de \texttt{getFrameControl()} methode ingevoerd. Intern worden de variabelen en hun bijbehorende waarden opgeslagen in een \texttt{HashMap}, gesorteerd op de naam van de variabele. Later kan dan de geaggregeerde lidmaatschapsfunctie bepaald worden uit een entry in de map. Vervolgens wordt het volledige systeem ge\"evalueerd aan de hand van \\
+
+		Hoewel het opgegeven controlesysteem natively gebruik maakt van het \texttt{float} datatype, werd de keuze gemaakt om met \texttt{double} te werken, voornamelijk omdat de Apache Commons Math library als in- en outputtype \texttt{double} heeft.
 
 	\section{Controllers}
 		\subsection{SafeController}
