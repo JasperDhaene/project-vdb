@@ -27,7 +27,7 @@ public class Main {
             String trackname = "interlagos1024";
             
 
-            RaceCar app = new RaceCar("DK McQueen", trackname, controller, false);
+            RaceCar app = new RaceCar("Rally McQueen", trackname, controller, false);
 
             app.setDisplayFps(false);
             app.setDisplayStatView(false);

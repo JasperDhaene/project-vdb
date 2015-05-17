@@ -1,5 +1,6 @@
-package examples;
+package control;
 
+import car.VehicleProperties;
 import fuzzy.Consequence;
 import fuzzy.FuzzySystem;
 import fuzzy.Rule;
@@ -10,31 +11,28 @@ import fuzzy.expression.GreaterThanEqual;
 import fuzzy.expression.LessThanEqual;
 import fuzzy.expression.Not;
 import fuzzy.expression.Premise;
-import fuzzy.membership.PIFunction;
-import fuzzy.norm.LukasiewicsNorm;
-import fuzzy.norm.ProbabilisticNorm;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.json.simple.parser.ParseException;
 import premises.ConsequenceReader;
 import premises.PremiseReader;
 
 /**
- *
- * @author jasper
+ * RallyController - Controller that gets the job done as awesome as possible
+ * @author Florian Dejonckheere <florian@floriandejonckheere.be>
  */
-public class DriftSteering {
+public class RallyController implements Controller {
 
-    public static void main(String[] args) throws IOException, FileNotFoundException, ParseException {
-        FuzzySystem system = new FuzzySystem();
-        
+   private final FuzzySystem system;
+
+    public RallyController() throws IOException, FileNotFoundException, ParseException {
+        this.system = new FuzzySystem();
+
         Map<String, Premise> premises = PremiseReader.read("RallyPremises");
         Map<String, Consequence> consequences = ConsequenceReader.read("RallyConsequences");
 
+        Premise speedBackwards = premises.get("speedBackwards");
         Premise speedVeryLow = premises.get("speedVeryLow");
         Premise speedLow = premises.get("speedLow");
         Premise speedMed = premises.get("speedMed");
@@ -42,12 +40,15 @@ public class DriftSteering {
         Premise speedHigh = premises.get("speedHigh");
         Premise speedVeryHigh = premises.get("speedHigh");
         Premise speedNitro = premises.get("speedNitro");
+        Premise speedInsane = premises.get("speedInsane");
 
         Premise distanceVeryLow = premises.get("distanceVeryLow");
         Premise distanceLow = premises.get("distanceLow");
         Premise distanceMed = premises.get("distanceMed");
+        Premise distanceDrift = premises.get("distanceDrift");
         Premise distanceHigh = premises.get("distanceHigh");
         Premise distanceVeryHigh = premises.get("distanceVeryHigh");
+        Premise distanceStop = premises.get("distanceStop");
         Premise distanceEndless = premises.get("distanceEndless");
         
         Premise ratioLow = premises.get("ratioLow");
@@ -58,7 +59,11 @@ public class DriftSteering {
         Premise ratioLowDrift = premises.get("ratioLowDrift");
         Premise ratioHighDrift = premises.get("ratioHighDrift");
         
-        Premise lateralVelocityLow = premises.get("lateralVelocityLow");
+        Premise ratioLowBeforeDrift = premises.get("ratioLowBeforeDrift");
+        Premise ratioHighBeforeDrift = premises.get("ratioHighBeforeDrift");
+        
+        Premise lateralVelocityLeft = premises.get("lateralVelocityLeft");
+        Premise lateralVelocityRight = premises.get("lateralVelocityRight");
         Premise notLateralVelocityHigh = premises.get("notLateralVelocityHigh");
         Premise notDriftingLateral = premises.get("notDriftingLateral");
         
@@ -69,7 +74,6 @@ public class DriftSteering {
         
         /////////////////////////////////////
         
-       
         Consequence accelBase = consequences.get("accelBase");
         Consequence accelLow = consequences.get("accelLow");
         Consequence accelMed = consequences.get("accelMed");
@@ -104,15 +108,16 @@ public class DriftSteering {
 
 /* ACCEL */      
         system.addRule(new Rule(new Conjunction(new LessThanEqual(speedVeryHigh),new GreaterThanEqual(distanceHigh)), accelNitro));
-        //Note: zet hier accelMed als je niet met 200+kph tegen de muur wil bokken. Maar je kan daarna wel verder rijden.
-        system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedVeryHigh),new GreaterThanEqual(distanceEndless)), accelHigh));
+        //system.addRule(new Rule(new Conjunction(speedNitro,distanceVeryHigh), accelMed));
+        system.addRule(new Rule(new Conjunction(new LessThanEqual(speedNitro),new GreaterThanEqual(distanceEndless)), accelHigh));
         //Note: beter speedMed hier, maar dan slipt ij in een van de begin bochten.
-        system.addRule(new Rule(new Conjunction(new LessThanEqual(speedLow), new Disjunction(distanceLow,distanceMed)), accelLow));
-
+        system.addRule(new Rule(new Conjunction(new LessThanEqual(speedDrift), new Disjunction(distanceLow,distanceMed)), accelLow));
+        system.addRule(new Rule(new Disjunction(speedBackwards,speedVeryLow), accelBase));
+        
 /* BRAKE */
         system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedHigh),new LessThanEqual(distanceMed)), brakeExtreme));
-        system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedVeryHigh),new LessThanEqual(distanceVeryHigh)), brakeHigh));
-        system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedLow),distanceVeryLow), brakeEpic));
+        system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedVeryHigh),new LessThanEqual(distanceStop)), brakeEpic));
+        system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedLow),distanceVeryLow), brakeHigh));
         
 /* STEERING */
         system.addRule(new Rule(new Conjunction(new Conjunction(ratioLow,new LessThanEqual(speedHigh)),new Not(drifting)), steerRight));
@@ -121,52 +126,86 @@ public class DriftSteering {
         system.addRule(new Rule(new Conjunction(ratioLow,new GreaterThanEqual(speedVeryHigh)), steerGentleRight));
         system.addRule(new Rule(new Conjunction(ratioHigh,new GreaterThanEqual(speedVeryHigh)), steerGentleLeft));
         
-//STEER IN TURN      
-        // RATIO = low /\ DISTANCE = low /\ FRICTION on front wheels (not drifting out of control) => DRIFT = left
-        system.addRule(new Rule(new Conjunction(new Conjunction(ratioLowDrift,new LessThanEqual(distanceMed)),new Not(drifting)), steerIntoDriftRight));
-        // RATIO = high /\ DISTANCE = low /\ FRICTION on front wheels (not drifting out of control) => DRIFT = right
-        system.addRule(new Rule(new Conjunction(new Conjunction(ratioHighDrift,new LessThanEqual(distanceMed)),new Not(drifting)), steerIntoDriftLeft));
-
 //ACCEL WHILE DRIFT
         system.addRule(new Rule(drifting, accelDriftHigh));
         system.addRule(new Rule(new Conjunction(new Not(notLateralVelocityHigh),new LessThanEqual(speedDrift)), accelDriftVeryHigh));
         
 //OVERSTEERING       
         // noRightWheelfriction /\ STEERING = ratioLow /\ DISTANCE = low  => DRIFT = right
-        system.addRule(new Rule(new Conjunction(new Conjunction(drifting,ratioLowDrift),new LessThanEqual(distanceMed)), driftRight));
-        system.addRule(new Rule(new Conjunction(new Conjunction(drifting,ratioHighDrift),new LessThanEqual(distanceMed)), driftLeft));
-
+        system.addRule(new Rule(new Conjunction(new Conjunction(drifting,lateralVelocityRight),new LessThanEqual(distanceDrift)), driftRight));
+        system.addRule(new Rule(new Conjunction(new Conjunction(drifting,lateralVelocityLeft),new LessThanEqual(distanceDrift)), driftLeft));
+        //system.addRule(new Rule(new Conjunction(new Conjunction(drifting,new Conjunction(ratioLowDrift,lateralVelocityLeft)),new LessThanEqual(distanceDrift)), driftLeft));
+        //system.addRule(new Rule(new Conjunction(new Conjunction(drifting,new Conjunction(ratioHighDrift,lateralVelocityRight)),new LessThanEqual(distanceDrift)), driftRight));
 //BRAKE
         system.addRule(new Rule(drifting, brakeLow));
         system.addRule(new Rule(new Conjunction(new Not(notLateralVelocityHigh),new LessThanEqual(speedDrift)), brakeDrift));
 
-   
-        /**
-         * EVALUATION
-         */
-        
-        List<Input> input = new ArrayList<Input>(){{
-            add(new Input(new HashMap<String,Double>(){{
-                    put("speed",(double) 87);
-                    put("frontSensorDistance",(double) 10);
-                    put("frontDistanceRatio",(double) 1.4);
-                    put("lateralVelocity",(double) 23);
-                    put("frontLeftFriction",(double) 0.06);
-                    put("frontRightFriction",(double) 0.12);
-                    put("backLeftFriction",(double) 0.03);
-                    put("backRightFriction",(double) 0.04);
-                                
-            }}));
-    
-            
-        }};
-        
-        for(Input i: input) {
-            for(String s: i.inputs.keySet()){
-                system.addInput(s, i.inputs.get(s));
-            }
-            System.out.println(i + " => " + system.evaluate());
-            
-        }
     }
+
+    @Override
+    public FrameControl getFrameControl(VehicleProperties vp) {
+        FrameControl fc;
+
+        double steering = 0,
+            acceleration = 0,
+            brake = 0,
+            scanAngle = 0;
+
+        system.addInput("speed", vp.getCurrentCarSpeedKph());
+        system.addInput("frontSensorDistance", vp.getDistanceFromFrontSensor());
+        system.addInput("frontDistanceRatio",
+                Ratio.calc(vp.getDistanceFromLeftSensor(), vp.getDistanceFromRightSensor()));
+        system.addInput("lateralVelocity", vp.getLateralVelocity());
+        system.addInput("frontLeftFriction", vp.getFrontLeftWheelFriction());
+        system.addInput("frontRightFriction", vp.getFrontRightWheelFriction());
+        system.addInput("backLeftFriction", vp.getBackLeftWheelFriction());
+        system.addInput("backRightFriction", vp.getBackRightWheelFriction());
+        Map<String, Double> output = system.evaluate();
+
+        /**
+         * Steering
+         */
+        steering = output.get("steering");
+        steering -= (steering - vp.getAngleFrontWheels())/8;
+
+        /**
+         * Acceleration
+         */
+        acceleration = output.get("acceleration");
+
+        /**
+         * Brake
+         */
+
+        brake = output.get("brake");
+
+        /**
+         * Scanangle
+         */
+        scanAngle = 0.9;
+
+        /**
+         * Debug output
+         */
+
+        System.out.println("acceleration: " + acceleration);
+        System.out.println("speed: " + vp.getCurrentCarSpeedKph());
+        System.out.println("brake: " + brake);
+        System.out.println("ratio: " +
+                Ratio.calc(vp.getDistanceFromLeftSensor(), vp.getDistanceFromRightSensor()) +
+                " => " + steering);
+        System.out.println("frontSensor: " + vp.getDistanceFromFrontSensor() + 
+                " | " + "lateralVelocity: " + vp.getLateralVelocity() );
+        System.out.println("frontFriction: " + vp.getFrontLeftWheelFriction() + " | " + vp.getFrontRightWheelFriction());
+        System.out.println("backFriction: " + vp.getBackLeftWheelFriction() + " | " + vp.getBackRightWheelFriction());
+        System.out.println("#######################");
+
+        fc = new FrameControl((float) steering,
+                                (float) acceleration,
+                                (float) brake,
+                                scanAngle);
+
+        return fc;
+    }
+
 }
