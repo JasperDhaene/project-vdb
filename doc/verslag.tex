@@ -137,7 +137,7 @@ IF distanceFront IS minimal THEN acceleration IS none
 			Ter slippreventie is er tenslotte nog een laatste regel van kracht: als er gedraaid moet worden ($ratio \not\approx 1$), treedt de rem ook in werking. Zo kan voorkomen worden dat er tegelijkertijd gedraaid en versneld wordt. \texttt{RallyController} breidt uit op dit concept.
 
 		\subsection{RallyController}
-			Beschrijving van de \texttt{RallyController}.
+			\texttt{RallyController} breidt op zijn beurt uit op \texttt{SpeedController}. In \texttt{RallyController} wordt de nadruk gelegd op het \textit{driften}. Dit fenomeen kan men aansturen door een bocht te benaderen via \textit{oversteer}, zodat er tegengestuurd moet worden om de bocht correct door te gaan. Het oversteering zelf kan gedetecteerd worden door de combinatie van laterale snelheid en het verlies van grip  of \texttt{friction} op de banden. Als er eenmaal oversteering is gedetecteerd, wordt er tegengestuurd om te corrigeren.\\
 
 	\section{Performantie}
 		\subsection{Keuze t-norm en t-conorm}
