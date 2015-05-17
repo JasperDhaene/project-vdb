@@ -161,6 +161,21 @@ IF distanceFront IS minimal THEN acceleration IS none
 
 		\subsection{Veiligheid}
 			%% Hoe veilig is uw wagen, i.e. hoe dikwijls crasht uw wagen?
+			In dit model bestaat het concept \textit{veiligheid} enkel uit het contact met de wand, waardoor de \texttt{collisionSum} omhoog gaat. \texttt{SafeController} is ontworpen om zo veilig mogelijk de finish te bereiken
+
+
+			%%% UITSLAG RITTEN %%%
+			%% SafeController
+			%%   Spa Francorchamps: crasht op de 45° bocht vlak voor de finish
+			%%   Silverstone: geen problemen
+			%%   Interlagos: geen problemen
+			%%   Texas: geen problemen
+
+			%% SpeedController
+			%%   Spa Francorchamps: keert midden in het parcours 180°
+			%%   Silverstone: geen problemen
+			%%   Interlagos: hapert, maar geen problemen
+			%%   Texas: draait 360°, maar corrigeert zichzelf
 
 		\subsection{Exacte controller}
 			%% Wat zijn de verschillen met een exacte controller (beter/slechter)?
