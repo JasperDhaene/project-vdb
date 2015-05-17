@@ -90,6 +90,7 @@ public class SpeedController extends BaseController {
 
         /**
          * High-speed steering.
+         *
          */
         // RATIO = low AND SPEED >= very high => STEERING = low (right)
         system.addRule(new Rule(new Conjunction(ratioLow, new GreaterThanEqual(speedVeryHigh)),
