@@ -10,6 +10,7 @@
 \usepackage{listings}
 \usepackage{amsmath}
 \usepackage{parskip}
+\usepackage{gensymb}
 
 \usepackage{xcolor, colortbl}
 \definecolor{ugentblue}{HTML}{164A7C}
@@ -145,7 +146,7 @@ IF distanceFront IS minimal THEN acceleration IS none
 
 		\subsection{Minder performante parcours}
 			%% Zijn er parcours waar uw controller minder goed presteert? Hoe komt dit?
-			Bepaalde parcours zijn zo geschreven dat de sensoren af en toe tekort komen. In een scherpe bocht bijvoorbeeld, kan het zijn dat de vooruitkijkende sensoren de bocht niet opmerken (voornamelijk door de hogere snelheid), en een foutieve meting geven voor de wand ertegenover.
+			Sommige parcours -- zoals Spa Francorchamps en Interlagos -- hebben een bepaalde structuur die verraderlijke metingen kunnen geven. Scherpe bochten kunnen aanleiding geven tot foutieve metingen door de vooruitkijkende sensoren die voor de correcte sturing zorgen. In zo'n scherpe bocht kan het voorkomen dat de sensoren de fysieke bocht niet (voldoende) opmerken, en onmiddelijk een meting geven voor de wand tegenover de bocht. Hierdoor stijgt de $ratio$, maar niet voldoende om de wagen te corrigeren in de bocht. Dit effect wordt versterkt door grote snelheden.
 
 			\begin{figure}[h]
 				\centering
@@ -154,9 +155,9 @@ IF distanceFront IS minimal THEN acceleration IS none
 				\label{fig:sensors-corner}
 			\end{figure}
 
-			Op zich kan dit probleem verholpen worden door de hoek van de sensoren continu adaptief aan te passen -- zodat een scherpe bocht toch opgemerkt wordt -- ware het niet dat de outputvariabelen van een bepaalde iteratie geen enkele invloed hebben op de volgende iteratie. Opnieuw kan dit probleem suboptimaal opgelost worden door het intelligent gebruik maken van \textit{dampening}, waarbij beslist wordt of de output van de huidige iteratie authoritatief wordt doorgevoerd, of dat de vorige iteratie er invloed op hebben. Een goede optimalisatie voor dit karakter is een lokale \textit{cache} van sensoren, zodat het patroon van een semi-zichtbaar obstakel kan gedetecteerd worden. Dit systeem valt echter niet in de scope van dit project en werd dus ook enkel als gedachte-experiment aangehaald.
+			Op zich zou dit probleem verholpen kunnen worden door de hoek van de sensoren continu adaptief aan te passen -- zodat een scherpe bocht toch opgemerkt wordt -- ware het niet dat de outputvariabelen van een enkele iteratie geen (meetbare) invloed hebben op de volgende iteratie. Opnieuw kan dit probleem suboptimaal opgelost worden door het intelligent gebruik maken van \textit{dampening}, waarbij beslist wordt of de output van de huidige iteratie authoritatief wordt doorgevoerd, of dat de vorige iteratie er invloed op hebben. Een goede optimalisatie voor dit karakter is een lokale \textit{cache} van sensorwaarden, zodat bepaalde probleempatronen en obstakels gedetecteerd kunnen worden. Dit systeem valt echter niet in de scope van dit project en wordt dus ook enkel als gedachte-experiment aangehaald.\\
 
-			Uiteindelijk werd gekozen om een vaste sensorhoek te hanteren, bepaald uit empirische experimenten op verschillende parcours met verschillende controllers.
+			Uiteindelijk werd gekozen om een vaste sensorhoek -- $scanAngle = 0.9 = 30 \degree$ -- te hanteren, bepaald uit empirische experimenten op verschillende parcours met verschillende controllers.
 
 		\subsection{Veiligheid}
 			%% Hoe veilig is uw wagen, i.e. hoe dikwijls crasht uw wagen?
@@ -185,4 +186,9 @@ return (1400 * (distanceFront / 200) * factor);
 			\end{lstlisting}
 
 			Deze formule bevat significant meer complexiteit en is ook sensitiever dan een vaagregelsysteem. Ook als er (foutieve) waarden optreden die buiten het definitiegebied vallen, kan de output een ongewenste waarde aannemen. Vage regelsystemen hebben hiertegen een intrinsieke bescherming, aangezien $\mu = 0$ buiten het definitiegebied van de lidmaatschapsfunctie.
+
+		\section*{Eindopmerkingen}
+		%% Debugging kan beter
+		%% Hybride regelsysteem
+
 \end{document}
