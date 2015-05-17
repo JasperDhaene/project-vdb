@@ -1,0 +1,60 @@
+[{
+  "name": "accelLow",
+  "variable": "acceleration",
+  "type": "trapezoid",
+  "params": [0, 0, 280, 560],
+  "integration": [0, 1600]
+},{
+  "name": "accelMed",
+  "variable": "acceleration",
+  "type": "trapezoid",
+  "params": [480, 660, 840, 1120],
+  "integration": [0, 1600]
+},{
+  "name": "accelHigh",
+  "variable": "acceleration",
+  "type": "trapezoid",
+  "params": [840, 1120, 1600, 1600],
+  "integration": [0, 1600]
+},{
+  "name": "accelNone",
+  "variable": "acceleration",
+  "type": "trapezoid",
+  "params": [0, 0, 0, 0],
+  "integration": [0, 1600]
+},
+
+{
+  "name": "brakeNone",
+  "variable": "brake",
+  "type": "trapezoid",
+  "params": [0, 0, 0, 0],
+  "integration": [0, 40]
+},{
+  "name": "brakeMed",
+  "variable": "brake",
+  "type": "trapezoid",
+  "params": [15, 17, 23, 25],
+  "integration": [0, 40]
+},{
+  "name": "brakeHigh",
+  "variable": "brake",
+  "type": "trapezoid",
+  "params": [30, 40, 40, 40],
+  "integration": [0, 40]
+},
+
+{
+  "name": "steerLeft",
+  "variable": "steering",
+  "type": "symmetric_s",
+  "params": [-1, 1.25],
+  "integration": [-1, 1],
+  "axis": 0
+},{
+  "name": "steerRight",
+  "variable": "steering",
+  "type": "s",
+  "params": [-1, 1.25],
+  "integration": [-1, 1]
+}]

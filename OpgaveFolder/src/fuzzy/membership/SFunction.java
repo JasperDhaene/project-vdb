@@ -1,12 +1,10 @@
 package fuzzy.membership;
 
-import org.apache.commons.math3.analysis.UnivariateFunction;
-
 /**
  * SFunction - S-shaped membership function
  * @author Florian Dejonckheere <florian@floriandejonckheere.be>
  */
-public class SFunction implements UnivariateFunction {
+public class SFunction implements Membership {
 
     private final double alpha, beta, gamma;
 
@@ -25,6 +23,11 @@ public class SFunction implements UnivariateFunction {
         } else if(value > beta && value <= gamma){
             return 1 - (2 * Math.pow(((value - gamma)/(gamma - alpha)), 2));
         } else return 1;
+    }
+
+    @Override
+    public double getLimitValue() {
+        return this.gamma;
     }
 
 }

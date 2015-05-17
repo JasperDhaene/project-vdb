@@ -10,6 +10,8 @@ import fuzzy.FuzzySystem;
 import fuzzy.Rule;
 import fuzzy.expression.Conjunction;
 import fuzzy.expression.Disjunction;
+import fuzzy.expression.GreaterThanEqual;
+import fuzzy.expression.LessThanEqual;
 import fuzzy.expression.Premise;
 import fuzzy.membership.PIFunction;
 import java.util.ArrayList;
@@ -77,26 +79,19 @@ public class SpeedSpeed {
                 new PIFunction.TriangularPIFunction(0.5, 1, 1), -1, 1);
 
 
-        // 1. Accelerate if nothing's in front of you, but mind your speed
-        // SPEED = low \/ med \/ high => ACCEL = nitro
+
+        system.addRule(new Rule(new Conjunction(new LessThanEqual(speedHigh),new GreaterThanEqual(distanceHigh)), accelNitro));
+        system.addRule(new Rule(new Conjunction(speedNitro,distanceEndless), accelMed));
+
+        system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedNitro),new LessThanEqual(distanceHigh)), brakeExtreme));
+
+        
+/*
         system.addRule(new Rule(new Conjunction(new Disjunction(new Disjunction(speedLow,speedMed),speedHigh),new Disjunction(distanceHigh,distanceEndless)), accelNitro));
         system.addRule(new Rule(new Conjunction(speedNitro,distanceEndless), accelMed));
-        //system.addRule(new Rule(new Conjunction(new Disjunction(speedLow,speedMed),distanceHigh), accelNitro));
-        
-        // Note: Bochten kunnen veilig genomen worden aan max ~90 
-        // 2. If something comes up in front of you, don't accelerate and use your brakes
-        // SPEED = High /\ DISTANCE = low => BRAKE = high
-        //system.addRule(new Rule(new Conjunction(new Disjunction(speedHigh,speedNitro),new Disjunction(distanceLow,distanceMed)), brakeHigh));
+
         system.addRule(new Rule(new Conjunction(new Disjunction(speedNitro,speedInsane),new Disjunction(new Disjunction(distanceLow,distanceMed),distanceHigh)), brakeExtreme));
-        // DISTANCE = low => ACCEL = none
-        //system.addRule(new Rule(new Conjunction(speedMed, distanceLow), accelNone));
-
-        // 3. Whatever happens, always have a base speed
-        // DISTANCE = low /\ SPEED = low => ACCEL = low
-        //system.addRule(new Rule(new Conjunction(speedLow, distanceLow), accelLow));
-
-
-        //system.addRule(new Rule(speedBackwards, brakeHigh));
+*/
         
         
         /**

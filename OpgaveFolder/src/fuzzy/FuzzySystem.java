@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.integration.BaseAbstractUnivariateIntegrator;
 import org.apache.commons.math3.analysis.integration.MidPointIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 
@@ -18,7 +19,7 @@ public class FuzzySystem {
      * Minimum and maximum integration evaluations
      */
     private static final int MIN_EVAL = MidPointIntegrator.DEFAULT_MIN_ITERATIONS_COUNT;
-    private static final int MAX_EVAL = MidPointIntegrator.MIDPOINT_MAX_ITERATIONS_COUNT;
+    private static final int MAX_EVAL = BaseAbstractUnivariateIntegrator.DEFAULT_MAX_ITERATIONS_COUNT;
     /**
      * integrator - used to integrate the union of all rules
      * Integration efficiency is not the most important aspect in this project,
@@ -28,8 +29,8 @@ public class FuzzySystem {
     private static final UnivariateIntegrator integrator = new MidPointIntegrator(
             1.0e-3,     // relative accuracy
             1.0e-15,    // absolute accuracy
-            MIN_EVAL,   // minimalIterationCount
-            MAX_EVAL);  // maximalIterationCount
+            MidPointIntegrator.DEFAULT_MIN_ITERATIONS_COUNT,   // minimalIterationCount
+            MidPointIntegrator.MIDPOINT_MAX_ITERATIONS_COUNT);  // maximalIterationCount
 
     private final List<Rule> rules;
     private final Map<String, Double> inputs;
@@ -68,10 +69,10 @@ public class FuzzySystem {
         Map<String, Double> crisp = new HashMap<>();
 
         consequences.forEach((string, consequenceList) -> {
-            
+
             /**
              * 4. Unification of rules
-             * 
+             *
              * */
             Denominator g = new Denominator(consequenceList);
             Numerator f = new Numerator(g);
@@ -92,7 +93,7 @@ public class FuzzySystem {
 
     /**
      * Denominator (noemer): g(x) = max(c_1, c_2, ..., c_n)
-     * 
+     *
      */
     private class Denominator implements UnivariateFunction {
 
@@ -111,7 +112,7 @@ public class FuzzySystem {
 
         @Override
         public double value(double x) {
-            double max = 0;
+            double max = -Double.MAX_VALUE;
             for(UnivariateFunction c: consequences)
                 max = Math.max(c.value(x), max);
             return max;
@@ -120,7 +121,7 @@ public class FuzzySystem {
 
     /**
      * Numerator (teller): f(x) = x*g(x)
-     * 
+     *
      */
     private class Numerator implements UnivariateFunction {
 
