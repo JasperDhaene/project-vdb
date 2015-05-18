@@ -25,7 +25,7 @@ public class Main {
              * controller, written by you - manual control, only non-manual laps are recorded for the leaderboard
              */
 
-            BaseController controller = new RallyController();
+            BaseController controller = new SpeedController();
             String trackname = "interlagos1024";
             
 

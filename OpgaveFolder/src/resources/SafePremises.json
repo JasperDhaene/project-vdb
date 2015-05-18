@@ -2,7 +2,7 @@
   "name": "speedLow",
   "variable": "speed",
   "type": "trapezoid",
-  "params": [0, 0, 40, 60]
+  "params": [-10, 0, 40, 60]
 },{
   "name": "speedMed",
   "variable": "speed",
