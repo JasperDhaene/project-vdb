@@ -141,12 +141,12 @@
   "name": "lateralVelocityLeft",
   "variable": "lateralVelocity",
   "type": "triangular",
-  "params": [-2147483647, -10, -4]
+  "params": [-2147483647, -7, -3]
 },{
   "name": "lateralVelocityRight",
   "variable": "lateralVelocity",
   "type": "triangular",
-  "params": [4, 10, 2147483647]
+  "params": [3, 7, 2147483647]
 },{
   "name": "notLateralVelocityHigh",
   "variable": "lateralVelocity",
