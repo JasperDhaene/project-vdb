@@ -140,7 +140,7 @@ IF distanceFront IS minimal THEN acceleration IS none
 			Ter slippreventie is er tenslotte nog een laatste regel van kracht: als er gedraaid moet worden ($ratio \not\approx 1$), treedt de rem ook in werking. Zo kan voorkomen worden dat er tegelijkertijd gedraaid en versneld wordt. \texttt{RallyController} breidt uit op dit concept.
 
 		\subsection{RallyController}
-			\texttt{RallyController} breidt op zijn beurt uit op \texttt{SpeedController}. In \texttt{RallyController} wordt de nadruk gelegd op het \textit{driften}. Dit fenomeen kan men aansturen door een bocht te benaderen via \textit{oversteer}, zodat er tegengestuurd moet worden om de bocht correct door te gaan. Het oversteering zelf kan gedetecteerd worden door de combinatie van laterale snelheid en het verlies van grip  of \texttt{friction} op de banden. Als er eenmaal oversteering is gedetecteerd, wordt er tegengestuurd om te corrigeren.\\
+			\texttt{RallyController} breidt op zijn beurt uit op \texttt{SpeedController}. In \texttt{RallyController} wordt de nadruk gelegd op het \textit{driften}. Dit fenomeen kan men aansturen door een bocht te benaderen via \textit{oversteer}, waardoor de auto begint te slippen en er tegengestuurd moet worden om alsnog de bocht correct door te gaan. Na vele mislukte pogingen werd deze aanpak echter geschrapt (TODO: benadering achterwege gelaten?). Door de irregulariteiten in de parcours kon het voorkomen dat er net voor de effectieve bocht een kleine uitdieping in de weg voorkomt. Dit werd door de sensoren echter al als een verschil tussen de linker- en rechtersensor opgemeten waardoor de auto de verkeerde kant op draaide. De granulariteit van de regels aanpassen kon hier echter geen werkbare (TODO: algemeen/schaalbare?) oplossing voor bieden. Bovendien kon er geen werkende combinatie van remmen en oversteer worden gevonden om de auto horizontaal te krijgen, mede doordat de maximale steering en remcapaciteit niet kon bereikt worden. Hierdoor werd er voor een andere aanpak geopteerd. In plaats van opzettelijk de auto te doen slippen door een bocht in oversteer te benaderen, worden de bochten nu aan hogere snelheid genomen. Door het draaien aan snelheden rond de 120-130 kph zal de auto vanzelf beginnen slippen, waarna er enkel nog tegengestuurd moet worden om de auto terug te stabiliseren. Het driften kan gedetecteerd worden door de combinatie van laterale snelheid en het verlies van grip of \texttt{friction} op de banden. Als er de auto eenmaal aan het driften is zal de laterale snelheid bepalen naar welke richting, en hoe hard, er moet tegengestuurd worden. Deze aanpak heeft als voordeel dat ze onafhankelijk is van de positie op de weg of het verdere parcours. De auto zal zo tegensturen zodanig dat hij weer in rechte lijn zijn traject kan verder zetten, ongeacht wat de linker- en rechtersensor zouden mogen aangeven. \\
 
 	\section{Performantie}
 		\subsection{Keuze t-norm en t-conorm}
@@ -153,9 +153,11 @@ IF distanceFront IS minimal THEN acceleration IS none
 
 			Bij \texttt{SpeedController} varieert de snelheid iets meer, omdat de grenzen die de afstand bepalen wat gevoeliger zijn. Op rechte stukken zal de controller proberen een zo groot mogelijke snelheid te halen (binnen het vermogen), terwijl hij bij obstakels al snel zal remmen en corrigeren. Binnen verschillende ritten van deze controller is de performantie nagenoeg gelijk.\\
 
+			De \texttt{RallyController} is iets minder robuust. Daar de sensoren die het driften detecteren zeer gevoelig zijn afgesteld kan het voorkomen dat de kleinste verandering in condities catastrofale gevolgen kan veroorzaken. Het tegensturen in een bocht gebeurt meestal ook zeer dicht bij een muur, dus een kleine alteratie in hoe hard de auto tegenstuurd kan een botsing met de muur veroorzaken. Na het uitvoerig testen van deze parameters gebeurt het nog zelden dat de auto tegen de muur botst en nog minder dat dit een frontale botsing is waarna niet verder kan gereden worden, maar deze situaties kunnen toch niet geheel uitgesloten worden.\\
+
 		\subsection{Minder performante parcours}
 			%% Zijn er parcours waar uw controller minder goed presteert? Hoe komt dit?
-			Sommige parcours -- zoals Spa Francorchamps en Interlagos -- hebben een bepaalde structuur die verraderlijke metingen kunnen geven. Scherpe bochten kunnen aanleiding geven tot foutieve metingen door de vooruitkijkende sensoren die voor de correcte sturing zorgen. In zo'n scherpe bocht kan het voorkomen dat de sensoren de fysieke bocht niet (voldoende) opmerken, en onmiddelijk een meting geven voor de wand tegenover de bocht. Hierdoor stijgt de $ratio$, maar niet voldoende om de wagen te corrigeren in de bocht. Dit effect wordt versterkt door grote snelheden.
+			Sommige parcours -- zoals Spa Francorchamps en Silverstone -- hebben een bepaalde structuur die verraderlijke metingen kunnen geven. Scherpe bochten kunnen aanleiding geven tot foutieve metingen door de vooruitkijkende sensoren die voor de correcte sturing zorgen. In zo'n scherpe bocht kan het voorkomen dat de sensoren de fysieke bocht niet (voldoende) opmerken, en onmiddelijk een meting geven voor de wand tegenover de bocht. Hierdoor stijgt de $ratio$, maar niet voldoende om de wagen te corrigeren in de bocht. Dit effect wordt versterkt door grote snelheden.
 
 			\begin{figure}[h]
 				\centering
@@ -168,11 +170,19 @@ IF distanceFront IS minimal THEN acceleration IS none
 
 			Uiteindelijk werd gekozen om een vaste sensorhoek -- $scanAngle = 0.9 = 30 \degree$ -- te hanteren, bepaald uit empirische experimenten op verschillende parcours met verschillende controllers.
 
+			Het moeilijkste parcours was veruit Spa Francorchamps. Dit parcours heeft in het begin een schijnbocht naar links die gevolgd wordt door een scherpe bocht naar rechts. Doordat de frontSensor echter het einde van de fysieke bocht naar rechts detecteerd zal er door zowel de \texttt{SpeedController} als de \texttt{RallyController} een te hoge snelheid ontstaan. Eenmaal aangekomen aan de onverwachte bocht zal de hoge snelheid en plotse aanpassing in $ratio$ bij beide controllers zorgen voor een te bruuske stuuring wat in de meeste instanties zal resulteren in een niet recupereerbare frontale botsing. Aangezien de controllers algemeen ontworpen werden was het niet mogelijk om voor deze specifieke (en eenmalige) situatie extra regels te voorzien die een ongewenst effect zouden veroorzaken op alle andere parcours. Dit zou echter kunnen opgelost worden in een controller specifiek voor dit parcours waar er geen stuuraanpassing gebeurt als de $ratio$ een bepaalde grens overschrijdt.
+
+			Verbazingwekkend was het simpelste parcour - Texas - ook een van de moeilijkere parcours. Dit circuit bezit net als Spa Francorchamps een bepaalde situatie die het moeilijk maakt voor algemeen ontworpen controllers. Dit circuit is namelijk zeer breed en lang, waardoor zowel met de \texttt{SpeedController} als de \texttt{RallyController} een hoge snelheid zal bekomen worden. Hierna komen echter zeer bruuske bochten waardoor er niet voldoende geremd wordt en de auto bij de te scherpe draai begint te tollen. Dit kan in sommige situaties gunstig uitdraaien waarna de auto gewoon verder rijdt maar dit is zeker niet de norm. Als de snellere controllers werden aangepast aan dit parcour zou dit echter resulteren in suboptimale tot zelfs teleurstellende prestaties op complexere parcours als Silverstone of Interlagos.
+
 		\subsection{Veiligheid}
 			%% Hoe veilig is uw wagen, i.e. hoe dikwijls crasht uw wagen?
 			In dit model bestaat het concept \textit{veiligheid} enkel uit het contact met de wand, waardoor de \texttt{collisionSum} omhoog gaat. Het doel is uiteraard om de finish te bereiken met een zo laag mogelijke \texttt{collisionSum}.
 
 			\texttt{SafeController} is ontworpen om zo veilig mogelijk de finish te bereiken. Door een gecontroleerd gebruik van de snelheid, lukt dit op de meeste parcours. Enkel op het Spa Francorchamps-parcours kan \texttt{SafeController} de laatste scherpe bocht van ongeveer $32 \degree$ net v\'o\'or de finish niet halen.\\
+
+			De \texttt{SpeedController} zal hogere snelheden behalen maar zal geen risico's nemen in bochten door op tijd te remmen. Dit zou ook niet mogen aangezien deze controller maar uitgerust is met minimale koers-correctie in geval van slippen. Dit komt echter nagenoeg nooit voor - tenzij op het Texas parcours zoals eerder aangegeven - waardoor deze controller kan gezien worden als voldoende veilig.
+
+			Zoals eerder aangegeven tijdens het bespreken van de robuustheid van de \texttt{RallyController} is deze controller minder veilig. Er is een reële mogelijkheid dat deze controller tegen de muur crasht, maar dit is meestal zijwaards, waardoor de auto verder kan rijden. In uitzonderlijke gevallen zal er echter een frontale botsing plaats vinden, wat de potentiële onveiligheid van deze controller enkel bevestigd.
 
 			%%% UITSLAG RITTEN %%%
 			%% SafeController
@@ -196,11 +206,11 @@ IF distanceFront IS minimal THEN acceleration IS none
 
 			\begin{lstlisting}
 IF (distanceFront IS SMALL) THEN acceleration IS high
-IF (lateralVelocity IS GREATER THAN ZERO) THEN acceleration IS low
+IF (lateralVelocity IS NOT ZERO) THEN acceleration IS low
 			\end{lstlisting}
 
 			Door het combineren van deze regels wordt in een drift rekening gehouden met zowel \texttt{acceleration IS high} en \texttt{acceleration IS low}, waardoor een gebalanceerd equilibrium uiteindelijk gekozen wordt als \texttt{acceleration}.
-			Indien men dit in een exacte controller wil implementeren, moeten de twee regels gemultiplexd worden in \'e\'en formule. Dit kan bijvoorbeeld als volgt gebeuren.
+			Indien men dit in een exacte controller wil implementeren, moeten de twee regels gemultiplexd worden in \'e\'en formule. Dit kan bijvoorbeeld als volgt gebeuren. %% gemultiplexed?
 
 			\begin{lstlisting}
 int factor = 1;
@@ -213,9 +223,9 @@ return (1400 * (distanceFront / 200) * factor);
 			Deze formule bevat significant meer complexiteit en is ook sensitiever dan een vaagregelsysteem. Ook als er (foutieve) waarden optreden die buiten het definitiegebied vallen, kan de output een ongewenste waarde aannemen. Vage regelsystemen hebben hiertegen een intrinsieke bescherming, aangezien $\mu = 0$ buiten het definitiegebied van de lidmaatschapsfunctie.
 
 		\section*{Eindopmerkingen}
-			Het opgegeven systeem is inherent moeilijk te debuggen. De auto start altijd op dezelfde plaats, wat het lastig maakt om bugs in een later deel van het parcours te identificeren en corrigeren. Ook een vorm van temporele controle ontbreekt, waardoor bugtracking een passieve en tijdsintensieve activiteit wordt. Ook het gebrek aan sensoren maakt het detecteren van een catastrofale fout onmogelijk. Als de auto crasht met een voldoende grote snelheid, kan de physics engine ervoor zorgen dat deze uiteindelijk omgekeerd techtkomt. De controllers zijn zich niet bewust van deze ontwikkeling, en rijden na\"ief verder -- de verkeerde richting op.\\
+			Het opgegeven systeem is inherent moeilijk te debuggen. De auto start altijd op dezelfde plaats, wat het lastig maakt om bugs in een later deel van het parcours te identificeren en corrigeren. Ook een vorm van temporele controle ontbreekt, waardoor bugtracking een passieve en tijdsintensieve activiteit wordt. Het gebrek aan sensoren maakt het detecteren van een catastrofale fout nagenoeg onmogelijk. Als de auto crasht met een voldoende grote snelheid, kan de physics engine ervoor zorgen dat deze uiteindelijk omgekeerd terechtkomt. De controllers zijn zich niet bewust van deze ontwikkeling, en rijden na\"ief verder -- de verkeerde richting op.\\
 
-			Ook is er een schijn van non-determinisme aanwezig, waardoor volgens het \href{https://en.wikipedia.org/wiki/Butterfly_effect}{butterfly-effect} elke beweging tot een compleet ander eindresultaat leidt. Daardoor is het ontwikkelen van een algemene controller -- die op alle parcours dezelfde acceptabele performantie heeft -- moeilijk tot zelfs onmogelijk.\\
+			Ook is er een schijn van non-determinisme aanwezig, waardoor volgens het \href{https://en.wikipedia.org/wiki/Butterfly_effect}{butterfly-effect} elke beweging van bv. het scherm (out-of-focus gaan) of camera aanpassing, tot een compleet ander eindresultaat leidt. Daardoor is het ontwikkelen van een algemene controller -- die op alle parcours, in alle races, dezelfde acceptabele performantie heeft -- moeilijk tot zelfs onmogelijk.\\
 
 			Uiteindelijk kunnen de controllers voor elk parcours geoptimaliseerd worden, omdat elk parcours zijn eigen karakteristieken bezit. De Texas Speedway bijvoorbeeld, heeft er baat bij dat er zeer snel gereden wordt, en dat slechts kleine koerscorrecties uitgevoerd worden. Remmen hoeft in principe niet. Omdat in dit project de nadruk wordt gelegd op het ontwikkelen van een algemene controller, wordt dit niet in detail uitgewerkt.\\
 
