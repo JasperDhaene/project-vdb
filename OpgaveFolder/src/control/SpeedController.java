@@ -35,7 +35,7 @@ public class SpeedController extends BaseController {
          * using their *name* as *variable* in the code below.
          *
          * */
-        Premise speedVeryLow = p("speedVeryLow"), speedLow = p("speedLow"), speedMed = p("speedMed"), speedHigh = p("speedHigh"), speedVeryHigh = p("speedHigh"), speedNitro = p("speedNitro"), distanceVeryLow = p("distanceVeryLow"), distanceLow = p("distanceLow"), distanceMed = p("distanceMed"), distanceHigh = p("distanceHigh"), distanceVeryHigh = p("distanceVeryHigh"), distanceEndless = p("distanceEndless"),  ratioLow = p("ratioLow"), ratioHigh = p("ratioHigh"), ratioLowSpeedy = p("ratioLowSpeedy"), ratioHighSpeedy = p("ratioHighSpeedy"),  ratioLowDrift = p("ratioLowDrift"), ratioHighDrift = p("ratioHighDrift"),  lateralVelocityLow = p("lateralVelocityLow"), notDriftingLateral = p("notDriftingLateral"),  noFrontLeftFriction = p("noFrontLeftFriction"), noBackLeftFriction = p("noBackLeftFriction"), noFrontRightFriction = p("noFrontRightFriction"), noBackRightFriction = p("noBackRightFriction");
+        Premise speedLow = p("speedLow"), speedMed = p("speedMed"), speedHigh = p("speedHigh"), speedVeryHigh = p("speedHigh"), speedNitro = p("speedNitro"), distanceVeryLow = p("distanceVeryLow"), distanceLow = p("distanceLow"), distanceMed = p("distanceMed"), distanceHigh = p("distanceHigh"), distanceVeryHigh = p("distanceVeryHigh"), distanceEndless = p("distanceEndless"),  ratioLow = p("ratioLow"), ratioHigh = p("ratioHigh"), ratioLowSpeedy = p("ratioLowSpeedy"), ratioHighSpeedy = p("ratioHighSpeedy"),  ratioLowDrift = p("ratioLowDrift"), ratioHighDrift = p("ratioHighDrift"),  lateralVelocityLow = p("lateralVelocityLow"), notDriftingLateral = p("notDriftingLateral"),  noFrontLeftFriction = p("noFrontLeftFriction"), noBackLeftFriction = p("noBackLeftFriction"), noFrontRightFriction = p("noFrontRightFriction"), noBackRightFriction = p("noBackRightFriction");
         Consequence accelBase = c("accelBase"), accelLow = c("accelLow"), accelMed = c("accelMed"), accelHigh = c("accelHigh"), accelNitro = c("accelNitro"), accelDriftHigh = c("accelDriftHigh"), brakeNone = c("brakeNone"), brakeLow = c("brakeLow"), brakeMed = c("brakeMed"), brakeHigh = c("brakeHigh"), brakeExtreme = c("brakeExtreme"), brakeEpic = c("brakeEpic"), steerLeft = c("steerLeft"), steerRight = c("steerRight"), steerGentleLeft = c("steerGentleLeft"), steerGentleRight = c("steerGentleRight"), driftLeft = c("driftLeft"), driftRight = c("driftRight");
 
         /**
@@ -51,15 +51,13 @@ public class SpeedController extends BaseController {
          * Acceleration.
          *
          */
-        // SPEED <= very high AND DISTANCE <= high => ACCEL = extremely high
+        // SPEED <= very high AND DISTANCE >= high => ACCEL = nitro (extremely high)
         system.addRule(new Rule(new Conjunction(new LessThanEqual(speedVeryHigh), new GreaterThanEqual(distanceHigh)),
                 accelNitro));
         // SPEED >= very high AND DISTANCE >= extremely high => ACCEL = high
-        // TODO: zet hier accelMed als je niet met 200+kph tegen de muur wil bokken. Maar je kan daarna wel verder rijden.
         system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedVeryHigh), new GreaterThanEqual(distanceEndless)),
                 accelHigh));
         // SPEED <= low AND (DISTANCE = low OR DISTANCE = med) => ACCEL = low
-        // TODO: beter speedMed hier, maar dan slipt hij in een van de begin bochten.
         system.addRule(new Rule(new Conjunction(new LessThanEqual(speedLow), new Disjunction(distanceLow, distanceMed)),
                 accelLow));
 
@@ -70,10 +68,10 @@ public class SpeedController extends BaseController {
         // SPEED >= very high AND DISTANCE <= med => BRAKE = extremely high
         system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedVeryHigh), new LessThanEqual(distanceMed)),
                 brakeExtreme));
-        // SPEED = extremely high AND DISTANCE <= very high => BRAKE = high
+        // SPEED = nitro (extremely fast) AND DISTANCE <= very high => BRAKE = high
         system.addRule(new Rule(new Conjunction(speedNitro, new LessThanEqual(distanceVeryHigh)),
                 brakeHigh));
-        // SPEED <= low AND DISTANCE = very low => BRAKE = epically high
+        // SPEED >= low AND DISTANCE = very low => BRAKE = epically high
         system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedLow), distanceVeryLow),
                 brakeEpic));
 
@@ -99,26 +97,23 @@ public class SpeedController extends BaseController {
         system.addRule(new Rule(new Conjunction(ratioHigh, new GreaterThanEqual(speedVeryHigh)),
                 steerGentleLeft));
 
-// TODO: STEER IN TURN
-        // RATIO = low /\ DISTANCE = low /\ FRICTION on front wheels (not drifting out of control) => DRIFT = left
- //       system.addRule(new Rule(new Conjunction(new Conjunction(ratioLowDrift,distanceLow),new Conjunction(new Not(noFrontLeftFriction),new Not(noFrontRightFriction))), driftRight));
-        // RATIO = high /\ DISTANCE = low /\ FRICTION on front wheels (not drifting out of control) => DRIFT = right
- //       system.addRule(new Rule(new Conjunction(new Conjunction(ratioHighDrift,distanceLow),new Conjunction(new Not(noFrontLeftFriction),new Not(noFrontRightFriction))), driftLeft));
-
-
         /**
          * Drifting.
+         * 
          */
+        // DRIFTING => ACCEL = high (for drifting)
         system.addRule(new Rule(drifting, accelDriftHigh));
+        // DRIFTING => BRAKE = low
         system.addRule(new Rule(drifting, brakeLow));
 
         /**
-         * Oversteering.
+         * Countersteering.
+         * 
          */
-        // noRightWheelfriction AND STEERING = ratioLow AND DISTANCE = low => DRIFT = right
+        // drifting AND STEERING = ratioLowDrift AND DISTANCE <= med => DRIFT = right
         system.addRule(new Rule(new Conjunction(new Conjunction(drifting, ratioLowDrift), new LessThanEqual(distanceMed)),
                 driftRight));
-        // noRightWheelfriction AND STEERING = ratioHigh AND DISTANCE = low => DRIFT = left
+        // drifting AND STEERING = ratioHighDrift AND DISTANCE <= med => DRIFT = left
         system.addRule(new Rule(new Conjunction(new Conjunction(drifting, ratioHighDrift), new LessThanEqual(distanceMed)),
                 driftLeft));
 

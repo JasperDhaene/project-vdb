@@ -55,15 +55,16 @@ public class RallyController extends BaseController {
          * Acceleration.
          *
          */
-        // SPEED <= very high AND DISTANCE <= high => ACCEL = extremely high
+        // SPEED <= very high AND DISTANCE >= high => ACCEL = nitro (extremely high)
         system.addRule(new Rule(new Conjunction(new LessThanEqual(speedVeryHigh), new GreaterThanEqual(distanceHigh)),
                 accelNitro));
-        //system.addRule(new Rule(new Conjunction(speedNitro,distanceVeryHigh), accelMed));
+        // SPEED <= nitro (extremely high) AND DISTANCE >= endless (extremely high) => ACCEL = high
         system.addRule(new Rule(new Conjunction(new LessThanEqual(speedNitro), new GreaterThanEqual(distanceEndless)),
                 accelHigh));
-        //Note: beter speedMed hier, maar dan slipt ij in een van de begin bochten.
+        // SPEED <= drift AND (DISTANCE = low OR DISTANCE = med) => ACCEL = low
         system.addRule(new Rule(new Conjunction(new LessThanEqual(speedDrift), new Disjunction(distanceLow,distanceMed)),
                 accelLow));
+        // SPEED = backwards OR SPEED = very low => ACCEL = base
         system.addRule(new Rule(new Disjunction(speedBackwards, speedVeryLow),
                 accelBase));
 
@@ -74,7 +75,7 @@ public class RallyController extends BaseController {
         // SPEED >= high AND DISTANCE <= med => BRAKE = extremely high
         system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedHigh), new LessThanEqual(distanceMed)),
                 brakeExtreme));
-        // SPEED >= very high AND DISTANCE <= stop => BRAKE = epically high
+        // SPEED >= very high AND DISTANCE <= stop (stop distance for high speeds) => BRAKE = epically high
         system.addRule(new Rule(new Conjunction(new GreaterThanEqual(speedVeryHigh), new LessThanEqual(distanceStop)),
                 brakeEpic));
         // SPEED >= low AND DISTANCE = very low => BRAKE = high
@@ -83,6 +84,7 @@ public class RallyController extends BaseController {
 
         // DRIFTING => BRAKE = low
         system.addRule(new Rule(drifting, brakeLow));
+        // LATERALVELOCITY = high AND SPEED <= drift => BRAKE = drift
         system.addRule(new Rule(new Conjunction(new Not(notLateralVelocityHigh), new LessThanEqual(speedDrift)),
                 brakeDrift));
 
@@ -90,8 +92,10 @@ public class RallyController extends BaseController {
          * Steering.
          *
          */
+        // RATIO = low (right) AND SPEED <= high AND NOT DRIFTING => STEERING = high (right)
         system.addRule(new Rule(new Conjunction(new Conjunction(ratioLow, new LessThanEqual(speedHigh)), new Not(drifting)),
                 steerRight));
+        // RATIO = high (left) AND SPEED <= high AND NOT DRIFTING => STEERING = negative high (left)
         system.addRule(new Rule(new Conjunction(new Conjunction(ratioHigh, new LessThanEqual(speedHigh)), new Not(drifting)),
                 steerLeft));
 
@@ -99,8 +103,10 @@ public class RallyController extends BaseController {
          * High-speed steering.
          *
          */
+        // RATIO = low (right) AND SPEED <= very high => STEERING = low (right)
         system.addRule(new Rule(new Conjunction(ratioLow,new GreaterThanEqual(speedVeryHigh)),
                 steerGentleRight));
+        // RATIO = high (left) AND SPEED <= very high => STEERING = negative low (left)
         system.addRule(new Rule(new Conjunction(ratioHigh,new GreaterThanEqual(speedVeryHigh)),
                 steerGentleLeft));
 
@@ -108,21 +114,23 @@ public class RallyController extends BaseController {
          * Drifting.
          *
          */
+        // DRIFTING => ACCEL = low (right)
         system.addRule(new Rule(drifting, accelDriftHigh));
+        // LATERALVELOCITY = high AND SPEED <= drift => ACCEL = very high (for drifting)
         system.addRule(new Rule(new Conjunction(new Not(notLateralVelocityHigh), new LessThanEqual(speedDrift)),
                 accelDriftVeryHigh));
 
         /**
-         * Oversteering.
+         * Countersteering.
          *
          * */
-        // noRightWheelfriction /\ STEERING = ratioLow /\ DISTANCE = low  => DRIFT = right
+        // drifting AND LATERALVELOCITY = positive (right) AND DISTANCE <= drift  => DRIFT = right
         system.addRule(new Rule(new Conjunction(new Conjunction(drifting, lateralVelocityRight), new LessThanEqual(distanceDrift)),
                 driftRight));
+        // drifting AND LATERALVELOCITY = negative (left) AND DISTANCE <= drift  => DRIFT = left
         system.addRule(new Rule(new Conjunction(new Conjunction(drifting, lateralVelocityLeft), new LessThanEqual(distanceDrift)),
                 driftLeft));
-        //system.addRule(new Rule(new Conjunction(new Conjunction(drifting,new Conjunction(ratioLowDrift,lateralVelocityLeft)),new LessThanEqual(distanceDrift)), driftLeft));
-        //system.addRule(new Rule(new Conjunction(new Conjunction(drifting,new Conjunction(ratioHighDrift,lateralVelocityRight)),new LessThanEqual(distanceDrift)), driftRight));
+
 
     }
 

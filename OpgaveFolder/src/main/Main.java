@@ -2,7 +2,9 @@ package main;
 
 import car.RaceCar;
 import control.BaseController;
+import control.RallyController;
 import control.SpeedController;
+import control.SafeController;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,7 +29,7 @@ public class Main {
             String trackname = "interlagos1024";
             
 
-            RaceCar app = new RaceCar("Rally McQueen", trackname, controller, false);
+            RaceCar app = new RaceCar("Lightning McQueen", trackname, controller, false);
 
             app.setDisplayFps(false);
             app.setDisplayStatView(false);
