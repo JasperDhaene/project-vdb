@@ -1,20 +1,8 @@
 [{
-  "name": "accelBase",
-  "variable": "acceleration",
-  "type": "trapezoid",
-  "params": [0, 0, 350, 560],
-  "integration": [0, 1600]
-},{
   "name": "accelLow",
   "variable": "acceleration",
   "type": "trapezoid",
   "params": [0, 0, 280, 560],
-  "integration": [0, 1600]
-},{
-  "name": "accelMed",
-  "variable": "acceleration",
-  "type": "trapezoid",
-  "params": [480, 660, 840, 1120],
   "integration": [0, 1600]
 },{
   "name": "accelHigh",
@@ -40,24 +28,13 @@
   "type": "trapezoid",
   "params": [1200, 1300, 1400, 1500],
   "integration": [0, 1600]
+},
 
-},{
-  "name": "brakeNone",
-  "variable": "brake",
-  "type": "trapezoid",
-  "params": [0, 0, 0, 0],
-  "integration": [0, 40]
-},{
+{
   "name": "brakeLow",
   "variable": "brake",
   "type": "trapezoid",
   "params": [0, 0, 10, 20],
-  "integration": [0, 40]
-},{
-  "name": "brakeMed",
-  "variable": "brake",
-  "type": "trapezoid",
-  "params": [15, 20, 30, 35],
   "integration": [0, 40]
 },{
   "name": "brakeHigh",

@@ -31,7 +31,7 @@ public class SafeController extends BaseController {
          *
          * */
         Premise speedLow = p("speedLow"), speedMed = p("speedMed"), speedHigh = p("speedHigh"), speedBackwards = p("speedBackwards"), distanceLow = p("distanceLow"), distanceHigh = p("distanceHigh"), ratioLow = p("ratioLow"), ratioHigh = p("ratioHigh");
-        Consequence accelLow = c("accelLow"), accelMed = c("accelMed"), accelHigh = c("accelHigh"), accelNone = c("accelNone"), brakeNone = c("brakeNone"), brakeMed = c("brakeMed"), brakeHigh = c("brakeHigh"), steerLeft = c("steerLeft"), steerRight = c("steerRight");
+        Consequence accelLow = c("accelLow"), accelMed = c("accelMed"), accelHigh = c("accelHigh"), accelNone = c("accelNone"), brakeHigh = c("brakeHigh"), steerLeft = c("steerLeft"), steerRight = c("steerRight");
 
         /**
          * Acceleration. Accelerate if nothing's in front of you, but mind your speed
